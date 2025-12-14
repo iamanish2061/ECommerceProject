@@ -43,13 +43,21 @@ public class OrderModel {
     private List<OrderItem> orderItems = new ArrayList<>();
 
 
-    public void addOrderItem(OrderItem item) {
-        orderItems.add(item);
-        item.setOrder(this);
+
+    //    helper method for orderItems
+    public void addOrderItem(OrderItem orderItem){
+        if(orderItem != null){
+            this.orderItems.add(orderItem);
+            orderItem.setOrder(this);
+        }
     }
 
     public void removeOrderItem(OrderItem item) {
-        orderItems.remove(item);
-        item.setOrder(null);
+        if(item != null){
+            orderItems.remove(item);
+            item.setOrder(null);
+        }
     }
+
+
 }
