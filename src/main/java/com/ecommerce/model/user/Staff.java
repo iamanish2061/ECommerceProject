@@ -1,16 +1,23 @@
 package com.ecommerce.model.user;
 
+import com.ecommerce.model.service.Appointment;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Table(name = "staff")
 public class Staff {
-
     @Id
-    private Long id;   // SAME as user.id
+    private Long id;        // SAME as userId
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
@@ -31,6 +38,13 @@ public class Staff {
     @CurrentTimestamp
     private LocalDate joinedDate;
 
-//    one to many relation with appointment
+    @OneToMany(
+            mappedBy = "staff",
+            fetch = FetchType.LAZY,
+            orphanRemoval = true,
+            cascade = CascadeType.ALL
+    )
+    private Set<Appointment> appointments = new HashSet<>();
+
 }
 

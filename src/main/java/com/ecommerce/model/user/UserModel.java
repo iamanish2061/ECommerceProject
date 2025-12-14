@@ -1,7 +1,7 @@
 package com.ecommerce.model.user;
 
-import com.ecommerce.model.cart.CartModel;
 import com.ecommerce.model.order.OrderModel;
+import com.ecommerce.model.service.Appointment;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +21,27 @@ import java.util.Set;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "username"),
                 @UniqueConstraint(columnNames = "email")
-        })
+        }
+)
+
+@NamedEntityGraph(
+        name = "withDriver",
+        attributeNodes = {
+                @NamedAttributeNode("driver"),
+                @NamedAttributeNode("address")
+        }
+)
+@NamedEntityGraph(
+        name = "withStaff",
+        attributeNodes = {
+                @NamedAttributeNode("staff"),
+                @NamedAttributeNode("address")
+        }
+)
+@NamedEntityGraph(
+        name = "withUser",
+        attributeNodes = @NamedAttributeNode("address")
+)
 public class UserModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,14 +86,21 @@ public class UserModel {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToMany(
+    @OneToOne(
             mappedBy = "user",
-            fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("user")
-    private Set<CartModel> cartItems = new HashSet<>();
+    private Driver driver;
+
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private Staff staff;
 
     @OneToMany(
             mappedBy = "order",
@@ -84,17 +111,59 @@ public class UserModel {
     @JsonIgnoreProperties("user")
     private Set<OrderModel> orders = new HashSet<>();
 
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private AddressModel address;
 
-//    helper method for cart
-    public void addItemInCart(CartModel cartItem){
-        if (cartItem!=null){
-            this.cartItems.add(cartItem);
+    @OneToMany(
+            mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private Set<Appointment> appointments = new HashSet<>();
+
+//    helper method (driver)
+    public void addDriver(Driver driver){
+        if(driver != null){
+            this.driver = driver;
+            driver.setUser(this);
         }
     }
 
-    public void removeItemFromCart(CartModel cartItem){
-        if (cartItem!=null){
-            this.cartItems.add(cartItem);
+//    helper method (staff)
+    public void addStaff(Staff staff){
+        if(staff != null){
+            this.staff = staff;
+            staff.setUser(this);
+        }
+    }
+
+//    helper method (Address)
+    public void addAddress(AddressModel address){
+        if(address != null){
+            this.address = address;
+            address.setUser(this);
+        }
+    }
+
+//    helper method for orders
+    public void addProducts(OrderModel order){
+        if(order != null){
+            this.orders.add(order);
+            order.setUser(this);
+        }
+    }
+
+//    helper method for appointment
+    public void addAppointment(Appointment appointment){
+        if(appointment != null){
+            this.appointments.add(appointment);
+            appointment.setCustomer(this);
         }
     }
 

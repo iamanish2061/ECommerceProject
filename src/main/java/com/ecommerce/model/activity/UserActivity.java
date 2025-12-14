@@ -8,7 +8,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_activity",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id", "action_type"}))
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"user_id", "product_id", "activity_type"}
+        )
+)
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class UserActivity {
@@ -23,7 +26,7 @@ public class UserActivity {
     private Long productId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "action_type", nullable = false)
+    @Column(name = "activity_type", nullable = false)
     private ActivityType activityType;
 
     @Column(nullable = false)
