@@ -21,16 +21,70 @@ import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
+// for fetching all products from admin side and user side with brief info
+@NamedEntityGraph(
+        name = "Product.images",
+        attributeNodes = @NamedAttributeNode("images")
+)
+
+//for admin side , fetching list of products from brand
+// for user side
+// fetching products from particular brand or fetching all brands with their products
+@NamedEntityGraph(
+        name = "Product.images.brand",
+        attributeNodes = {
+                @NamedAttributeNode("images"),
+                @NamedAttributeNode("brand")
+        }
+)
+
+//same as brand
+//for admin fetching list of products from category
+//for user fetching list of products of specific category
+@NamedEntityGraph(
+        name = "Product.images.category",
+        attributeNodes = {
+                @NamedAttributeNode("category"),
+                @NamedAttributeNode("images")
+        }
+)
+
+//same as category but of tag
+@NamedEntityGraph(
+        name = "Product.images.tags",
+        attributeNodes = {
+                @NamedAttributeNode("tags"),
+                @NamedAttributeNode("images")
+        }
+)
+
+//fetching details of a product in admin and user side
+@NamedEntityGraph(
+        name = "Product.images.brand.category.tags",
+        attributeNodes = {
+                @NamedAttributeNode("brand"),
+                @NamedAttributeNode("category"),
+                @NamedAttributeNode("tags"),
+                @NamedAttributeNode("images")
+        }
+)
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "products", indexes = {
-        @Index(name = "idx_slug", columnList = "slug", unique = true),
-        @Index(name = "idx_category", columnList = "category_id"),
-        @Index(name = "idx_brand", columnList = "brand_id")
-})
+@Table(
+        name = "products",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"name", "brand_id"}
+        ),
+        indexes = {
+            @Index(name = "idx_slug", columnList = "slug", unique = true),
+            @Index(name = "idx_category", columnList = "category_id"),
+            @Index(name = "idx_brand", columnList = "brand_id")
+        }
+)
 public class ProductModel {
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -75,23 +129,68 @@ public class ProductModel {
     private boolean active = true;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // Relations
-    @OneToMany(mappedBy = "product", cascade = ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = ALL, orphanRemoval = true, fetch = LAZY)
     @JsonIgnoreProperties("product")
     @BatchSize(size = 5)
     private List<ProductImageModel> images = new ArrayList<>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(
+            fetch = LAZY,
+            cascade = CascadeType.MERGE
+    )
     @JoinTable(
             name = "product_tags",
             joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            inverseJoinColumns = @JoinColumn(name = "tag_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    columnNames = {"product_id", "tag_id"}
+            )
     )
     @JsonIgnoreProperties("products")
     private Set<TagModel> tags = new HashSet<>();
+
+//    helper method for images
+    public void addImage(ProductImageModel image){
+        if(image != null){
+            this.images.add(image);
+            image.setProduct(this);
+        }
+    }
+
+    public void removeImage(ProductImageModel image){
+        if(image != null){
+            this.images.remove(image);
+            image.setProduct(null);
+        }
+    }
+
+//    helper method for tags
+    public void addTag(TagModel tag){
+        if(tag != null){
+            this.tags.add(tag);
+            tag.getProducts().add(this);
+        }
+    }
+
+    public void removeTag(TagModel tag){
+        if(tag != null){
+            this.tags.remove(tag);
+            tag.getProducts().remove(this);
+        }
+    }
+
+    public void addTags(List<TagModel> tagList){
+        if(!tagList.isEmpty()){
+            this.tags.addAll(tagList);
+            tagList.forEach(tag-> tag.getProducts().add(this));
+        }
+    }
+
+
 }

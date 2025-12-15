@@ -11,6 +11,7 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -31,7 +32,7 @@ public class CategoryModel {
     @Column(nullable = false, unique = true, length = 120)
     private String slug;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = EAGER)
     @JoinColumn(name = "parent_id")
     @JsonIgnoreProperties("parent")
     private CategoryModel parent;
@@ -42,7 +43,22 @@ public class CategoryModel {
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 10;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", fetch = LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("category")
     private Set<ProductModel> products = new HashSet<>();
+
+    //    helper methods
+    public void addProduct(ProductModel productModel){
+        if(productModel != null){
+            this.products.add(productModel);
+            productModel.setCategory(this);
+        }
+    }
+
+    public void removeProduct(ProductModel productModel){
+        if(productModel != null){
+            this.products.remove(productModel);
+            productModel.setCategory(null);
+        }
+    }
 }

@@ -32,7 +32,22 @@ public class BrandModel {
     @Column(name = "logo_url")
     private String logoUrl;
 
-    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("brand")
     private Set<ProductModel> products = new HashSet<>();
+
+    //    helper methods
+    public void addProduct(ProductModel productModel){
+        if(productModel != null){
+            this.products.add(productModel);
+            productModel.setBrand(this);
+        }
+    }
+
+    public void removeProduct(ProductModel productModel){
+        if(productModel != null){
+            this.products.remove(productModel);
+            productModel.setBrand(null);
+        }
+    }
 }

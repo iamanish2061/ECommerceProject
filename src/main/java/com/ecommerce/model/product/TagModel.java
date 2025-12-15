@@ -29,7 +29,7 @@ public class TagModel {
     @Column(nullable = false, unique = true, length = 70)
     private String slug;
 
-    @ManyToMany(mappedBy = "tags")
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("tags")
     private Set<ProductModel> products = new HashSet<>();
 

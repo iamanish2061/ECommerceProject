@@ -15,7 +15,9 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_images", indexes = {
+@Table(name = "product_images",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"alt_text", "url"}),
+        indexes = {
         @Index(name = "idx_product_images_product_id", columnList = "product_id")
 })
 public class ProductImageModel {
