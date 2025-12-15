@@ -1,6 +1,5 @@
 package com.ecommerce.model.order;
 
-
 import com.ecommerce.model.product.ProductModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -10,10 +9,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "order_items")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class OrderItem {
     @Id
