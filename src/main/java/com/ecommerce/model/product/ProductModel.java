@@ -42,10 +42,16 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 //for admin fetching list of products from category
 //for user fetching list of products of specific category
 @NamedEntityGraph(
-        name = "Product.images.category",
+        name = "Product.images.category.parent",
         attributeNodes = {
-                @NamedAttributeNode("category"),
+                @NamedAttributeNode(value = "category", subgraph = "categoryGraph"),
                 @NamedAttributeNode("images")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "categoryGraph",
+                        attributeNodes = @NamedAttributeNode("parent")
+                )
         }
 )
 
@@ -77,7 +83,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(
         name = "products",
         uniqueConstraints = @UniqueConstraint(
-                columnNames = {"name", "brand_id"}
+                columnNames = {"title", "brand_id"}
         ),
         indexes = {
             @Index(name = "idx_slug", columnList = "slug", unique = true),
@@ -93,7 +99,7 @@ public class ProductModel {
     @Column(nullable = false, unique = true, length = 60)
     private String sku;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "title", nullable = false, length = 255)
     private String title;
 
     @Column(nullable = false, unique = true, length = 300)

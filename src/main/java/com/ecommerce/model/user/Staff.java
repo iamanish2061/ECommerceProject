@@ -20,13 +20,7 @@ import java.util.Set;
         name = "Staff.user.services",
         attributeNodes = {
                 @NamedAttributeNode("services"),
-                @NamedAttributeNode(value = "services", subgraph = "userGraph")
-        },
-        subgraphs = {
-                @NamedSubgraph(
-                        name = "userGraph",
-                        attributeNodes = @NamedAttributeNode("user")
-                )
+                @NamedAttributeNode("user")
         }
 )
 @Entity

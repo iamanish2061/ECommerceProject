@@ -11,7 +11,6 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
-import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -32,7 +31,7 @@ public class CategoryModel {
     @Column(nullable = false, unique = true, length = 120)
     private String slug;
 
-    @ManyToOne(fetch = EAGER)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
     @JsonIgnoreProperties("parent")
     private CategoryModel parent;

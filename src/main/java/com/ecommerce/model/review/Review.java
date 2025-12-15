@@ -1,7 +1,6 @@
 package com.ecommerce.model.review;
 
 
-import com.ecommerce.model.product.ProductModel;
 import com.ecommerce.model.user.UserModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

@@ -48,7 +48,7 @@ public class PaymentModel {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "transaction_id", unique = true, length = 255)
+    @Column(name = "transaction_id", unique = true, length = 255, nullable = false)
     private String transactionId;
 
     @Enumerated(EnumType.STRING)

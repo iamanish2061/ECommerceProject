@@ -30,9 +30,10 @@ public class ProductImageModel {
     @JsonIgnoreProperties("images")
     private ProductModel product;
 
-    @Column(nullable = false, length = 500)
+    @Column(name="url", nullable = false, length = 500)
     private String url;
 
+    @Column(name = "alt_text")
     private String altText;
 
     private int sortOrder = 0;

@@ -54,7 +54,11 @@ import java.time.LocalDateTime;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointments",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"staff_id", "appointment_date_time"}
+        )
+)
 public class Appointment {
 
     @Id
@@ -73,9 +77,10 @@ public class Appointment {
     @JoinColumn(name = "service_id", nullable = true)
     private ServiceModel service;
 
-    @Column(nullable = false)
+    @Column(name = "appointment_date_time", nullable = false)
     private LocalDateTime appointmentDateTime;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 

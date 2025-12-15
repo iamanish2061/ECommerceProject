@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class Driver {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @MapsId
     private UserModel user;
 
     @Column(nullable = false)
@@ -45,6 +47,9 @@ public class Driver {
     private String licenseUrl;
 
     @CurrentTimestamp
+    @Column(nullable = false)
+    private LocalDateTime submittedAt;
+
     private LocalDateTime verifiedAt;
 }
 

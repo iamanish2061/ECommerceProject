@@ -89,7 +89,7 @@ public class UserModel {
     private Staff staff;
 
     @OneToMany(
-            mappedBy = "order",
+            mappedBy = "user",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true
@@ -103,7 +103,7 @@ public class UserModel {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    private AddressModel address;
+    private Set<AddressModel> addresses = new HashSet<>();
 
     @OneToMany(
             mappedBy = "customer",
@@ -132,7 +132,7 @@ public class UserModel {
 //    helper method (Address)
     public void addAddress(AddressModel address){
         if(address != null){
-            this.address = address;
+            this.addresses.add(address);
             address.setUser(this);
         }
     }
