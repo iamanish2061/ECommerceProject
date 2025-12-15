@@ -25,21 +25,7 @@ import java.util.Set;
 )
 
 @NamedEntityGraph(
-        name = "withDriver",
-        attributeNodes = {
-                @NamedAttributeNode("driver"),
-                @NamedAttributeNode("address")
-        }
-)
-@NamedEntityGraph(
-        name = "withStaff",
-        attributeNodes = {
-                @NamedAttributeNode("staff"),
-                @NamedAttributeNode("address")
-        }
-)
-@NamedEntityGraph(
-        name = "withUser",
+        name = "User",
         attributeNodes = @NamedAttributeNode("address")
 )
 public class UserModel {

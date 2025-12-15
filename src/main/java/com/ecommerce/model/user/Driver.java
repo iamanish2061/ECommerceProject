@@ -11,6 +11,10 @@ import org.hibernate.annotations.NaturalId;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@NamedEntityGraph(
+        name = "Driver.user",
+        attributeNodes = @NamedAttributeNode("user")
+)
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Entity
 @Table(name = "drivers")
