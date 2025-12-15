@@ -8,5 +8,6 @@ public class TimeSlot {
     private LocalDateTime end;
     private Long staffId;
     private double score;
+    private boolean booked;
 
 }
