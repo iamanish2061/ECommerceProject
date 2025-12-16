@@ -5,9 +5,12 @@ import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.model.user.UserModel;
 import com.ecommerce.repository.user.UserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -76,19 +79,33 @@ public class JwtService {
 
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) throws ApplicationException{
-        final String userName =  extractUsername(token);
-        UserModel user = userRepo.findByUsername(userName).orElseThrow(
-                ()-> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.BAD_REQUEST)
-        );
-        if(!userName.equals(userDetails.getUsername())) return false;
-        if(isTokenExpired(token)) return false;
 
-        Instant tokenIssuedAt = extractClaim(token, Claims::getIssuedAt).toInstant();
-        if (tokenIssuedAt.isBefore(user.getTokenValidAfter()))
-            return false;
+    public boolean validateToken(String token, UserDetails userDetails) throws ApplicationException {
+        try {
+            final String userName = extractUsername(token);
+            if(isTokenExpired(token)) return false; // will throw ExpiredJwtToken if token is expired
+            UserModel user = userRepo.findByUsername(userName).orElseThrow(
+                    ()-> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.BAD_REQUEST)
+            );
 
-        return true;
+            if(!userName.equals(userDetails.getUsername())) return false;
+
+            Instant tokenIssuedAt = extractClaim(token, Claims::getIssuedAt).toInstant();
+            if (tokenIssuedAt.isBefore(user.getTokenValidAfter())) {
+                // Token was issued before the global revocation time
+                return false;
+            }
+
+            return true;
+
+        } catch (ExpiredJwtException e) {
+            // Explicitly catch the expiration throwing an exception so the filter can catch it
+            // and return the specific 401 status. so that refresh endpoint can be hit
+            throw new ApplicationException("Token Expired", "TOKEN_EXPIRED", HttpStatus.UNAUTHORIZED);
+        } catch (SignatureException | MalformedJwtException e) {
+            // Catch invalid signature or structure
+            throw new ApplicationException("Invalid Token Structure/Signature", "TOKEN_INVALID", HttpStatus.FORBIDDEN);
+        }
     }
 
     public boolean isTokenExpired(String token){
