@@ -26,7 +26,7 @@ import java.util.Set;
 
 @NamedEntityGraph(
         name = "User",
-        attributeNodes = @NamedAttributeNode("address")
+        attributeNodes = @NamedAttributeNode("addresses")
 )
 public class UserModel {
     @Id

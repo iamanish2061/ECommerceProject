@@ -66,9 +66,9 @@ import java.util.List;
 @Table(name = "orders")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class OrderModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

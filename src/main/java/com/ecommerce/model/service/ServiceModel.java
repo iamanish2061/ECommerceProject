@@ -26,7 +26,7 @@ import java.util.Set;
 )
 @Entity
 @Table(name = "services")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class ServiceModel {
 
     @Id
