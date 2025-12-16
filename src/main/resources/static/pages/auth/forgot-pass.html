@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/frogot.css" />
+</head>
+
+<body>
+<div class="page-wrapper">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+    <div class="blob b5"></div>
+    <div class="blob b6"></div>
+
+    <div class="auth-card">
+        <!-- Card shapes -->
+        <div class="card-shape s1"></div>
+        <div class="card-shape s2"></div>
+
+        <!-- Avatar + Welcome -->
+        <div class="hero-illustration">
+            <img src="assets/Forgot password-bro.svg" alt="barber" />
+        </div>
+
+        <div class="hero-title">
+            <small>THE CUTLAB</small>
+            <h2>Recover your account</h2>
+        </div>
+
+        <!-- Form wrapper-->
+        <div class="form-wrapper">
+            <form action="" id="forgot-form">
+                <!-- Step1 -->
+                <div class="step step-1 active">
+                    <div class="field">
+                        <label for="username">Username</label>
+                        <input type="username" id="username" placeholder="Your username" required />
+                    </div>
+                    <button type="button" id="find-username" class="all-btn find">Find Username</button>
+                    <!--if username found then redirect to next step if not then display alert-->
+                </div>
+
+                <!--step2-->
+                <div class="step step-2">
+                    <div class="field">
+                        <div class="field-label-row">
+                            <label for="code">Verification Code</label>
+                            <button type="button" id="link-btn">Send Code</button>
+                        </div>
+
+                        <div class="otp-wrapper">
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                        </div>
+                        <input type="hidden" id="verification-code" name="verification-code" />
+                    </div>
+                    <button type="button" id="verify-code" class="all-btn verify">Verify Code</button>
+                </div>
+
+                <!--Step3-->
+                <div class="step step-3">
+                    <div class="field">
+
+
+                        <div class="options">
+                            <button type="button" id="change-password-yes" class="all-btn yes">Yes</button>
+                            <button type="button" id="change-password-no" class="all-btn no">No</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!--step4-->
+                <div class="step step-4">
+
+
+                    <div class="field">
+                        <label for="new-password">New Password</label>
+                        <input class="pass" type="password" id="new-password" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input class="pass" type="password" id="confirm-password" required />
+                        <i class="bx bx-hide eye-icon closed active"></i>
+                        <i class="bx bx-show eye-icon open"></i>
+                    </div>
+
+                    <button type="submit" id="change-pass" class="all-btn change">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/forgot.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="assets/css/login.css" />
+</head>
+
+<body>
+<!-- PAGE WRAPPER -->
+<div class="page-wrapper">
+    <!-- Background blobs -->
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+    <div class="blob b5"></div>
+    <div class="blob b6"></div>
+
+    <!-- AUTH CARD -->
+    <div class="auth-card">
+        <!-- Card shapes -->
+        <div class="card-shape s1"></div>
+        <div class="card-shape s2"></div>
+
+        <!-- Avatar + Welcome -->
+        <div class="hero-illustration">
+            <img src="assets/barbershop team-pana (1).svg" alt="barber" />
+        </div>
+
+        <div class="hero-title">
+            <small>THE CUTLAB</small>
+            <h1>Welcome Back!</h1>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-bar">
+            <div class="tabs-pill">
+                <span class="tab-indicator"></span>
+                <div class="tab active" data-target="login">Login</div>
+                <div class="tab" data-target="signup">Sign up</div>
+            </div>
+        </div>
+
+        <!-- FORM WRAPPER -->
+        <div class="form-wrapper">
+            <!-- LOGIN FORM -->
+            <form id="login-form" class="form active">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Your user name" required />
+                    <span class="error-msg" data-default="Please enter username with 2 to 50 characters."></span>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="input-container">
+                        <input type="password" id="password" placeholder="Your password" required />
+                        <span class="error-msg"></span>
+                        <i class="bx bx-hide eye-icon closed active"></i>
+                        <i class="bx bx-show eye-icon open"></i>
+                    </div>
+                </div>
+                <div class="forgot-row">
+                    <a href="forgot.html">Forgot password?</a>
+                </div>
+
+                <button class="btn-primary" type="submit">Login</button>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form id="signup-form" class="form">
+                <!-- Step 1 -->
+                <div class="step step-1 active">
+                    <div class="field">
+                        <label for="full-name">Full name</label>
+                        <input type="text" id="full-name" placeholder="Your full name" required />
+                        <span class="error-msg"
+                              data-default="Please enter fullname with 2 to 50 characters."></span>
+                    </div>
+
+                    <div class="field">
+                        <label for="create-username">Username</label>
+                        <input type="text" id="create-username" placeholder="Create a username" required />
+                        <span class="error-msg"
+                              data-default="Please enter username with 2 to 50 characters."></span>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step step-2">
+                    <div class="field">
+                        <div class="field-label-row">
+                            <label for="email">Email</label>
+                            <button type="button" class="link-btn" id="send-code">
+                                Send code
+                            </button>
+                        </div>
+                        <input type="email" id="email" placeholder="Your email address" required />
+                        <span class="error-msg"></span>
+                    </div>
+
+                    <div class="field">
+                        <label for="code">Verification Code</label>
+                        <div class="otp-wrapper">
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+                        </div>
+                        <input type="hidden" id="hidden-otp" name="hidden-code" />
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step step-3">
+                    <div class="field">
+                        <label for="signup-password">Password</label>
+                        <div class="input-container">
+                            <input type="password" id="signup-password" placeholder="Create a password" required />
+                            <span class="error-msg"></span>
+                            <i class="bx bx-hide eye-icon closed active"></i>
+                            <i class="bx bx-show eye-icon open"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="field">
+                        <label for="confirm-password">Confirm Password</label>
+                        <div class="input-container">
+                            <input type="password" id="confirm-password" placeholder="Confirm your password" required />
+                            <span class="error-msg"></span>
+                            <i class="bx bx-hide eye-icon closed active"></i>
+                            <i class="bx bx-show eye-icon open"></i>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Navigation buttons -->
+                <div class="step-nav">
+                    <div class="btn-container">
+                        <button class="btn-primary" type="button" id="prev-btn">
+                            <span>Back</span>
+                            <i class="bx bx-left-arrow-alt"></i>
+                        </button>
+                        <button class="btn-primary" type="button" id="next-btn">
+                            <span>Next</span>
+                            <i class="bx bx-right-arrow-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!--end of signup form-->
+        </div>
+        <!-- END form-wrapper -->
+    </div>
+    <!-- END auth-card -->
+</div>
+<!-- END page-wrapper -->
+
+<script src="/assets/js/validation.js"></script>
+<script src="/assets/js/login.js"></script>
+</body>
+
+</html>
