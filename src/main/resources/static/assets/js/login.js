@@ -1,5 +1,3 @@
-
-
 document.addEventListener('DOMContentLoaded',()=>{
 
 //tab switching login
@@ -12,7 +10,7 @@ function showForm(type){
     });
 
     tabs.forEach(tab=>{
-        tab.classList.toggle('active',tab.dataset.target === type);
+        tab.classList.toggle('active',tabataset.target === type);
 
     });
 
