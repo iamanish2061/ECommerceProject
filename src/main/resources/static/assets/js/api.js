@@ -44,7 +44,7 @@ async function request(endpoint, method = 'GET', body = null) {
                 return { ...retryData, httpStatus: retryRes.status };
             } else {
                 // refresh failed → logout
-                AuthService.logout();
+                AuthService.clearLocalStorage();
                 return {
                     success: false,
                     message: 'Session expired. Please login again.',

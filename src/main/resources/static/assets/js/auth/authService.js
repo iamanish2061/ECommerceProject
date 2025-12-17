@@ -6,7 +6,9 @@ const AuthService = {
     },
 
     async register(userData) {
-        return await request('/auth/register', 'POST', userData);
+        const response = await request('/auth/register', 'POST', userData);
+        if(response?.success) this.saveSession(response.data);
+        return response;
     },
 
     async checkUsername(username) {
@@ -38,10 +40,19 @@ const AuthService = {
         return localStorage.getItem('accessToken') !== null;
     },
 
-    logout() {
+
+    async logout() {
+        const response = await request('/auth/logout', 'POST');
+        if(response?.success) this.clearLocalStorage();
+        return response;
+    },
+
+    clearLocalStorage() {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('tokenType');
         localStorage.removeItem('user');
-        // href do it in ui
     }
+
+
+
 };
