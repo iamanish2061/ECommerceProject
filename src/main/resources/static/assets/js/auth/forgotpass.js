@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
        eyeClose.classList.remove('active');
        eyeOpen.classList.add('active');
     });
+
     eyeOpen.addEventListener('click', ()=>{
         passwordFields.forEach(field=>{
             field.type='password';
@@ -34,10 +35,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
         eyeClose.classList.add('active')
         eyeOpen.classList.remove('active');
     });
-
-
-
-
 
     let verifiedOtp = ""; //storing otp after verification
 
@@ -64,9 +61,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
         },duration);
     }
 
-
-
-
     function getOtp(){
         return Array.from(otpInputs).map(input => input.value.trim()).join('');
     }
@@ -79,6 +73,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         currentStep = n;
         updateWelcomeMsg(n);
     }
+
     function updateWelcomeMsg(step){
         const heroHeading = document.querySelector('.hero-title h2');
         if(heroHeading && STEP_MESSAGES[step]){
@@ -88,38 +83,33 @@ document.addEventListener('DOMContentLoaded', ()=>{
     showStep(1);
 
 
-
-
-
     //step 1 check if the username exists
-    findUsernameBtn.addEventListener('click',async()=>{
+    findUsernameBtn.addEventListener('click', async()=>{
         const username = usernameInput.value.trim();
 
         if(!username){
             showToast("Please enter your username","error");
             return;
         }
+        if(!validateUsername(usernameInput)){
+            return;
+        }
 
         //connect to backend
         try{
-            const res = await fetch('/api/auth/username-exists?username='+encodeURIComponent(username),{
-            method:'GET',
-            headers:{ 'Content-Type':'application/json' },
-            credentials : "include" //this is for accepting cookies tokens from backend httpServletresponse
-        });
-            const data = await res.json();
-
-            if(!data.success){
-                showToast(data.messsage || "Username not found", "error");
-             }
+            const res = await ForgotPasswordService.doesUsernameExist(username);
+            if(!res.success){
+                showToast(res.message || "Username not found", "error");
+                return;
+            }
+            document.getElementById('generatedEmail').textContent = `Do you want to send Verification code to : ${res.data}`;
+            setInterval(()=>showStep(2), 500);
 
         }catch(error){
             console.error("Error finding username");
             showToast("Network error while checking username", "error");
         }
-        console.log("Button Clicked");
-        showToast("Accound Found! Proceeding to next step","success");
-        showStep(2);
+
     });
 
     //step 2 verification code
@@ -130,24 +120,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
             showToast('please enter username first',"error");
             return;
         }
+        if(!validateUsername(usernameInput)){
+            return;
+        }
 
         sendCodeBtn.disabled = true;
-        sendCodeBtn.innerHTML = `<span>Sending...</span>`;
+        sendCodeBtn.textContent = "Sending...";
 
         try{
-            const response = await fetch('/api/auth/send-otp-code-to-recover?username='+encodeURIComponent(username),{
-                method:'GET',
-                headers:{ 'Content-Type':'appication/json' },
-                credentials:"include"
-            });
-
-            const data = await response.json();
-
-            if(!data.success){
-                showToast(data.message || "Failed to send code", "error");
+            const response = await ForgotPasswordService.sendOtpCodeToRecover(username);
+            if(!response.success){
+                showToast(response.message || "Failed to send code", "error");
                 return;
             }
-            alert("Code Sent successfully")
+            showToast("Code Sent successfully","success");
         }catch(error){
             console.error("Error in sending code");
             showToast("Network error please check your internet","error");
@@ -178,7 +164,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
 
     //after clicking on verify code
-    verifyCodeBtn.addEventListener('click',async()=>{
+    verifyCodeBtn.addEventListener('click', async()=>{
         const username = usernameInput.value.trim();
         const code = hiddenOtpInput.value.trim() || getOtp();
 
@@ -186,37 +172,29 @@ document.addEventListener('DOMContentLoaded', ()=>{
             showToast("please enter your username","error");
             return;
         }
-
-        if(code.length !== otpInputs.length || !/^\d{6}$/.test(code)){
-            alert("Please enter full code");
+        if(!validateUsername(usernameInput)){
             return;
         }
 
+        if(code.length !== otpInputs.length || !/^\d{6}$/.test(code)){
+            showToast("Please enter full code", "error");
+            return;
+        }
 
         try{
-            const response = await fetch ('/api/auth/continue-without-login?username='+ encodeURIComponent(username) + "&code="+ encodeURIComponent(code),{
-                method:'GET',
-                headers:{ 'Content-Type':'application/json' },
-                credentials: "include"
-            });
-            const data = await response.json();
-
-            if(!data.success){
-                alert(data.message || "Invalid Otp Code");
+            const response = await ForgotPasswordService.verifyOtpCodeForRecovery({ username, code });
+            if(!response.success){
+                showToast(response.message || "Invalid Otp Code", "error");
                 return;
             }
-
-        verifiedOtp = code;
-            showToast("Verification successfull","success");
-            showStep(3);
+            verifiedOtp = code;
+            showToast("Verification successful","success");
+            setTimeout(()=>showStep(3), 500);
 
         }catch(error){
             console.error("Error verifying code");
             showToast("Failed to verify code","error");
         }
-
-
-
     });
 
     //step 3 for yes no
@@ -230,72 +208,83 @@ document.addEventListener('DOMContentLoaded', ()=>{
             showToast("please verify otp first","error");
         }
 
-           showToast("logging in...", "info");
-           window.location.href = "login.html";
+        const username = usernameInput.value.trim();
+        const code = hiddenOtpInput.value.trim() || getOtp();
 
+        if(!username){
+            showToast("please enter your username","error");
+            return;
+        }
+        if(!validateUsername(usernameInput)){
+            return;
+        }
 
+        if(code.length !== otpInputs.length || !/^\d{6}$/.test(code)){
+            showToast("Please enter full code", "error");
+            return;
+        }
+
+        try{
+            const response = await ForgotPasswordService.continueWithoutPasswordReset({ username, code });
+            if(!response.success){
+                showToast(response.message || "Error! Please try again", "error");
+                return;
+            }
+
+            showToast("Please Wait...", "info");
+            setTimeout(window.location.href = "/product.html", 500);
+        }catch(error){
+            console.error("Error continuing without password reset");
+            showToast("Network error please try again later","error");
+        }
     });
 
     //step4
     forgotForm.addEventListener('submit', async (e)=>{
         e.preventDefault();
 
-        const usernameInp = usernameInput.value.trim();
-        const pass = newPassInput.value.trim();
-        const rePass = confirmPassInput.value.trim();
+        const username = usernameInput.value.trim();
+        const code = hiddenOtpInput.value.trim() || getOtp();
+        const password = newPassInput.value.trim();
+        const rePassword = confirmPassInput.value.trim();
 
-       const passwordRegex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$/;
-
-        if(!pass || !rePass){
-            alert("Please fill out both password fields")
+        if(!username){
+            showToast("Please enter your username","error");
             return;
         }
-        if(!passwordRegex.test(pass)){
-            alert("password must have a uppercase number and a speacial character");
+        if(!validateUsername(usernameInput)){
+            return;
+        }
+        if(code.length !== otpInputs.length || !/^\d{6}$/.test(code)){
+            showToast("Please enter full code", "error");
+            return;
+        }
+        if(!password || !rePassword){
+            showToast("Please fill out both password fields","error");
+            return;
+        }   
+        if(!validatePassword(newPassInput)){
             return;
         }
 
-        if(pass !== rePass){
-            alert("Please enter the same password");
+        if(password !== rePassword){
+            showToast("Please enter the same password","error");
             return;
         }
-
-        const finalData = {
-            username: usernameInp,
-            code: verifiedOtp,
-            password: pass,
-            rePassword: rePass
-        };
-
-
-
+        
         try{
-            const response = await fetch('/api/auth/update-password',{
-                method: 'POST',
-                headers: {'Content-Type' : 'application/json'},
-                credentials: 'include',
-                body: JSON.stringify(finalData)
-            });
-
-            const data = await response.json();
-
-            if(!data.success){
-               showToast(data.message || "Update Failed","error");
+            const response = await ForgotPasswordService.updatePassword({ username, code, password, rePassword });
+            if(!response.success){
+               showToast(response.message || "Update Failed", "error");
                 return;
             }
-
-            showToast("Password changed successfully","success");
-                window.location.href = "login.html"; //back to login page
-
-
+            showToast("Password changed successfully", "success");
+            setTimeout(window.location.href = "/product.html", 500);
         }catch(error){
             console.error("Error changing password: ", error);
             showToast("Something went wrong please try again later","error");
         }
 
-
     });
-
-
 
 });

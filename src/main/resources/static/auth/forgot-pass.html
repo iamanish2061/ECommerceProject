@@ -6,7 +6,7 @@
     <title>Document</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="/assets/css/forgot-pass.css" />
+    <link rel="stylesheet" href="/assets/css/auth/forgot-pass.css" />
 </head>
 
 <body>
@@ -50,6 +50,9 @@
                 <!--step2-->
                 <div class="step step-2">
                     <div class="field">
+
+                        <div class="generated-email" id="generatedEmail"></div>
+
                         <div class="field-label-row">
                             <label for="code">Verification Code</label>
                             <button type="button" id="link-btn">Send Code</button>
@@ -106,7 +109,11 @@
     </div>
 </div>
 
-<script src="/assets/js/forgot-pass.js"></script>
+
+<script src="/assets/js/validation.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth/forgotPasswordService.js"></script>
+<script src="/assets/js/auth/forgotpass.js"></script>
 
 <div id="toast-container"></div>
 </body>
