@@ -72,7 +72,7 @@ public class ForgotPasswordController {
 //    do you want to reset password now? yes ... no
 //    this end point is for no (when user continue without resetting password)
 //    data sending same as above
-    @PostMapping("/continue-without-login")
+    @PostMapping("/continue-without-password-reset")
     public ResponseEntity<ApiResponse<AuthResponse>> setTokenForUserContinuingWithoutResettingPassword(
             @Valid @RequestBody VerifyOtpCodeFromUsernameRequest request,
             HttpServletResponse httpServletResponse
@@ -83,7 +83,7 @@ public class ForgotPasswordController {
 
 //    if user resets password
 //    data sending post + request body : see UpdatePasswordRequest
-    @PostMapping("/update-password")
+    @PutMapping("/update-password")
     public ResponseEntity<ApiResponse<AuthResponse>> updatePassword(
             @Valid @RequestBody UpdatePasswordRequest request, HttpServletResponse httpServletResponse
     ) throws ApplicationException {

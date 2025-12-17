@@ -131,20 +131,20 @@ public class AuthService {
             HttpServletRequest request, HttpServletResponse httpServletResponse
     ) throws ApplicationException{
         String refreshToken = CookieUtils.getRefreshTokenFromCookie(request)
-                .orElseThrow(() -> new ApplicationException("Refresh token missing", "UNAUTHORIZED", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new ApplicationException("Refresh token missing", "REFRESH_TOKEN_MISSING", HttpStatus.BAD_REQUEST));
         // Validate & extract user email from refresh token
         String email = jwtService.extractUsername(refreshToken);
         UserModel user = userRepo.findByUsername(email)
                 .orElseThrow(() -> new ApplicationException("User not found", "NOT_FOUND", HttpStatus.NOT_FOUND));
         // Verify stored hash matches this refresh token
         if (!DigestUtils.sha256Hex(refreshToken).equals(user.getRefreshToken())) {
-            throw new ApplicationException("Invalid refresh token", "UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+            throw new ApplicationException("Invalid refresh token", "INVALID_REFRESH_TOKEN", HttpStatus.BAD_REQUEST);
         }
         // Check if token is expired
         if (jwtService.isTokenExpired(refreshToken)) {
             user.setRefreshToken(null);
             userRepo.save(user);
-            throw new ApplicationException("Refresh token expired", "UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+            throw new ApplicationException("Refresh token expired", "REFRESH_TOKEN_EXPIRED", HttpStatus.BAD_REQUEST);
         }
         // Generate NEW access + refresh tokens (rotation!)
         String newAccessToken = jwtService.generateAccessToken(new UserPrincipal(user));

@@ -70,42 +70,50 @@ public class JwtService {
         return claimResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token){
-        return Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    private Claims extractAllClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
 
+        } catch (ExpiredJwtException ex) {
+            throw new ApplicationException(
+                    "Access token expired",
+                    "TOKEN_EXPIRED",
+                    HttpStatus.UNAUTHORIZED
+            );
+        } catch (SignatureException | MalformedJwtException ex) {
+            throw new ApplicationException(
+                    "Invalid token",
+                    "TOKEN_INVALID",
+                    HttpStatus.FORBIDDEN
+            );
+        }
     }
 
 
     public boolean validateToken(String token, UserDetails userDetails) throws ApplicationException {
-        try {
-            final String userName = extractUsername(token);
-            if(isTokenExpired(token)) return false; // will throw ExpiredJwtToken if token is expired
-            UserModel user = userRepo.findByUsername(userName).orElseThrow(
-                    ()-> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.BAD_REQUEST)
-            );
+        String userName = extractUsername(token);
 
-            if(!userName.equals(userDetails.getUsername())) return false;
-
-            Instant tokenIssuedAt = extractClaim(token, Claims::getIssuedAt).toInstant();
-            if (tokenIssuedAt.isBefore(user.getTokenValidAfter())) {
-                // Token was issued before the global revocation time
-                return false;
-            }
-
-            return true;
-
-        } catch (ExpiredJwtException e) {
-            // Explicitly catch the expiration throwing an exception so the filter can catch it
-            // and return the specific 401 status. so that refresh endpoint can be hit
+        if(isTokenExpired(token))
             throw new ApplicationException("Token Expired", "TOKEN_EXPIRED", HttpStatus.UNAUTHORIZED);
-        } catch (SignatureException | MalformedJwtException e) {
-            // Catch invalid signature or structure
-            throw new ApplicationException("Invalid Token Structure/Signature", "TOKEN_INVALID", HttpStatus.FORBIDDEN);
+
+        UserModel user = userRepo.findByUsername(userName).orElseThrow(
+                ()-> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.BAD_REQUEST)
+        );
+
+        if(!userName.equals(userDetails.getUsername())) return false;
+
+        Instant tokenIssuedAt = extractClaim(token, Claims::getIssuedAt).toInstant();
+        if (tokenIssuedAt.isBefore(user.getTokenValidAfter())) {
+            // Token was issued before the global revocation time
+            return false;
         }
+
+        return true;
+
     }
 
     public boolean isTokenExpired(String token){

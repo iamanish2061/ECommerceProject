@@ -67,7 +67,7 @@ public class UserModel {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     @UpdateTimestamp
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();

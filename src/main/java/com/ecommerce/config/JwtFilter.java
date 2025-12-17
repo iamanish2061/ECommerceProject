@@ -1,14 +1,15 @@
 package com.ecommerce.config;
 
+import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.service.CustomUserDetailsService;
 import com.ecommerce.service.jwt.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,30 +29,46 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String username = null;
 
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
-            token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails =myUserDetailsService.loadUserByUsername(username);
+        String token = authHeader.substring(7);
+        try {
+            String username = jwtService.extractUsername(token);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
 
-
-            try {
-                if(jwtService.validateToken(token, userDetails)){
+                if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails,null,  userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-            } catch (ApplicationException e) {
-                throw new ApplicationException("Error validating token", "INVALID_TOKEN", HttpStatus.BAD_REQUEST);
+
             }
+            filterChain.doFilter(request, response);
+        }catch (ApplicationException ex){
+            writeError(response, ex);
         }
-        filterChain.doFilter(request, response);
     }
+
+    private void writeError(HttpServletResponse response,
+                            ApplicationException ex) throws IOException {
+
+        response.setStatus(ex.getStatus().value());
+        response.setContentType("application/json");
+
+        ApiResponse<Object> apiRes =
+                ApiResponse.error(ex.getMessage(), ex.getErrorCode());
+
+        response.getWriter().write(
+                new ObjectMapper().writeValueAsString(apiRes)
+        );
+    }
+
+
 }

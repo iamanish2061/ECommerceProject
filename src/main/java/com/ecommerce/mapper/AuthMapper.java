@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 public interface AuthMapper {
 
     @Mapping(source = "accessToken", target = "accessToken")
-    @Mapping(target = "tokenType", ignore = true, defaultValue = "Bearer")
+    @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(source ="accessTokenExpiration", target = "expiresIn")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.fullName", target = "fullName")
