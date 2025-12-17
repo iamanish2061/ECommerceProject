@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
         },duration);
     }
 
-    function getOtp(){
-        return Array.from(otpInputs).map(input => input.value.trim()).join('');
-    }
+    // function getOtp(){
+    //     return Array.from(otpInputs).map(input => input.value.trim()).join('');
+    // }
 
     function showStep(n){
         steps.forEach((step, index)=>{
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
                 return;
             }
             document.getElementById('generatedEmail').textContent = `Do you want to send Verification code to : ${res.data}`;
-            setInterval(()=>showStep(2), 500);
+            setTimeout(()=>showStep(2), 500);
 
         }catch(error){
             console.error("Error finding username");
@@ -145,20 +145,37 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
 
     //otp behavaiour
-    otpInputs.forEach((input, index) =>{
-        input.addEventListener('input', ()=>{
-            input.value = input.value.replace(/[^0-9]/g, '');
+    otpInputs.forEach((input,index)=>{
 
-            if(input.value && index<otpInputs.length -1){
+        input.addEventListener('input',()=>{
+            input.value = input.value.replace(/\D/g,'').slice(0,1);
+            if(input.value && index < otpInputs.length - 1){
                 otpInputs[index + 1].focus();
             }
-            const code = getOtp();
-            hiddenOtpInput.value = code;
+            hiddenOtpInput.value = Array.from(otpInputs).map(i=>i.value).join('');
+
+            if(hiddenOtpInput.value.length === 6){
+                if(/^\d{6}$/.test(hiddenOtpInput.value)){
+                    otpInputs.forEach(box=> box.style.borderColor = '#28a745');
+                }else{
+                    otpInputs.forEach(box=> box.style.borderColor = '#dc3545');
+                }
+            }
         });
 
-        input.addEventListener('keydown', (e) =>{
-            if(e.key === 'Backspace' && !input.value && index>0){
-                otpInputs[index - 1].focus();
+        input.addEventListener('keydown',(e)=>{
+            if(e.key ==='Backspace' && !input.value && index>0){
+                otpInputs[index -1 ].focus();
+            }
+        });
+
+        input.addEventListener('paste', e => {
+            const paste = (e.clipboardData.getData('text')||'').replace(/\D/g,'');
+            if(paste.length >= 6){
+                otpInputs.forEach((inp,i)=> inp.value = paste[i]||'');
+                hiddenOtpInput.value = paste.slice(0,6);
+                otpInputs[5].focus();
+                e.preventDefault();
             }
         });
     });
@@ -166,7 +183,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     //after clicking on verify code
     verifyCodeBtn.addEventListener('click', async()=>{
         const username = usernameInput.value.trim();
-        const code = hiddenOtpInput.value.trim() || getOtp();
+        const code = hiddenOtpInput.value.trim();
 
         if(!username){
             showToast("please enter your username","error");
@@ -189,7 +206,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
             }
             verifiedOtp = code;
             showToast("Verification successful","success");
-            setTimeout(()=>showStep(3), 500);
+            setTimeout(() => showStep(3), 500);
 
         }catch(error){
             console.error("Error verifying code");
@@ -209,7 +226,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         }
 
         const username = usernameInput.value.trim();
-        const code = hiddenOtpInput.value.trim() || getOtp();
+        const code = hiddenOtpInput.value.trim();
 
         if(!username){
             showToast("please enter your username","error");
@@ -232,7 +249,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
             }
 
             showToast("Please Wait...", "info");
-            setTimeout(window.location.href = "/product.html", 500);
+            setTimeout(() => {
+                window.location.href = "/product.html"
+            }, 500);
         }catch(error){
             console.error("Error continuing without password reset");
             showToast("Network error please try again later","error");
@@ -244,7 +263,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         e.preventDefault();
 
         const username = usernameInput.value.trim();
-        const code = hiddenOtpInput.value.trim() || getOtp();
+        const code = hiddenOtpInput.value.trim();
         const password = newPassInput.value.trim();
         const rePassword = confirmPassInput.value.trim();
 
@@ -279,7 +298,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
                 return;
             }
             showToast("Password changed successfully", "success");
-            setTimeout(window.location.href = "/product.html", 500);
+            setTimeout(() => window.location.href = "/product.html", 500);
         }catch(error){
             console.error("Error changing password: ", error);
             showToast("Something went wrong please try again later","error");
