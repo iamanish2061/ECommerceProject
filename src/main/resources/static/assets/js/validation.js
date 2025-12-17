@@ -1,5 +1,3 @@
-
-
 const patterns = {
     fullName: /^[A-Za-z\s]{4,50}$/,
     username: /^[A-Za-z0-9_]{4,20}$/,
