@@ -54,7 +54,7 @@
                 <div class="field">
                     <label for="username">Username</label>
                     <input type="text" id="username" placeholder="Your user name" required />
-                    <span class="error-msg" data-default="Please enter username with 2 to 50 characters."></span>
+                    <span class="error-msg"></span>
                 </div>
                 <div class="field">
                     <label for="password">Password</label>
@@ -79,15 +79,13 @@
                     <div class="field">
                         <label for="full-name">Full name</label>
                         <input type="text" id="full-name" placeholder="Your full name" required />
-                        <span class="error-msg"
-                              data-default="Please enter fullname with 2 to 50 characters."></span>
+                        <span class="error-msg"></span>
                     </div>
 
                     <div class="field">
                         <label for="create-username">Username</label>
                         <input type="text" id="create-username" placeholder="Create a username" required />
-                        <span class="error-msg"
-                              data-default="Please enter username with 2 to 50 characters."></span>
+                        <span class="error-msg"></span>
                     </div>
                 </div>
 
@@ -167,6 +165,8 @@
 
 <script src="/assets/js/validation.js"></script>
 <script src="/assets/js/login.js"></script>
+
+<div id="toast-container"></div>
 </body>
 
 </html>

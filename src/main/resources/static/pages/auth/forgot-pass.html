@@ -41,6 +41,7 @@
                     <div class="field">
                         <label for="username">Username</label>
                         <input type="username" id="username" placeholder="Your username" required />
+                        <span class="error-msg"></span>
                     </div>
                     <button type="button" id="find-username" class="all-btn find">Find Username</button>
                     <!--if username found then redirect to next step if not then display alert-->
@@ -63,6 +64,7 @@
                             <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
                         </div>
                         <input type="hidden" id="verification-code" name="verification-code" />
+
                     </div>
                     <button type="button" id="verify-code" class="all-btn verify">Verify Code</button>
                 </div>
@@ -86,11 +88,13 @@
                     <div class="field">
                         <label for="new-password">New Password</label>
                         <input class="pass" type="password" id="new-password" required />
+                        <span class="error-msg"></span>
                     </div>
 
                     <div class="field">
                         <label for="confirm-password">Confirm Password</label>
                         <input class="pass" type="password" id="confirm-password" required />
+                        <span class="error-msg"></span>
                         <i class="bx bx-hide eye-icon closed active"></i>
                         <i class="bx bx-show eye-icon open"></i>
                     </div>
@@ -103,6 +107,8 @@
 </div>
 
 <script src="/assets/js/forgot.js"></script>
+
+<div id="toast-container"></div>
 </body>
 
 </html>

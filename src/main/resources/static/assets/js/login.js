@@ -62,6 +62,24 @@ setupPasswordToggle('signup-password'); // Signup Password
 setupPasswordToggle('confirm-password'); // Signup Confirm Password
 
 
+
+//toast function
+function showToast(message,type="info", duration = 3000){
+    const toastContainer = document.getElementById('toast-container');
+    if(!toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(()=>{
+        toast.remove();
+    },duration);
+}
+
+
 //login submission login
 const usernameInput = document.getElementById('login-username');
 const loginPasswordInput = document.getElementById('login-password');
@@ -72,14 +90,14 @@ loginBtn.addEventListener('click', async ()=>{
     const password = loginPasswordInput.value.trim();
 
     if(!username){
-        alert("please enter your usernme");
+        showToast("please enter your username","error");
         return;
     }
     if(!validateUsername(usernameInput)){
         return;
     }
     if(!password){
-        alert("Please enter your password");
+        showToast("Please enter your password","error");
         return
     }
     if(!validatePassword(loginPasswordInput)){
@@ -101,14 +119,14 @@ loginBtn.addEventListener('click', async ()=>{
         });
         const data = await response.json();
         if(data.success){
-            alert("Login successful! Redirecting...");
+            showToast("Login successful! Redirecting...", "success");
             window.location.href = "user/index.html"
         }else{
-            alert(data.message || "Login failed, please try again.");
+            showToast(data.message || "Login failed, please try again.", "error");
         }
     }catch(error){
         console.error("Login error: ", error);
-        alert("Network error please try again later");
+        showToast("Network error please try again later", "error");
     }finally{
         loginBtn.disabled = false;
         loginBtn.innerHTML = `<span>Login</span>`;
@@ -183,7 +201,7 @@ sendCodeBtn.addEventListener("click", async () => {
         // showing error if email register xa vaye
         if (!data.success) {
 
-            alert(data.message || "Email already registered or failed to send code.");
+            showToast(data.message || "Email already registered or failed to send code.", "error");
 
 
             sendCodeBtn.disabled = false;
@@ -191,7 +209,7 @@ sendCodeBtn.addEventListener("click", async () => {
 
         } else {
 
-            alert(data.message || "OTP code sent successfully");
+            showToast(data.message || "OTP code sent successfully","success");
 
 
             startResendTimer();
@@ -200,9 +218,7 @@ sendCodeBtn.addEventListener("click", async () => {
     } catch (error) {
 
         console.error("Network error:", error);
-
-
-        alert("Network error, please check your connection.");
+        showToast("Network error, please check your connection.", "error");
 
 
         sendCodeBtn.disabled = false;
@@ -234,7 +250,7 @@ nextBtn.addEventListener('click', async () =>{
         const data = await res.json();
 
         if(!data.success){
-           alert("Username already taken");
+           showToast("Username already taken","info");
             return;
         }else{
             alert(data.message || "Username is available.");
@@ -258,11 +274,11 @@ nextBtn.addEventListener('click', async () =>{
         }
 
         if(enteredOtp.length !==6 || !/^\d{6}$/.test(enteredOtp)){
-            alert("Please enter full 6 digit-code");
+            showToast("Please enter full 6 digit-code","error");
             otpInputs.forEach(box => box.style.borderColor = '#dc3545'); // red border
             return;
         }
-        //crating a request body
+        //creating a request body
         const verificationData ={
             email: emailValue,
             code: enteredOtp
@@ -284,12 +300,12 @@ nextBtn.addEventListener('click', async () =>{
                 isOtpVerified = true;
                 showStep(3);
             }else{
-                alert(result.message || "Invalid or expired code");
+                showToast(result.message || "Invalid or expired code","error");
                 isOtpVerified = false;
             }
         }catch(error){
             console.error(error);
-            alert("Verification failed. Check your connection");
+            showToast("Verification failed. Check your connection", "error");
             otpInputs.forEach(box => box.style.borderColor = '#dc3545'); // red border
         }finally{
             nextBtn.disabled = false;
@@ -308,7 +324,7 @@ nextBtn.addEventListener('click', async () =>{
         }
 
         if(!isOtpVerified){
-            alert("Please verify your email first!");
+            showToast("Please verify your email first!", "info");
             showStep(2);
             return;
         }
@@ -335,14 +351,14 @@ nextBtn.addEventListener('click', async () =>{
             const result = await response.json();
 
             if(result.success){
-                alert("Account created successfully");
+                showToast("Account created successfully", "success");
                 showForm('login');
             }else{
-                alert(result.message || "Registration failed please try again");
+                showToast(result.message || "Registration failed please try again", "error");
             }
         }catch(error){
             console.error("Registration error: ",error);
-            alert("Network error please try again later");
+            showToast("Network error please try again later", "error");
         }finally{
             nextBtn.disabled = false;
             nextBtn.innerHTML = `<span>Create Account</span>`;

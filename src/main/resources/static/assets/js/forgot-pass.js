@@ -48,6 +48,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
         4: "Create Password"
     };
 
+    //helper functions
+    function showToast(message,type="info", duration = 3000){
+        const toastContainer = document.getElementById('toast-container');
+        if(!toastContainer) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        
+        toastContainer.appendChild(toast);
+
+        setTimeout(()=>{
+            toast.remove();
+        },duration);
+    }
+
+
+
+
     function getOtp(){
         return Array.from(otpInputs).map(input => input.value.trim()).join('');
     }
@@ -68,12 +87,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
     showStep(1);
 
+
+
+
+
     //step 1 check if the username exists
     findUsernameBtn.addEventListener('click',async()=>{
         const username = usernameInput.value.trim();
 
         if(!username){
-            alert("Please enter your username");
+            showToast("Please enter your username","error");
             return;
         }
 
@@ -87,15 +110,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
             const data = await res.json();
 
             if(!data.success){
-                alert(data.messsage || "Username not found");
+                showToast(data.messsage || "Username not found", "error");
              }
 
         }catch(error){
             console.error("Error finding username");
-            alert("Network error while checking username");
+            showToast("Network error while checking username", "error");
         }
         console.log("Button Clicked");
-        alert("Accound Found! Proceeding to next step")
+        showToast("Accound Found! Proceeding to next step","success");
         showStep(2);
     });
 
@@ -104,9 +127,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const username = usernameInput.value.trim();
 
         if(!username){
-            alert('please enter username first');
+            showToast('please enter username first',"error");
             return;
         }
+
+        sendCodeBtn.disabled = true;
+        sendCodeBtn.innerHTML = `<span>Sending...</span>`;
+
         try{
             const response = await fetch('/api/auth/send-otp-code-to-recover?username='+encodeURIComponent(username),{
                 method:'GET',
@@ -117,12 +144,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
             const data = await response.json();
 
             if(!data.success){
-                alert(data.message || "Failed to send code")
+                showToast(data.message || "Failed to send code", "error");
+                return;
             }
             alert("Code Sent successfully")
         }catch(error){
             console.error("Error in sending code");
-            alert("Network error please check your internet");
+            showToast("Network error please check your internet","error");
+        }finally{
+            sendCodeBtn.disabled = false;
+            sendCodeBtn.innerHTML = `<span>Send Code</span>`;
         }
 
     });
@@ -152,7 +183,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const code = hiddenOtpInput.value.trim() || getOtp();
 
         if(!username){
-            alert("please enter your username");
+            showToast("please enter your username","error");
             return;
         }
 
@@ -161,7 +192,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
             return;
         }
 
-        console.log("Final OTP ", code);
 
         try{
             const response = await fetch ('/api/auth/continue-without-login?username='+ encodeURIComponent(username) + "&code="+ encodeURIComponent(code),{
@@ -177,12 +207,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
             }
 
         verifiedOtp = code;
-            alert("Verification successfull");
+            showToast("Verification successfull","success");
             showStep(3);
 
         }catch(error){
             console.error("Error verifying code");
-            alert("Failed to verify code");
+            showToast("Failed to verify code","error");
         }
 
 
@@ -197,10 +227,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     //if user chooses no
     noBtn.addEventListener('click', async ()=>{
         if(!verifiedOtp){
-            alert("please verify otp first");
+            showToast("please verify otp first","error");
         }
 
-           alert("logging in...")
+           showToast("logging in...", "info");
            window.location.href = "login.html";
 
 
@@ -250,17 +280,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
             const data = await response.json();
 
             if(!data.success){
-               alert(data.message || "Update Failed")
+               showToast(data.message || "Update Failed","error");
                 return;
             }
 
-            alert("Password changed successfully");
+            showToast("Password changed successfully","success");
                 window.location.href = "login.html"; //back to login page
 
 
         }catch(error){
             console.error("Error changing password: ", error);
-            alert("Something went wrong while changing password please try again later");
+            showToast("Something went wrong please try again later","error");
         }
 
 
