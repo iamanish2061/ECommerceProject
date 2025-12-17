@@ -120,7 +120,7 @@ loginBtn.addEventListener('click', async ()=>{
         const data = await response.json();
         if(data.success){
             showToast("Login successful! Redirecting...", "success");
-            window.location.href = "user/index.html"
+            window.location.href = "/product.html"
         }else{
             showToast(data.message || "Login failed, please try again.", "error");
         }
