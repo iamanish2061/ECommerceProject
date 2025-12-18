@@ -6,7 +6,7 @@ INSERT INTO brands (name, slug, logo_url) VALUES
 ("Olaplex",                "olaplex",                "/uploads/brands/olaplex.png"),
 ("Minimalist",             "minimalist",             "/uploads/brands/minimalist.png"),
 ("Arata",                  "arata",                  "/uploads/brands/arata.png"),
-("Schwarzkopf Professional","schwarzkopf-professional",      "/uploads/brands/schwarzkopf-pro.png"),
+("Garnier",                 "garnier",              "/uploads/brands/garnier.png"),
 ("The Man Company",        "the-man-company",        "/uploads/brands/the-man-company.png"),
 ("Plum Goodness",          "plum-goodness",                   "/uploads/brands/plum.png");
 
