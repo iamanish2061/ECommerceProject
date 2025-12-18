@@ -8,7 +8,12 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Entity
-@Table(name = "address")
+@Table(
+        name = "address",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"user_id", "type"}
+        )
+)
 public class AddressModel {
 
     @Id

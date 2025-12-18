@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/staff/**", "/api/staff/**").hasAuthority("ROLE_STAFF")
                         .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER", "ROLE_DRIVER", "ROLE_STAFF")
                         .requestMatchers("/*", "/assets/**", "/auth/**", "/ws/**", "/uploads/**", "/api/auth/**", "/api/public/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)

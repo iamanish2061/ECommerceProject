@@ -31,9 +31,9 @@ public class UserActivity {
     @Column(nullable = false)
     private int score;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
 }
 

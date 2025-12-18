@@ -39,9 +39,6 @@ public class CategoryModel {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder = 10;
-
     @OneToMany(mappedBy = "category", fetch = LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("category")
     private Set<ProductModel> products = new HashSet<>();

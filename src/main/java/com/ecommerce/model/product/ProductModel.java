@@ -122,7 +122,7 @@ public class ProductModel {
     private CategoryModel category;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal basePrice;
+    private BigDecimal costPrice;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal sellingPrice;

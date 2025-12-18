@@ -36,7 +36,5 @@ public class ProductImageModel {
     @Column(name = "alt_text")
     private String altText;
 
-    private int sortOrder = 0;
-
     private boolean thumbnail = false;
 }
