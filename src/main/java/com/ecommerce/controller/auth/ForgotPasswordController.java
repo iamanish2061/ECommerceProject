@@ -8,6 +8,7 @@ import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.service.auth.AuthService;
 import com.ecommerce.service.auth.ForgotPasswordService;
 import com.ecommerce.validation.ValidUsername;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Validated
 @RequestMapping("/api/auth")
+@Tag(name = "Forgot Password APIs", description = "Forgot related sabai xa")
 public class ForgotPasswordController {
 
     private final AuthService authService;

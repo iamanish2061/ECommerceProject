@@ -9,6 +9,8 @@ import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.service.auth.AuthService;
 import com.ecommerce.validation.ValidEmail;
 import com.ecommerce.validation.ValidUsername;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -23,12 +25,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Tag(name = "Auth APIs")
 public class AuthController {
 
     private final AuthService authService;
 
 //    end point for checking if username is available for registering
 //    data to be sent through get request : url?username=data
+    @Operation(summary = "check if entered username is available")
     @GetMapping("/username-availability")
     public ResponseEntity<ApiResponse<String>> checkUserNameAvailability(
             @ValidUsername @RequestParam String username
