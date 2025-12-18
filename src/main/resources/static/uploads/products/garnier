@@ -1,0 +1,118 @@
+[
+  {
+    "brand": { "name": "Garnier", "slug": "garnier" },
+    "category": { "name": "Hair Color", "slug": "hair-color" },
+    "sku": "GRN-OIL-PC-DB",
+    "title": "Garnier Oil Powered Permanent Color - Dark Brown",
+    "slug": "garnier-oil-powered-permanent-color-dark-brown",
+    "shortDescription": "A nourishing permanent hair color enriched with oils for vibrant dark brown hair.",
+    "description": "This oil-powered permanent hair color offers long-lasting dark brown results while protecting hair from dryness. Enriched with nourishing oils, it strengthens hair strands, reduces damage, and leaves hair smooth and shiny. Easy to apply, it delivers even coverage and vibrant color with a healthy finish.",
+    "costPrice": 550.00,
+    "sellingPrice": 899.00,
+    "sizeMl": "100ml",
+    "stock": 50,
+    "active": true,
+    "images": [
+      "/uploads/product/garnier-oil-powered-permanent-color-dark-brown/1.jpg",
+      "/uploads/product/garnier-oil-powered-permanent-color-dark-brown/2.jpg"
+    ],
+    "tags": [
+      { "name": "Color Safe", "slug": "color-safe" },
+      { "name": "Shine & Smooth", "slug": "shine-smooth" },
+      { "name": "Unisex", "slug": "unisex" }
+    ]
+  },
+  {
+    "brand": { "name": "Garnier", "slug": "garnier" },
+    "category": { "name": "Hair Color", "slug": "hair-color" },
+    "sku": "GRN-OIL-PC-BK",
+    "title": "Garnier Oil Powered Permanent Color - Black",
+    "slug": "garnier-oil-powered-permanent-color-black",
+    "shortDescription": "A nourishing permanent hair color with oils for deep black hair.",
+    "description": "This oil-powered permanent hair color provides rich black color while conditioning the hair. Formulated with oils, it strengthens and protects hair from damage, leaving strands smooth and shiny. Provides even coverage, long-lasting results, and maintains hair softness and shine.",
+    "costPrice": 550.00,
+    "sellingPrice": 899.00,
+    "sizeMl": "100ml",
+    "stock": 50,
+    "active": true,
+    "images": [
+      "/uploads/product/garnier-oil-powered-permanent-color-black/1.jpg",
+      "/uploads/product/garnier-oil-powered-permanent-color-black/2.jpg"
+    ],
+    "tags": [
+      { "name": "Color Safe", "slug": "color-safe" },
+      { "name": "Shine & Smooth", "slug": "shine-smooth" },
+      { "name": "Unisex", "slug": "unisex" }
+    ]
+  },
+  {
+    "brand": { "name": "Garnier", "slug": "garnier" },
+    "category": { "name": "Hair Color", "slug": "hair-color" },
+    "sku": "GRN-OIL-PC-DBL",
+    "title": "Garnier Oil Powered Permanent Color - Dark Blonde",
+    "slug": "garnier-oil-powered-permanent-color-dark-blonde",
+    "shortDescription": "A nourishing permanent hair color with oils for rich dark blonde hair.",
+    "description": "This oil-powered permanent hair color provides vibrant dark blonde color while nourishing and protecting hair. Infused with oils, it strengthens strands, reduces dryness, and leaves hair shiny and smooth. Ensures even coverage, long-lasting results, and healthy-looking hair.",
+    "costPrice": 550.00,
+    "sellingPrice": 899.00,
+    "sizeMl": "100ml",
+    "stock": 50,
+    "active": true,
+    "images": [
+      "/uploads/product/garnier-oil-powered-permanent-color-dark-blonde/1.jpg",
+      "/uploads/product/garnier-oil-powered-permanent-color-dark-blonde/2.jpg"
+    ],
+    "tags": [
+      { "name": "Color Safe", "slug": "color-safe" },
+      { "name": "Shine & Smooth", "slug": "shine-smooth" },
+      { "name": "Unisex", "slug": "unisex" }
+    ]
+  },
+  {
+    "brand": { "name": "Garnier", "slug": "garnier" },
+    "category": { "name": "Repair & Bond Builder", "slug": "repair-bond-builder" },
+    "sku": "GRN-HFP-FR-250",
+    "title": "Hair Filler + Polypeptides Fullness Repair Shampoo",
+    "slug": "hair-filler-polypeptides-fullness-repair-shampoo",
+    "shortDescription": "A repair shampoo enriched with polypeptides to restore hair fullness and strength.",
+    "description": "This shampoo contains Hair Filler and Polypeptides to repair and strengthen hair from root to tip. It replenishes lost nutrients, improves hair density, and reduces breakage. Regular use leaves hair fuller, smoother, and healthier while restoring natural shine and vitality.",
+    "costPrice": 650.00,
+    "sellingPrice": 1149.00,
+    "sizeMl": "250ml",
+    "stock": 45,
+    "active": true,
+    "images": [
+      "/uploads/product/hair-filler-polypeptides-fullness-repair-shampoo/1.jpg",
+      "/uploads/product/hair-filler-polypeptides-fullness-repair-shampoo/2.jpg"
+    ],
+    "tags": [
+      { "name": "Bond Builder", "slug": "bond-builder" },
+      { "name": "Damaged Hair Repair", "slug": "damaged-hair-repair" },
+      { "name": "Shine & Smooth", "slug": "shine-smooth" },
+      { "name": "Unisex", "slug": "unisex" }
+    ]
+  },
+  {
+    "brand": { "name": "Garnier", "slug": "garnier" },
+    "category": { "name": "Keratin & Smoothing", "slug": "keratin-smoothing" },
+    "sku": "GRN-SSS-250",
+    "title": "Sleek & Shine Smoothing Shampoo",
+    "slug": "sleek-shine-smoothing-shampoo",
+    "shortDescription": "A keratin-enriched shampoo to smooth hair and enhance shine.",
+    "description": "This shampoo is enriched with keratin to smooth the hair cuticle and reduce frizz. It nourishes strands while improving manageability and shine. Regular use leaves hair soft, sleek, and more resilient to styling damage. Suitable for all hair types, especially frizzy or dry hair.",
+    "costPrice": 600.00,
+    "sellingPrice": 1049.00,
+    "sizeMl": "250ml",
+    "stock": 50,
+    "active": true,
+    "images": [
+      "/uploads/product/sleek-shine-smoothing-shampoo/1.jpg",
+      "/uploads/product/sleek-shine-smoothing-shampoo/2.jpg"
+    ],
+    "tags": [
+      { "name": "Shine & Smooth", "slug": "shine-smooth" },
+      { "name": "Keratin Treatment", "slug": "keratin-treatment" },
+      { "name": "Unisex", "slug": "unisex" }
+    ]
+  }
+]

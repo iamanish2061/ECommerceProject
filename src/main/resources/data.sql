@@ -11,22 +11,22 @@ INSERT INTO brands (name, slug, logo_url) VALUES
 ("Plum Goodness",          "plum-goodness",                   "/uploads/brands/plum.png");
 
 
-INSERT INTO categories (name, slug, parent_id, image_url, sort_order) VALUES
-("Hair Care",           "hair-care",        NULL, "/uploads/categories/hair-care.jpg",           10),
-("Beard & Moustache",   "beard-moustache",  NULL, "/uploads/categories/beard-moustache.jpg",     20),
-("Color & Treatments",  "color-treatments", NULL, "/uploads/categories/color-treatments.jpg",    30),
+INSERT INTO categories (name, slug, parent_id, image_url) VALUES
+("Hair Care",           "hair-care",        NULL, "/uploads/categories/hair-care.jpg"),
+("Beard & Moustache",   "beard-moustache",  NULL, "/uploads/categories/beard-moustache.jpg"),
+("Color & Treatments",  "color-treatments", NULL, "/uploads/categories/color-treatments.jpg"),
 
-("Shampoo & Cleansers",     "shampoo-cleansers",     1, "/uploads/categories/shampoo-cleansers.jpg",     10),
-("Conditioner & Masks",     "conditioner-masks",     1, "/uploads/categories/conditioner-masks.jpg",     20),
-("Hair Oil & Serum",        "hair-oil-serum",        1, "/uploads/categories/hair-oil-serum.jpg",        30),
+("Shampoo & Cleansers",     "shampoo-cleansers",     1, "/uploads/categories/shampoo-cleansers.jpg"),
+("Conditioner & Masks",     "conditioner-masks",     1, "/uploads/categories/conditioner-masks.jpg"),
+("Hair Oil & Serum",        "hair-oil-serum",        1, "/uploads/categories/hair-oil-serum.jpg"),
 
-("Beard Oil & Balm",        "beard-oil-balm",        2, "/uploads/categories/beard-oil-balm.jpg",        10),
-("Beard Wash & Softener",   "beard-wash-softener",   2, "/uploads/categories/beard-wash-softener.jpg",   20),
-("Beard Growth & Trim",     "beard-growth-trim",     2, "/uploads/categories/beard-growth-trim.jpg",     30),
+("Beard Oil & Balm",        "beard-oil-balm",        2, "/uploads/categories/beard-oil-balm.jpg"),
+("Beard Wash & Softener",   "beard-wash-softener",   2, "/uploads/categories/beard-wash-softener.jpg"),
+("Beard Growth & Trim",     "beard-growth-trim",     2, "/uploads/categories/beard-growth-trim.jpg"),
 
-("Hair Color",              "hair-color",            3, "/uploads/categories/hair-color.jpg",            10),
-("Keratin & Smoothing",     "keratin-smoothing",     3, "/uploads/categories/keratin-smoothing.jpg",     20),
-("Repair & Bond Builder",   "repair-bond-builder",   3, "/uploads/categories/repair-bond-builder.jpg",   30);
+("Hair Color",              "hair-color",            3, "/uploads/categories/hair-color.jpg"),
+("Keratin & Smoothing",     "keratin-smoothing",     3, "/uploads/categories/keratin-smoothing.jpg"),
+("Repair & Bond Builder",   "repair-bond-builder",   3, "/uploads/categories/repair-bond-builder.jpg");
 
 
 INSERT INTO tags (name, slug) VALUES
