@@ -1,6 +1,6 @@
 package com.ecommerce.dto.response.user;
 
-public record DetailUserResponse(
+public record DetailedUserResponse(
     DetailedUser user,
     DetailedAddress address
 ) {}

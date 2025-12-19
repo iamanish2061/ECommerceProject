@@ -2,6 +2,7 @@ package com.ecommerce.model.user;
 
 import com.ecommerce.model.service.Appointment;
 import com.ecommerce.model.service.ServiceModel;
+import com.ecommerce.model.service.StaffLeave;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,18 @@ import java.util.Set;
                 @NamedAttributeNode("user")
         }
 )
+
+
+//while viewing info of staff in user part of dashboard
+//seeing info of staff with its leave info
+@NamedEntityGraph(
+        name = "Staff.leave.services",
+        attributeNodes = {
+                @NamedAttributeNode("staffLeave"),
+                @NamedAttributeNode("services")
+        }
+)
+
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Table(name = "staff")
@@ -39,8 +52,9 @@ public class Staff {
     @Column(nullable = false)
     private StaffRole expertiseIn;
 
-    @Column(nullable = false)
-    private boolean onLeave;
+    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY,
+    orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<StaffLeave> staffLeave;
 
     @Column(nullable = false)
     @CurrentTimestamp
@@ -99,6 +113,21 @@ public class Staff {
         if(service != null){
             this.services.remove(service);
             service.getStaff().remove(this);
+        }
+    }
+
+//    helper for leave
+    public void addLeave(StaffLeave leave){
+        if(leave != null){
+            this.staffLeave.add(leave);
+            leave.setStaff(this);
+        }
+    }
+
+    public void removeLeave(StaffLeave leave){
+        if(leave != null){
+            this.staffLeave.remove(leave);
+            leave.setStaff(null);
         }
     }
 

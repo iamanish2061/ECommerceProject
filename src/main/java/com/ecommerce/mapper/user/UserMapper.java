@@ -1,9 +1,9 @@
 package com.ecommerce.mapper.user;
 
-import com.ecommerce.dto.response.user.AllUsersResponse;
-import com.ecommerce.dto.response.user.DetailedAddress;
-import com.ecommerce.dto.response.user.DetailedUser;
+import com.ecommerce.dto.response.user.*;
 import com.ecommerce.model.user.AddressModel;
+import com.ecommerce.model.user.Driver;
+import com.ecommerce.model.user.Staff;
 import com.ecommerce.model.user.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,4 +18,8 @@ public interface UserMapper {
     DetailedUser mapEntityToDetailedUser(UserModel userModel);
 
     DetailedAddress mapEntityToDetailedAddress(AddressModel address);
+
+    DriverInfoResponse mapEntityToDriverInfoResponse(Driver driver);
+
+    StaffInfoResponse mapEntityToStaffInfoResponse(Staff staff);
 }
