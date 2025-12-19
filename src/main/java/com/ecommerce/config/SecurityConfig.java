@@ -29,13 +29,14 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/admin/**", "/api/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/driver/**", "/api/driver/**").hasAuthority("ROLE_DRIVER")
-                        .requestMatchers("/staff/**", "/api/staff/**").hasAuthority("ROLE_STAFF")
-                        .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER", "ROLE_DRIVER", "ROLE_STAFF")
-                        .requestMatchers("/*", "/assets/**", "/auth/**", "/ws/**", "/uploads/**", "/api/auth/**", "/api/public/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .anyRequest().authenticated())
+//                        .requestMatchers("/admin/**", "/api/admin/**").hasAuthority("ROLE_ADMIN")
+//                        .requestMatchers("/driver/**", "/api/driver/**").hasAuthority("ROLE_DRIVER")
+//                        .requestMatchers("/staff/**", "/api/staff/**").hasAuthority("ROLE_STAFF")
+//                        .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER", "ROLE_DRIVER", "ROLE_STAFF")
+//                        .requestMatchers("/*", "/assets/**", "/auth/**", "/ws/**", "/uploads/**", "/api/auth/**", "/api/products/**").permitAll()
+//                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+//                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->

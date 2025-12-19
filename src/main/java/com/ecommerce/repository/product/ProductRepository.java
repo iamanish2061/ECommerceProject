@@ -26,7 +26,8 @@ public interface ProductRepository extends JpaRepository<ProductModel, Long> {
     List<ProductModel> findAllWithImageFromCategorySlug(@Param("categorySlug") String categorySlug);
 
     @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.LOAD)
-    List<ProductModel> findAllProductsAndImages();
+    @Query("SELECT p FROM ProductModel p")
+    List<ProductModel> findAllProductsWithImages();
 
     @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.LOAD)
     List<ProductModel> findAllByIdIn(@Param("recommendedIds") List<Long> recommendedIds);
@@ -37,5 +38,8 @@ public interface ProductRepository extends JpaRepository<ProductModel, Long> {
     @EntityGraph(value = "Product.images.brand.category.tags", type = EntityGraph.EntityGraphType.LOAD)
     Optional<ProductModel> findProductDetailsById(@Param("id") Long id);
 
+    @EntityGraph(value = "Product.tags", type = EntityGraph.EntityGraphType.LOAD)
+    @Query("SELECT p FROM ProductModel p WHERE p.id = :productId")
+    Optional<ProductModel> findProductByIdWithTags(@Param("productId") Long productId);
 }
 

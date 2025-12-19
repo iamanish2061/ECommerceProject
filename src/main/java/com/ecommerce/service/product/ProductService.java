@@ -1,13 +1,11 @@
 package com.ecommerce.service.product;
 
+import com.ecommerce.dto.request.product.ProductRequest;
 import com.ecommerce.dto.response.product.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.product.*;
 import com.ecommerce.model.activity.ActivityType;
-import com.ecommerce.model.product.BrandModel;
-import com.ecommerce.model.product.CategoryModel;
-import com.ecommerce.model.product.ProductModel;
-import com.ecommerce.model.product.TagModel;
+import com.ecommerce.model.product.*;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.product.BrandRepository;
@@ -15,6 +13,7 @@ import com.ecommerce.repository.product.CategoryRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.repository.product.TagRepository;
 import com.ecommerce.service.recommendation.UserActivityService;
+import com.ecommerce.utils.HelperClass;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
@@ -23,9 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -118,7 +115,7 @@ public class ProductService {
     }
 
     public List<BriefProductsResponse> getAllProducts() {
-        List<ProductModel> products = productRepository.findAllProductsAndImages();
+        List<ProductModel> products = productRepository.findAllProductsWithImages();
         if(products.isEmpty())
             throw new ApplicationException("No products found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND);
 
@@ -223,4 +220,66 @@ public class ProductService {
     }
 
 
+
+
+
+
+
+
+
+
+
+
+    public String saveProductsManually(List<ProductRequest> requests) {
+
+        requests.forEach(request->{
+            //        handling brands
+            BrandModel brand = brandRepository.findBySlug(request.brandSlug().trim())
+                    .orElseThrow(() -> new ApplicationException("Brand not found", "BRAND_NOT_FOUND", HttpStatus.NOT_FOUND));
+//        handling category
+            CategoryModel category = categoryRepository.findBySlug(request.categorySlug().trim())
+                    .orElseThrow(() -> new ApplicationException("Category not found!", "CATEGORY_NOT_FOUND", HttpStatus.NOT_FOUND));
+//        handling tags
+            Set<TagModel> tags = new HashSet<>();
+            for (String slug : request.tagSlugs()) {
+                String cleanSlug = slug.trim().toLowerCase();
+                if (cleanSlug.isBlank()) continue;
+                TagModel tag = tagRepository.findBySlug(cleanSlug)
+                        .orElseThrow(() -> new ApplicationException("Tag not found!", "TAG_NOT_FOUND", HttpStatus.NOT_FOUND));
+                tags.add(tag);
+            }
+//        Creating Product
+            ProductModel product = new ProductModel();
+            product.setSku(request.sku().trim().toUpperCase());
+            product.setTitle(request.title().trim());
+            product.setSlug(HelperClass.generateSlug(request.title().trim()));
+            product.setShortDescription(request.shortDescription().trim());
+            product.setDescription(request.description().trim());
+            product.setCostPrice(request.costPrice());
+            product.setSellingPrice(request.sellingPrice());
+            product.setStock(request.stock() != null ? request.stock() : 0);
+            product.setSizeMl(request.sizeMl());
+            product.setActive(request.active());
+
+            product.addTags(tags);
+            brand.addProduct(product);
+            category.addProduct(product);
+
+
+            List<ProductImageModel> imageModels = new ArrayList<>();
+
+            request.images().forEach(img->{
+                ProductImageModel productImageModel = new ProductImageModel();
+                productImageModel.setUrl(img.name()); //photo ko naam with path
+                productImageModel.setAltText(img.altText());
+                productImageModel.setThumbnail(img.thumbnail());
+                imageModels.add(productImageModel);
+            });
+
+            imageModels.forEach(product::addImage);
+
+            productRepository.save(product);
+        });
+        return "SAVED";
+    }
 }

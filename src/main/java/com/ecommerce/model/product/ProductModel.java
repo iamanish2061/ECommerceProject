@@ -75,6 +75,12 @@ import static jakarta.persistence.GenerationType.IDENTITY;
         }
 )
 
+//findind product with tags only for adding and removing purose
+@NamedEntityGraph(
+        name = "Product.tags",
+        attributeNodes = @NamedAttributeNode("tags")
+)
+
 @Entity
 @Getter
 @Setter
@@ -191,7 +197,7 @@ public class ProductModel {
         }
     }
 
-    public void addTags(List<TagModel> tagList){
+    public void addTags(Set<TagModel> tagList){
         if(!tagList.isEmpty()){
             this.tags.addAll(tagList);
             tagList.forEach(tag-> tag.getProducts().add(this));

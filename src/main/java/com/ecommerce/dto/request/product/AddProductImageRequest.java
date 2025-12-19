@@ -8,6 +8,5 @@ public record AddProductImageRequest(
 
         String altText,
 
-
         boolean thumbnail
 ) {}

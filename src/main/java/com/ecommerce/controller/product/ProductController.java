@@ -1,5 +1,6 @@
 package com.ecommerce.controller.product;
 
+import com.ecommerce.dto.request.product.ProductRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.product.*;
 import com.ecommerce.model.user.UserPrincipal;
@@ -22,7 +23,7 @@ import java.util.Map;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/public/products")
+@RequestMapping("/api/products")
 public class ProductController {
     private final ProductService productService;
     private final RecommendationService recommendationService;
@@ -108,7 +109,7 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched successfully"));
     }
 
-//    get details of one products
+//    get details of one product
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<SingleProductResponse>> getDetailOfProduct(
             @AuthenticationPrincipal UserPrincipal currentUser,
@@ -130,6 +131,21 @@ public class ProductController {
     ){
         List<BriefProductsResponse> response = productService.getSearchedProducts(query);
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched searched product successfully"));
+    }
+
+
+
+
+
+
+
+
+    @PostMapping("save-products-detail-manually")
+    public ResponseEntity<ApiResponse<?>> save(
+            @RequestBody List<ProductRequest> requests
+    ){
+        String result = productService.saveProductsManually(requests);
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
 
