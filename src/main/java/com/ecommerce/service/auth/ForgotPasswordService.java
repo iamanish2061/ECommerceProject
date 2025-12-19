@@ -14,7 +14,6 @@ import com.ecommerce.utils.HelperClass;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,7 +35,7 @@ public class ForgotPasswordService {
     private final UserRepository userRepo;
     private final BCryptPasswordEncoder encoder= new BCryptPasswordEncoder(12);
 
-    private final AuthMapper authMapper = Mappers.getMapper(AuthMapper.class);
+    private final AuthMapper authMapper;
 
     public String findEmailByUsername(String username) throws ApplicationException {
         String email = userRepo.findByUsername(username)

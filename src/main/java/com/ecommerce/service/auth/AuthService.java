@@ -46,7 +46,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder encoder= new BCryptPasswordEncoder(12);
 
-    AuthMapper authMapper = Mappers.getMapper(AuthMapper.class);
+    private final AuthMapper authMapper;
 
     public boolean doesUserNameExist(String username) {
         return userRepo.existsByUsername(username);
