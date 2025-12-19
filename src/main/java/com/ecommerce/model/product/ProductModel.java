@@ -29,7 +29,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 //for admin side , fetching list of products from brand
 // for user side
-// fetching products from particular brand or fetching all brands with their products
+// fetching products from particular brand
 @NamedEntityGraph(
         name = "Product.images.brand",
         attributeNodes = {
@@ -108,7 +108,7 @@ public class ProductModel {
     @Column(columnDefinition = "TEXT")
     private String shortDescription;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = LAZY)
