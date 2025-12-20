@@ -141,11 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
         prevBtn.style.display = n == 1? 'none' : 'flex';
 
         if(n === 3){
-            nextBtn.innerHTML = `<span>Create Account</span>` ;
+            nextBtn.textContent = `<span>Create Account</span>` ;
         }else if(n === 2){
-            nextBtn.innerHTML = `<span>Verify</span><i class ='bx bx-right-arrow-alt'></i>` ;
+            nextBtn.textContent = `<span>Verify</span><i class ='bx bx-right-arrow-alt'></i>` ;
         }else{
-            nextBtn.innerHTML = `<span>Next</span><i class='bx bx-right-arrow-alt'></i>`;
+            nextBtn.textContent = `<span>Next</span><i class='bx bx-right-arrow-alt'></i>`;
         }
     }
 
