@@ -48,15 +48,15 @@ public class RedisService {
         redisTemplate.expire(key, 90, TimeUnit.DAYS);           // Optional: expire in 90 days if user inactive
     }
 
-//    public void updateViewedProduct(Long userId, Long productId){
-//        String viewedKey = "viewed:"+userId+":"+productId;
-//        boolean alreadyViewed = redisTemplate.hasKey(viewedKey);
-//        if(!alreadyViewed){
-//            incrementUserVector(userId, productId, 1);
-//            redisTemplate.opsForValue().set(viewedKey, "1", 48, TimeUnit.HOURS);
-//        }
-//        similarUserUpdater.updateSimilarUsersAsync(userId);
-//    }
+    public void updateViewedProduct(Long userId, Long productId){
+        String viewedKey = "viewed:"+userId+":"+productId;
+        boolean alreadyViewed = redisTemplate.hasKey(viewedKey);
+        if(!alreadyViewed){
+            incrementUserVector(userId, productId, 1);
+            redisTemplate.opsForValue().set(viewedKey, "1", 48, TimeUnit.HOURS);
+        }
+        similarUserUpdater.updateSimilarUsersAsync(userId);
+    }
 
 }
 
