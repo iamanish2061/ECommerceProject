@@ -10,7 +10,6 @@ INSERT INTO brands (name, slug, logo_url) VALUES
 ('The Man Company',        'the-man-company',        '/uploads/brands/the-man-company.png'),
 ('Plum Goodness',          'plum-goodness',          '/uploads/brands/plum.png');
 
-
 INSERT INTO categories (name, slug, parent_id, image_url) VALUES
 ('Hair Care',           'hair-care',        NULL, '/uploads/categories/hair-care.jpg'),
 ('Beard & Moustache',   'beard-moustache',  NULL, '/uploads/categories/beard-moustache.jpg'),
