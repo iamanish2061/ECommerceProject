@@ -1,12 +1,12 @@
 package com.ecommerce.controller.product;
 
-import com.ecommerce.dto.request.product.ProductRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.product.*;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.product.ProductService;
 import com.ecommerce.service.recommendation.RecommendationService;
 import com.ecommerce.validation.ValidId;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,7 @@ public class ProductController {
 //   getting tags for putting in user interface so user clicks to the tag and get related product result (user side)
 //   also for dropdowns and options while adding products (admin side)
     @GetMapping("/tags")
+    @Operation(summary = "getting details of all available tags to display tag name")
     public ResponseEntity<ApiResponse<List<TagResponse>>> getAllTags(){
         List<TagResponse> tags = productService.getAllTags();
         return ResponseEntity.ok(ApiResponse.ok(tags, "Tags fetched"));
@@ -39,6 +40,7 @@ public class ProductController {
 //   while user click the tag, the products related to that tag is returned
 //   NOTE send tagSlug not tag name
     @GetMapping("/tags/{tagSlug}")
+    @Operation(summary = "getting all products of selected tag")
     public ResponseEntity<ApiResponse<ProductsFromTagResponse>> getProductsOfTag(
             @NotBlank(message = "Tag is required")
             @PathVariable String tagSlug
@@ -50,6 +52,7 @@ public class ProductController {
 //  end point for getting brand name that can be used in dropdowns (admin) useful while adding products
 //  and for displaying brands we have in brand section (customer sees it)
     @GetMapping("/brand-details")
+    @Operation(summary = "getting details of all available brands to display brand name")
     public ResponseEntity<ApiResponse<List<BrandResponse>>> getAllBrands(){
         List<BrandResponse> brands = productService.getAllBrands();
         return ResponseEntity.ok(ApiResponse.ok(brands, "Brand name fetched"));
@@ -59,6 +62,7 @@ public class ProductController {
 //    and products of that brand that we have
 //    NOTE SEND SLUG WHILE SENDING DATA IN PATH VARIABLE
     @GetMapping("/brand-details/{brandSlug}")
+    @Operation(summary = "getting all products of selected brand")
     public ResponseEntity<ApiResponse<ProductsFromBrandResponse>> getProductsOfBrand(
             @NotBlank(message = "Brand is required")
             @PathVariable String brandSlug
@@ -70,6 +74,7 @@ public class ProductController {
 //  end point for getting category name that can be used in dropdowns (admin) useful while adding products
 //  and for displaying categories we have in brand section (customer sees it)
     @GetMapping("/categories")
+    @Operation(summary = "getting details of all available categories to display category name")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories(){
         List<CategoryResponse> categories = productService.getAllCategories();
         return ResponseEntity.ok(ApiResponse.ok(categories, "Categories fetched"));
@@ -78,6 +83,7 @@ public class ProductController {
 //    displaying products according to the selected category
 //    NOTE SEND SLUG WHILE SENDING DATA IN PATH VARIABLE
     @GetMapping("/category-products/{categorySlug}")
+    @Operation(summary = "getting all products of selected category")
     public ResponseEntity<ApiResponse<ProductsFromCategoryResponse>> getProductsOfCategory(
             @NotBlank(message = "Category is required")
             @PathVariable String categorySlug
@@ -89,6 +95,7 @@ public class ProductController {
 //    all products
 //    recommendation for users too
     @GetMapping()
+    @Operation(summary = "getting all products to display in main page (recommended product ni aauxa if user logged in xa vane")
     public ResponseEntity<ApiResponse<Map<String,List<BriefProductsResponse>>>> getAllProducts(
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
@@ -105,12 +112,14 @@ public class ProductController {
         List<BriefProductsResponse> otherProducts = productService.getAllProductsExcept(personalizedIds);
         Map<String, List<BriefProductsResponse>> response = new HashMap<>();
         response.put("personalized", personalizedProducts);
-        response.put("otherProducts", otherProducts);
+        response.put("products", otherProducts);
+
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched successfully"));
     }
 
 //    get details of one product
     @GetMapping("/{id}")
+    @Operation(summary = "get detailed info of one product")
     public ResponseEntity<ApiResponse<SingleProductResponse>> getDetailOfProduct(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @ValidId @PathVariable Long id
@@ -121,6 +130,7 @@ public class ProductController {
 
     //searched product
     @GetMapping("/searched")
+    @Operation(summary = "getting products related user searched query")
     public ResponseEntity<ApiResponse<List<BriefProductsResponse>>> getSearchedProducts(
             @NotBlank(message = "Searched keyword is needed")
             @Pattern(
@@ -131,21 +141,6 @@ public class ProductController {
     ){
         List<BriefProductsResponse> response = productService.getSearchedProducts(query);
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched searched product successfully"));
-    }
-
-
-
-
-
-
-
-
-    @PostMapping("save-products-detail-manually")
-    public ResponseEntity<ApiResponse<?>> save(
-            @RequestBody List<ProductRequest> requests
-    ){
-        String result = productService.saveProductsManually(requests);
-        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
 

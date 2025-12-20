@@ -46,6 +46,7 @@ public class AuthController {
 
 //    end point for checking if email is unique for registering and send otp
 //    data to be sent through get request : url?email=data
+    @Operation(summary = "send code to entered email by checking if email is unique and does not exist in db")
     @GetMapping("/send-otp-code")
     public ResponseEntity<ApiResponse<String>> sendOtpCode(
             @ValidEmail @RequestParam String email
@@ -63,6 +64,7 @@ public class AuthController {
 
 //    end point for verifying otp code
 //    post request : parameters should be sent in body {email=...., code=...}
+@Operation(summary = "for verifying the code entered by user: (send email also)")
     @PostMapping("/verify-otp-code")
     public ResponseEntity<ApiResponse<String>> verifyOtpCode(
             @Valid @RequestBody VerifyOtpCodeRequest request
@@ -76,6 +78,7 @@ public class AuthController {
 
 //    end point for signing up
 //    post method + request body : see request body in SignupRequest
+    @Operation(summary = "final step for register, it saves user to db")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
             @Valid @RequestBody SignupRequest request, HttpServletResponse httpResponse
@@ -86,6 +89,7 @@ public class AuthController {
 
 //    end point for logging in
 //    post method + request body : see LoginRequest
+    @Operation(summary = "end point for logging in")
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request, HttpServletResponse httpResponse
@@ -97,6 +101,7 @@ public class AuthController {
 //    generating refresh token
 //    redirect to this api if the error is token expired
 //    post request with no body
+    @Operation(summary = "if user's access token is expired but refresh token is not then this endpoint helps to generate new access token")
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             HttpServletRequest request, HttpServletResponse httpServletResponse
@@ -109,6 +114,7 @@ public class AuthController {
 
 // hit this end point when user logs out of the system
 //    post request with no body
+@Operation(summary = "end point for logging out")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<?>> logout(
             HttpServletResponse httpServletResponse, Authentication authentication
