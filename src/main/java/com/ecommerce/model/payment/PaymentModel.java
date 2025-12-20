@@ -4,10 +4,7 @@ import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.service.Appointment;
 import com.ecommerce.model.user.UserModel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -26,7 +23,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PaymentModel {
 
     @Id

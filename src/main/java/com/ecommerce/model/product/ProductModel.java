@@ -150,7 +150,7 @@ public class ProductModel {
     @OneToMany(mappedBy = "product", cascade = ALL, orphanRemoval = true, fetch = LAZY)
     @JsonIgnoreProperties("product")
     @BatchSize(size = 5)
-    private List<ProductImageModel> images = new ArrayList<>();
+    private Set<ProductImageModel> images = new HashSet<>();
 
     @ManyToMany(
             fetch = LAZY,

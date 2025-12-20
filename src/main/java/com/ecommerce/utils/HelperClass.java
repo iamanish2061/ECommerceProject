@@ -1,5 +1,8 @@
 package com.ecommerce.utils;
 
+import java.util.UUID;
+import java.util.random.RandomGenerator;
+
 public class HelperClass {
 
     private HelperClass(){}
@@ -32,6 +35,9 @@ public class HelperClass {
     }
 
 
+    public static String generateTransactionIdForInStoreOperation() {
+        return "InStore "+ UUID.randomUUID().toString();
+    }
 }
 
 
