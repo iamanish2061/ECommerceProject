@@ -1,0 +1,183 @@
+{
+  "sku": "USTRAA-HGC-001",
+  "title": "Ustraa Hair Growth Cream",
+  "slug": "ustraa-hair-growth-cream",
+  "shortDescription": "A nourishing hair cream designed to support healthy hair growth and reduce hair fall.",
+  "description": "Ustraa Hair Growth Cream is enriched with herbal extracts and essential nutrients that strengthen hair roots. It helps reduce hair fall while improving scalp nourishment. The cream promotes healthier and thicker-looking hair with regular use. Its non-sticky formula is ideal for daily application.",
+  "costPrice": 520.00,
+  "sellingPrice": 699.00,
+  "stock": 100,
+  "sizeMl": "100 g",
+  "active": true,
+  "brand": {
+    "name": "Ustraa",
+    "slug": "ustraa"
+  },
+  "category": {
+    "name": "Conditioner & Masks",
+    "slug": "conditioner-masks"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/ustraa-hair-growth-cream" },
+    { "imageUrl": "/uploads/product/ustraa-hair-growth-cream-2" }
+  ],
+  "tags": [
+    { "name": "Hair Growth", "slug": "hair-growth" },
+    { "name": "Anti Hair Fall", "slug": "anti-hair-fall" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "Best Seller", "slug": "best-seller" }
+  ]
+}
+
+
+
+
+
+
+{
+  "sku": "USTRAA-AHFS-002",
+  "title": "Ustraa Anti Hair Fall Shampoo with Apple Cider Vinegar",
+  "slug": "ustraa-anti-hair-fall-shampoo-apple-cider-vinegar",
+  "shortDescription": "A strengthening shampoo formulated to reduce hair fall and cleanse the scalp effectively.",
+  "description": "This anti hair fall shampoo is infused with apple cider vinegar to gently cleanse the scalp and remove buildup. It helps strengthen hair roots and reduce breakage. The formula improves scalp health while maintaining natural moisture balance. Suitable for regular use on all hair types.",
+  "costPrice": 650.00,
+  "sellingPrice": 849.00,
+  "stock": 140,
+  "sizeMl": "250 ml",
+  "active": true,
+  "brand": {
+    "name": "Ustraa",
+    "slug": "ustraa"
+  },
+  "category": {
+    "name": "Shampoo & Cleansers",
+    "slug": "shampoo-cleansers"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/ustraa-anti-hair-fall-shampoo-apple-cider-vinegar" },
+    { "imageUrl": "/uploads/product/ustraa-anti-hair-fall-shampoo-apple-cider-vinegar-2" },
+    { "imageUrl": "/uploads/product/ustraa-anti-hair-fall-shampoo-apple-cider-vinegar-3" }
+  ],
+  "tags": [
+    { "name": "Anti Hair Fall", "slug": "anti-hair-fall" },
+    { "name": "Scalp Care", "slug": "scalp-care" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "Best Seller", "slug": "best-seller" }
+  ]
+}
+
+
+
+
+
+
+
+
+
+{
+  "sku": "USTRAA-AHO-003",
+  "title": "Ustraa Ayurvedic Hair Oil",
+  "slug": "ustraa-ayurvedic-hair-oil",
+  "shortDescription": "A traditional ayurvedic hair oil that nourishes the scalp and strengthens hair roots.",
+  "description": "Ustraa Ayurvedic Hair Oil is made with a blend of time-tested herbs and natural oils. It deeply nourishes the scalp and helps reduce hair fall. The oil improves blood circulation to hair follicles, supporting healthy hair growth. Regular use enhances hair strength and shine.",
+  "costPrice": 580.00,
+  "sellingPrice": 749.00,
+  "stock": 110,
+  "sizeMl": "100 ml",
+  "active": true,
+  "brand": {
+    "name": "Ustraa",
+    "slug": "ustraa"
+  },
+  "category": {
+    "name": "Hair Oil & Serum",
+    "slug": "hair-oil-serum"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/ustraa-ayurvedic-hair-oil" },
+    { "imageUrl": "/uploads/product/ustraa-ayurvedic-hair-oil-2" }
+  ],
+  "tags": [
+    { "name": "Hair Growth", "slug": "hair-growth" },
+    { "name": "Anti Hair Fall", "slug": "anti-hair-fall" },
+    { "name": "100% Natural", "slug": "100-natural" },
+    { "name": "For Men", "slug": "for-men" }
+  ]
+}
+
+
+
+
+
+
+
+
+{
+  "sku": "USTRAA-DUHC-004",
+  "title": "Ustraa Daily Use Hair Conditioner",
+  "slug": "ustraa-daily-use-hair-conditioner",
+  "shortDescription": "A keratin-infused conditioner that smoothens hair and improves manageability.",
+  "description": "Ustraa Daily Use Hair Conditioner is enriched with keratin to repair damaged hair and reduce frizz. It smoothens hair strands while improving softness and shine. The formula helps protect hair from daily styling damage. Suitable for everyday conditioning.",
+  "costPrice": 480.00,
+  "sellingPrice": 649.00,
+  "stock": 130,
+  "sizeMl": "100 g",
+  "active": true,
+  "brand": {
+    "name": "Ustraa",
+    "slug": "ustraa"
+  },
+  "category": {
+    "name": "Conditioner & Masks",
+    "slug": "conditioner-masks"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/ustraa-daily-use-hair-conditioner" },
+    { "imageUrl": "/uploads/product/ustraa-daily-use-hair-conditioner-2" },
+    { "imageUrl": "/uploads/product/ustraa-daily-use-hair-conditioner-3" }
+  ],
+  "tags": [
+    { "name": "Keratin Treatment", "slug": "keratin-treatment" },
+    { "name": "Shine & Smooth", "slug": "shine-smooth" },
+    { "name": "For Men", "slug": "for-men" }
+  ]
+}
+
+
+
+
+
+
+
+
+{
+  "sku": "USTRAA-BSW-005",
+  "title": "Ustraa Beard Softener Woody",
+  "slug": "ustraa-beard-softener-woody",
+  "shortDescription": "A woody-scented beard softener that conditions beard hair and reduces roughness.",
+  "description": "Ustraa Beard Softener Woody is formulated with conditioning agents to soften coarse beard hair. It helps reduce dryness and improves beard manageability. The woody fragrance provides a long-lasting masculine scent. Ideal for daily beard grooming.",
+  "costPrice": 550.00,
+  "sellingPrice": 729.00,
+  "stock": 95,
+  "sizeMl": "100 g",
+  "active": true,
+  "brand": {
+    "name": "Ustraa",
+    "slug": "ustraa"
+  },
+  "category": {
+    "name": "Beard Wash & Softener",
+    "slug": "beard-wash-softener"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/ustraa-beard-softener-woody" },
+    { "imageUrl": "/uploads/product/ustraa-beard-softener-woody-2" },
+    { "imageUrl": "/uploads/product/ustraa-beard-softener-woody-3" }
+  ],
+  "tags": [
+    { "name": "Beard Softener", "slug": "beard-softener" },
+    { "name": "Non-Greasy Beard", "slug": "non-greasy-beard" },
+    { "name": "For Men", "slug": "for-men" }
+  ]
+}
+

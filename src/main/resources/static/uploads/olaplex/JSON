@@ -1,0 +1,179 @@
+{
+  "sku": "OLAPLEX-B7-001",
+  "title": "Nº.7 Bonding Oil",
+  "slug": "no-7-bonding-oil",
+  "shortDescription": "A lightweight bonding oil that strengthens hair and enhances shine.",
+  "description": "Olaplex Nº.7 Bonding Oil repairs damaged hair and reinforces hair bonds. It provides heat protection and reduces frizz while improving softness and shine. The non-greasy formula absorbs quickly, leaving hair manageable and radiant. Suitable for all hair types.",
+  "costPrice": 2800.00,
+  "sellingPrice": 3399.00,
+  "stock": 80,
+  "sizeMl": "30 ml",
+  "active": true,
+  "brand": {
+    "name": "Olaplex",
+    "slug": "olaplex"
+  },
+  "category": {
+    "name": "Hair Oil & Serum",
+    "slug": "hair-oil-serum"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/no-7-bonding-oil" },
+    { "imageUrl": "/uploads/product/no-7-bonding-oil-2" },
+    { "imageUrl": "/uploads/product/no-7-bonding-oil-3" }
+  ],
+  "tags": [
+    { "name": "Shine & Smooth", "slug": "shine-smooth" },
+    { "name": "Damaged Hair Repair", "slug": "damaged-hair-repair" },
+    { "name": "Salon Professional", "slug": "salon-professional" }
+  ]
+}
+
+
+
+
+
+
+
+
+{
+  "sku": "OLAPLEX-B4-002",
+  "title": "Nº.4 Bond Maintenance® Shampoo",
+  "slug": "no-4-bond-maintenance-shampoo",
+  "shortDescription": "A strengthening shampoo that repairs and maintains healthy hair bonds.",
+  "description": "Olaplex Nº.4 Shampoo cleanses hair while repairing and reinforcing hair bonds. It reduces breakage, improves elasticity, and strengthens hair from root to tip. Regular use leaves hair soft, resilient, and manageable. Suitable for all hair types, especially damaged hair.",
+  "costPrice": 2500.00,
+  "sellingPrice": 2999.00,
+  "stock": 90,
+  "sizeMl": "1 L",
+  "active": true,
+  "brand": {
+    "name": "Olaplex",
+    "slug": "olaplex"
+  },
+  "category": {
+    "name": "Shampoo & Cleansers",
+    "slug": "shampoo-cleansers"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/no-4-bond-maintenance-shampoo" },
+    { "imageUrl": "/uploads/product/no-4-bond-maintenance-shampoo-2" },
+    { "imageUrl": "/uploads/product/no-4-bond-maintenance-shampoo-3" }
+  ],
+  "tags": [
+    { "name": "Damaged Hair Repair", "slug": "damaged-hair-repair" },
+    { "name": "Salon Professional", "slug": "salon-professional" },
+    { "name": "Volume & Thickness", "slug": "volume-thickness" }
+  ]
+}
+
+
+
+
+
+
+
+
+{
+  "sku": "OLAPLEX-B5-003",
+  "title": "Nº.5 Bond Maintenance® Conditioner",
+  "slug": "no-5-bond-maintenance-conditioner",
+  "shortDescription": "A strengthening conditioner that repairs hair bonds and improves softness.",
+  "description": "Olaplex Nº.5 Conditioner nourishes and strengthens hair while repairing damaged bonds. It improves manageability and reduces breakage. Regular use leaves hair soft, smooth, and resilient. Ideal for all hair types, especially chemically treated or weakened hair.",
+  "costPrice": 2600.00,
+  "sellingPrice": 3199.00,
+  "stock": 85,
+  "sizeMl": "250 ml",
+  "active": true,
+  "brand": {
+    "name": "Olaplex",
+    "slug": "olaplex"
+  },
+  "category": {
+    "name": "Conditioner & Masks",
+    "slug": "conditioner-masks"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/no-5-bond-maintenance-conditioner" },
+    { "imageUrl": "/uploads/product/no-5-bond-maintenance-conditioner-2" }
+  ],
+  "tags": [
+    { "name": "Damaged Hair Repair", "slug": "damaged-hair-repair" },
+    { "name": "Keratin Treatment", "slug": "keratin-treatment" },
+    { "name": "Salon Professional", "slug": "salon-professional" }
+  ]
+}
+
+
+
+
+
+
+{
+  "sku": "OLAPLEX-B9-004",
+  "title": "Nº.9 Bond Protector Nourishing Hair Serum",
+  "slug": "no-9-bond-protector-nourishing-hair-serum",
+  "shortDescription": "A nourishing hair serum that protects and strengthens hair bonds.",
+  "description": "Olaplex Nº.9 Hair Serum repairs damaged hair, strengthens bonds, and prevents breakage. It adds softness, shine, and manageability. The lightweight formula absorbs quickly without leaving greasiness. Perfect for daily use on damp or dry hair.",
+  "costPrice": 2900.00,
+  "sellingPrice": 3499.00,
+  "stock": 75,
+  "sizeMl": "50 ml",
+  "active": true,
+  "brand": {
+    "name": "Olaplex",
+    "slug": "olaplex"
+  },
+  "category": {
+    "name": "Hair Oil & Serum",
+    "slug": "hair-oil-serum"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/no-9-bond-protector-nourishing-hair-serum" },
+    { "imageUrl": "/uploads/product/no-9-bond-protector-nourishing-hair-serum-2" },
+    { "imageUrl": "/uploads/product/no-9-bond-protector-nourishing-hair-serum-3" }
+  ],
+  "tags": [
+    { "name": "Damaged Hair Repair", "slug": "damaged-hair-repair" },
+    { "name": "Shine & Smooth", "slug": "shine-smooth" },
+    { "name": "Salon Professional", "slug": "salon-professional" }
+  ]
+}
+
+
+
+
+
+
+
+
+{
+  "sku": "OLAPLEX-RHM-005",
+  "title": "Rich Hydration Mask",
+  "slug": "rich-hydration-mask",
+  "shortDescription": "A deeply hydrating hair mask that restores moisture and softness.",
+  "description": "Olaplex Rich Hydration Mask deeply nourishes and hydrates dry, damaged hair. It strengthens hair bonds and improves elasticity, leaving hair soft, smooth, and manageable. Suitable for all hair types, particularly dry or chemically treated hair.",
+  "costPrice": 2700.00,
+  "sellingPrice": 3299.00,
+  "stock": 65,
+  "sizeMl": "200 ml",
+  "active": true,
+  "brand": {
+    "name": "Olaplex",
+    "slug": "olaplex"
+  },
+  "category": {
+    "name": "Conditioner & Masks",
+    "slug": "conditioner-masks"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/rich-hydration-mask" },
+    { "imageUrl": "/uploads/product/rich-hydration-mask-2" }
+  ],
+  "tags": [
+    { "name": "Damaged Hair Repair", "slug": "damaged-hair-repair" },
+    { "name": "Keratin Treatment", "slug": "keratin-treatment" },
+    { "name": "Salon Professional", "slug": "salon-professional" }
+  ]
+}
+

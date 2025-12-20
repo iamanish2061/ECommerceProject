@@ -1,0 +1,186 @@
+{
+  "sku": "BEARDO-BHGO-001",
+  "title": "Beardo Beard & Hair Growth Oil",
+  "slug": "beardo-beard-hair-growth-oil",
+  "shortDescription": "A nourishing oil formulated to promote faster beard and hair growth while strengthening roots.",
+  "description": "Beardo Beard & Hair Growth Oil is enriched with castor oil, almond oil, and vitamin E to stimulate healthy hair follicles. It helps reduce patchy beard growth and strengthens hair roots. Regular use improves beard density and scalp health. The lightweight formula absorbs quickly without greasiness.",
+  "costPrice": 650.00,
+  "sellingPrice": 799.00,
+  "stock": 100,
+  "sizeMl": "50 ml",
+  "active": true,
+  "brand": {
+    "name": "Beardo",
+    "slug": "beardo"
+  },
+  "category": {
+    "name": "Beard Oil & Balm",
+    "slug": "beard-oil-balm"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/beardo-beard-hair-growth-oil" },
+    { "imageUrl": "/uploads/product/beardo-beard-hair-growth-oil-2" },
+    { "imageUrl": "/uploads/product/beardo-beard-hair-growth-oil-3" }
+  ],
+  "tags": [
+    { "name": "Beard Growth", "slug": "beard-growth" },
+    { "name": "Hair Growth", "slug": "hair-growth" },
+    { "name": "Non-Greasy Beard", "slug": "non-greasy-beard" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "Best Seller", "slug": "best-seller" }
+  ]
+}
+
+
+
+
+
+
+
+{
+  "sku": "BEARDO-GBW-002",
+  "title": "Beardo Godfather Beard Wash",
+  "slug": "beardo-godfather-beard-wash",
+  "shortDescription": "A gentle yet effective beard wash that cleanses deeply while keeping the beard soft and fresh.",
+  "description": "Beardo Godfather Beard Wash uses mild cleansing agents and conditioners to remove dirt and excess oil. It prevents beard dryness while maintaining moisture balance. The formula softens coarse beard hair and reduces itchiness. Suitable for daily beard care.",
+  "costPrice": 520.00,
+  "sellingPrice": 649.00,
+  "stock": 120,
+  "sizeMl": "100 ml",
+  "active": true,
+  "brand": {
+    "name": "Beardo",
+    "slug": "beardo"
+  },
+  "category": {
+    "name": "Beard Wash & Softener",
+    "slug": "beard-wash-softener"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/beardo-godfather-beard-wash" },
+    { "imageUrl": "/uploads/product/beardo-godfather-beard-wash-2" },
+    { "imageUrl": "/uploads/product/beardo-godfather-beard-wash-3" }
+  ],
+  "tags": [
+    { "name": "Beard Softener", "slug": "beard-softener" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "Shine & Smooth", "slug": "shine-smooth" },
+    { "name": "Best Seller", "slug": "best-seller" }
+  ]
+}
+
+
+
+
+
+
+
+
+
+{
+  "sku": "BEARDO-BSER-003",
+  "title": "Beardo Beard Serum",
+  "slug": "beardo-beard-serum",
+  "shortDescription": "A lightweight serum designed to strengthen beard hair and promote healthy growth.",
+  "description": "Beardo Beard Serum is enriched with biotin, argan oil, and vitamin E to nourish beard roots. It reduces breakage and improves hair texture. The serum enhances natural shine and supports fuller beard growth. Its non-sticky formula is ideal for everyday use.",
+  "costPrice": 600.00,
+  "sellingPrice": 749.00,
+  "stock": 90,
+  "sizeMl": "30 ml",
+  "active": true,
+  "brand": {
+    "name": "Beardo",
+    "slug": "beardo"
+  },
+  "category": {
+    "name": "Beard Oil & Balm",
+    "slug": "beard-oil-balm"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/beardo-beard-serum" },
+    { "imageUrl": "/uploads/product/beardo-beard-serum-2" },
+    { "imageUrl": "/uploads/product/beardo-beard-serum-3" }
+  ],
+  "tags": [
+    { "name": "Beard Growth", "slug": "beard-growth" },
+    { "name": "Non-Greasy Beard", "slug": "non-greasy-beard" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "New Arrival", "slug": "new-arrival" }
+  ]
+}
+
+
+
+
+
+
+
+{
+  "sku": "BEARDO-VC2S-004",
+  "title": "Beardo Vitamin C 2 in 1 Toning Serum",
+  "slug": "beardo-vitamin-c-2-in-1-toning-serum",
+  "shortDescription": "A dual-action serum that tones skin while supporting healthy beard growth.",
+  "description": "This Vitamin C serum brightens skin and strengthens beard roots using antioxidant-rich ingredients. It improves skin texture beneath the beard while reducing dullness. Regular use supports healthier beard growth. The formula absorbs quickly without residue.",
+  "costPrice": 720.00,
+  "sellingPrice": 899.00,
+  "stock": 80,
+  "sizeMl": "50 ml",
+  "active": true,
+  "brand": {
+    "name": "Beardo",
+    "slug": "beardo"
+  },
+  "category": {
+    "name": "Beard Growth & Trim",
+    "slug": "beard-growth-trim"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/beardo-vitamin-c-2-in-1-toning-serum" },
+    { "imageUrl": "/uploads/product/beardo-vitamin-c-2-in-1-toning-serum-2" },
+    { "imageUrl": "/uploads/product/beardo-vitamin-c-2-in-1-toning-serum-3" }
+  ],
+  "tags": [
+    { "name": "Beard Growth", "slug": "beard-growth" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "Scalp Care", "slug": "scalp-care" },
+    { "name": "New Arrival", "slug": "new-arrival" }
+  ]
+}
+
+
+
+
+
+
+
+{
+  "sku": "BEARDO-DCSS-005",
+  "title": "Beardo Dandruff Control Sulphate Free Shampoo",
+  "slug": "beardo-dandruff-control-sulphate-free-shampoo",
+  "shortDescription": "A sulphate-free shampoo that effectively controls dandruff while keeping hair healthy.",
+  "description": "This sulphate-free shampoo gently cleanses the scalp while fighting dandruff and flakes. It soothes scalp irritation and maintains natural moisture balance. Regular use helps prevent recurring dandruff. Suitable for daily use on all hair types.",
+  "costPrice": 580.00,
+  "sellingPrice": 699.00,
+  "stock": 150,
+  "sizeMl": "200 ml",
+  "active": true,
+  "brand": {
+    "name": "Beardo",
+    "slug": "beardo"
+  },
+  "category": {
+    "name": "Shampoo & Cleansers",
+    "slug": "shampoo-cleansers"
+  },
+  "images": [
+    { "imageUrl": "/uploads/product/beardo-dandruff-control-sulphate-free-shampoo" },
+    { "imageUrl": "/uploads/product/beardo-dandruff-control-sulphate-free-shampoo-2" },
+    { "imageUrl": "/uploads/product/beardo-dandruff-control-sulphate-free-shampoo-3" }
+  ],
+  "tags": [
+    { "name": "Dandruff Control", "slug": "dandruff-control" },
+    { "name": "Sulfate-Free", "slug": "sulfate-free" },
+    { "name": "For Men", "slug": "for-men" },
+    { "name": "Scalp Care", "slug": "scalp-care" }
+  ]
+}

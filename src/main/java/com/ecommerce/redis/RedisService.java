@@ -1,6 +1,6 @@
 package com.ecommerce.redis;
 
-import com.ecommerce.service.recommendation.SimilarUserUpdater;
+//import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ public class RedisService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
     private final RedisTemplate redisTemplate;
-    private final SimilarUserUpdater similarUserUpdater;
+//    private final SimilarUserUpdater similarUserUpdater;
 
     public String getCode(String key){
         try{
@@ -47,15 +47,15 @@ public class RedisService {
         redisTemplate.expire(key, 90, TimeUnit.DAYS);           // Optional: expire in 90 days if user inactive
     }
 
-    public void updateViewedProduct(Long userId, Long productId){
-        String viewedKey = "viewed:"+userId+":"+productId;
-        boolean alreadyViewed = redisTemplate.hasKey(viewedKey);
-        if(!alreadyViewed){
-            incrementUserVector(userId, productId, 1);
-            redisTemplate.opsForValue().set(viewedKey, "1", 48, TimeUnit.HOURS);
-        }
-        similarUserUpdater.updateSimilarUsersAsync(userId);
-    }
+//    public void updateViewedProduct(Long userId, Long productId){
+//        String viewedKey = "viewed:"+userId+":"+productId;
+//        boolean alreadyViewed = redisTemplate.hasKey(viewedKey);
+//        if(!alreadyViewed){
+//            incrementUserVector(userId, productId, 1);
+//            redisTemplate.opsForValue().set(viewedKey, "1", 48, TimeUnit.HOURS);
+//        }
+//        similarUserUpdater.updateSimilarUsersAsync(userId);
+//    }
 
 }
 
