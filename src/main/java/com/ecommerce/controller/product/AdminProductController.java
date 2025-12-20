@@ -1,12 +1,11 @@
 package com.ecommerce.controller.product;
 
 
-import com.ecommerce.dto.request.product.BrandRequest;
-import com.ecommerce.dto.request.product.CategoryRequest;
-import com.ecommerce.dto.request.product.ProductRequest;
-import com.ecommerce.dto.request.product.TagRequest;
+import com.ecommerce.dto.request.product.*;
 import com.ecommerce.dto.response.ApiResponse;
+import com.ecommerce.dto.response.product.NameAndIdResponse;
 import com.ecommerce.dto.response.product.SingleProductWithCostPriceResponse;
+import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.product.AdminProductService;
 import com.ecommerce.validation.ValidId;
 import com.ecommerce.validation.ValidPrice;
@@ -16,12 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Validated
 @RequiredArgsConstructor
@@ -72,6 +73,21 @@ public class AdminProductController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(response, "New product added successfully"));
     }
+
+//    selling products instore
+    @PostMapping("/sell-products")
+    public ResponseEntity<ApiResponse<?>> sellProducts(
+        @Valid @RequestBody List<SellProductRequests> requests, @AuthenticationPrincipal UserPrincipal currentUser
+    ){
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Admin not logged in", "ADMIN_NOT_LOGGED_IN"));
+        }
+
+      String message = adminProductService.sellProducts(requests, currentUser.getUser());
+      return ResponseEntity.ok(ApiResponse.ok(message));
+    }
+
 
 
 
@@ -160,6 +176,13 @@ public class AdminProductController {
         return ResponseEntity.ok(
                 ApiResponse.ok("Long description updated successfully.")
         );
+    }
+
+//    get product name and id for putting in dropdown to sell product in store
+    @GetMapping("/id-and-name")
+    public ResponseEntity<ApiResponse<List<NameAndIdResponse>>> getNameAndIdOfAllProducts(){
+        List<NameAndIdResponse> response = adminProductService.getNameAndIdOfAllProducts();
+        return ResponseEntity.ok(ApiResponse.ok(response, "Fetched name and if of products successfully"));
     }
 
 

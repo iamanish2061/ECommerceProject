@@ -138,7 +138,7 @@ public class UserModel {
     }
 
 //    helper method for orders
-    public void addProducts(OrderModel order){
+    public void addProductsOrder(OrderModel order){
         if(order != null){
             this.orders.add(order);
             order.setUser(this);

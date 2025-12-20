@@ -7,18 +7,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
     @Mapping(source = "sellingPrice", target = "price")
-    @Mapping(source = "images", target = "imageUrl", qualifiedByName = "pickThumbnail")
+    @Mapping(source = "images", target = "imageUrl", qualifiedByName = "pickThumbnailPhoto")
     BriefProductsResponse mapEntityToBriefProductsResponse(ProductModel productModel);
 
 
-    @Named("pickThumbnail")
-    default String pickThumbnail(List<ProductImageModel> images) {
+    @Named("pickThumbnailPhoto")
+    default String pickThumbnail(Set<ProductImageModel> images) {
         return images.stream()
                 .filter(img-> img.isThumbnail())
                 .findFirst()
