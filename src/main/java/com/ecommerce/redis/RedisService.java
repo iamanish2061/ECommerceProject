@@ -1,6 +1,7 @@
 package com.ecommerce.redis;
 
 //import com.ecommerce.service.recommendation.SimilarUserUpdater;
+import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public class RedisService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
     private final RedisTemplate redisTemplate;
-//    private final SimilarUserUpdater similarUserUpdater;
+    private final SimilarUserUpdater similarUserUpdater;
 
     public String getCode(String key){
         try{
