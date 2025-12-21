@@ -25,19 +25,19 @@ function toSlug(str) {
 }
 
 function showToast(message,type="info", duration = 3000){
-        const toastContainer = document.getElementById('toast-container');
-        if(!toastContainer) return;
+    const toastContainer = document.getElementById('toast-container');
+    if(!toastContainer) return;
 
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
 
-        toastContainer.appendChild(toast);
+    toastContainer.appendChild(toast);
 
-        setTimeout(()=>{
-            toast.remove();
-        },duration);
-    }
+    setTimeout(()=>{
+        toast.remove();
+    },duration);
+}
 
 // Helper to extract array from API responses
 function toArray(res) {
