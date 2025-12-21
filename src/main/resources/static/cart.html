@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CutLab - Shopping Cart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/toast.css">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        .quantity-input::-webkit-outer-spin-button,
+        .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quantity-input {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
+    
+    <!-- Abstract Background Blobs -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="text-3xl font-bold text-slate-800">
+                    Cut<span class="text-blue-600">Lab</span>
+                </a>
+                
+                <div class="flex items-center gap-4">
+                    <a href="products.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">
+                        Continue Shopping
+                    </a>
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full flex items-center gap-2 shadow-lg">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span class="font-medium">Cart (<span id="cartCount">0</span>)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        <h1 class="text-4xl font-bold text-slate-800 mb-8">Shopping Cart</h1>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Cart Items -->
+            <div class="flex-1">
+                <div class="bg-white rounded-3xl shadow-lg p-8">
+                    <div id="cartItemsContainer">
+                        <!-- Loading state -->
+                        <div class="text-center py-12">
+                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                            <p class="mt-4 text-slate-500">Loading your cart...</p>
+                        </div>
+                    </div>
+
+                    <!-- Empty Cart State -->
+                    <div id="emptyCartState" class="text-center py-12" style="display: none;">
+                        <svg class="mx-auto h-24 w-24 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Your cart is empty</h3>
+                        <p class="text-slate-500 mb-6">Add some products to get started!</p>
+                        <a href="products.html" class="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-xl transition-all hover:scale-105">
+                            Browse Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <aside class="w-full lg:w-96 flex-shrink-0">
+                <div class="bg-white rounded-3xl shadow-lg p-8 sticky top-24">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Order Summary</h2>
+                    
+                    <div class="space-y-3 mb-6" id="productPricesList">
+                        <!-- Product prices will be listed here -->
+                    </div>
+
+                    <div class="border-t border-slate-200 pt-4 mb-6">
+                        <div class="flex justify-between text-2xl font-bold">
+                            <span class="text-slate-800">Total</span>
+                            <span id="total" class="text-blue-600">Rs.0</span>
+                        </div>
+                    </div>
+
+                    <button id="checkoutBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 mb-4">
+                        Proceed to Checkout
+                    </button>
+
+                    <button id="clearCartBtn" class="w-full bg-white border-2 border-red-500 text-red-500 py-3 rounded-full font-medium hover:bg-red-50 transition-all">
+                        Clear Cart
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/cart/cartService.js"></script>
+    <script src="assets/js/cart/cart.js"></script>
+</body>
+</html>
