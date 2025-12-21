@@ -27,7 +27,7 @@ public class CartController {
     private final String cartErrorMessage = "Please login to add items to cart";
     private final String cartErrorCode = "NOT_LOGGED_IN";
 
-    @PostMapping("/{productId}")
+    @PutMapping("/add-to-cart/{productId}")
     @Operation(summary = "endpoint for adding product to cart")
     public ResponseEntity<ApiResponse<String>> addToCart(
             @AuthenticationPrincipal UserPrincipal currentUser,

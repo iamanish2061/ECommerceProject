@@ -9,14 +9,7 @@ import com.ecommerce.mapper.product.BrandMapper;
 import com.ecommerce.mapper.product.CategoryMapper;
 import com.ecommerce.mapper.product.ProductImageMapper;
 import com.ecommerce.mapper.product.TagMapper;
-import com.ecommerce.model.order.OrderItem;
-import com.ecommerce.model.order.OrderModel;
-import com.ecommerce.model.order.OrderStatus;
-import com.ecommerce.model.payment.PaymentMethod;
-import com.ecommerce.model.payment.PaymentModel;
-import com.ecommerce.model.payment.PaymentStatus;
 import com.ecommerce.model.product.*;
-import com.ecommerce.model.user.UserModel;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.product.BrandRepository;
 import com.ecommerce.repository.product.CategoryRepository;
@@ -31,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -42,7 +37,6 @@ public class AdminProductService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final ProductRepository productRepository;
-    private final OrderRepository orderRepository;
 
     private final BrandMapper brandMapper;
     private final TagMapper tagMapper;
@@ -154,47 +148,7 @@ public class AdminProductService {
         return getAdminDetailOfProduct(savedProduct.getId());
     }
 
-    @Transactional
-    public String sellProducts(List<SellProductRequests> requests, UserModel admin) {
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
-
-        OrderModel order = new OrderModel();
-        for(SellProductRequests request: requests){
-            ProductModel product = productRepository.findById(request.productId())
-                            .orElseThrow(()->new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND));
-            if (product.getStock() < request.quantity()) {
-                throw new ApplicationException("Insufficient stock for " + product.getTitle(),
-                        "INSUFFICIENT_STOCK", HttpStatus.BAD_REQUEST);
-            }
-            product.setStock(product.getStock() - request.quantity());
-
-            order.addOrderItem(
-                    OrderItem.builder()
-                            .quantity(request.quantity())
-                            .priceAtPurchase(product.getSellingPrice())
-                            .product(product)
-                    .build());
-            BigDecimal total = product.getSellingPrice().multiply(BigDecimal.valueOf(request.quantity()));
-            totalAmount = totalAmount.add(total);
-        }
-
-        order.setTotalAmount(totalAmount);
-        order.setStatus(OrderStatus.INSTORE_COMPLETED);
-        order.setAddress(null);
-        order.addPayment(PaymentModel.builder()
-                .user(admin)
-                .amount(totalAmount)
-                .transactionId(HelperClass.generateTransactionIdForInStoreOperation())
-                .paymentMethod(PaymentMethod.INSTORE_CASH)
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .build());
-        admin.addProductsOrder(order);
-
-        orderRepository.save(order);
-
-        return "Transaction successful";
-    }
 
 
 
