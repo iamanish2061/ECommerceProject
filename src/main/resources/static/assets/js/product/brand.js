@@ -21,6 +21,21 @@ function toSlug(str) {
         .replace(/^-+|-+$/g, '');
 }
 
+function showToast(message,type="info", duration = 3000){
+        const toastContainer = document.getElementById('toast-container');
+        if(!toastContainer) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(()=>{
+            toast.remove();
+        },duration);
+    }
+
 // simple helper to get an array from your API response
 function toArray(res) {
     if (!res) return [];
@@ -166,8 +181,8 @@ function renderBrandSidebar() {
     }
 
     brandState.brands.forEach(brand => {
-        const name = brand.name || brand.title || brand;
-        const slug = (brand.slug || toSlug(name)).toLowerCase();
+        const name = brand.name;
+        const slug = brand.slug.toLowerCase();
         const isActive = slug === brandState.selectedBrandSlug;
 
         const btn = document.createElement('button');
@@ -260,71 +275,135 @@ function renderBrandHeader() {
     }
 }
 
-// ---------- RENDER: PRODUCTS ----------
+// ---------- RENDER: PRODUCTS ----------  
+
 
 function createBrandProductCard(product) {
-    const card = document.createElement('div');
-    card.className =
+    const productCard = document.createElement('div');
+    productCard.className =
         'bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover:scale-105 cursor-pointer flex flex-col h-full';
 
-    const productImage = product.image || product.imageUrl || '📦';
-    const productId = product.id || product._id;
-    const productName =
-        product.name ||
-        product.productName ||
-        product.title ||
-        'Product';
+    const productId = product.id;
+    const productName = product.title || 'Untitled Product';
+    const shortDesc = product.shortDescription || '';
+    const price = product.price ? `Rs. ${product.price}` : 'Price on request';
+    const stock = product.stock;
+    const imageUrl = product.imageUrl || null;
 
-    const priceValue = product.price; // use as backend sends it
+    // Stock status badge
+    const stockStatus = stock > 10 
+        ? `<span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">In Stock</span>`
+        : stock > 0 
+            ? `<span class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">Low Stock</span>`
+            : `<span class="text-xs text-red-700 bg-red-100 px-2 py-1 rounded-full">Out of Stock</span>`;
 
-    const isEmoji =
-        typeof productImage === 'string' &&
-        !productImage.includes('/') &&
-        productImage.length <= 4;
-
-    card.innerHTML = `
-        <div class="flex-1">
-            <div class="bg-white rounded-xl h-48 flex items-center justify-center mb-4 overflow-hidden">
-                ${
-                    isEmoji
-                        ? `<span class="text-6xl">${productImage}</span>`
-                        : `<img src="${productImage}" alt="${productName}" class="w-full h-full object-cover">`
+    productCard.innerHTML = `
+        <div class="relative">
+            <div class="bg-gray-50 h-64 flex items-center justify-center overflow-hidden">
+                ${imageUrl 
+                    ? `<img src="${imageUrl}" alt="${productName}" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'; this.onerror=null;">`
+                    : `<div class="text-6xl text-gray-300">📦</div>`
                 }
             </div>
-
-            <h3 class="font-bold text-lg text-slate-800 mb-4">${productName}</h3>
-
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-2xl font-bold text-blue-600">Rs. ${priceValue}</span>
+            <div class="absolute top-3 right-3">
+                ${stockStatus}
             </div>
         </div>
 
-        <div class="mt-auto flex gap-2">
-            <button class="add-to-cart-btn flex-1 bg-white border-2 border-blue-600 text-blue-600 px-4 py-2.5 rounded-full hover:bg-blue-50 transition-all font-medium text-sm" data-product-id="${productId}">
-                Add to Cart
-            </button>
+        <div class="p-6 flex flex-col flex-1">
+            <h3 class="font-bold text-xl text-gray-800 mb-2 line-clamp-2 leading-tight">
+                ${productName}
+            </h3>
+            
+            ${shortDesc ? `
+                <p class="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
+                    ${shortDesc}
+                </p>
+            ` : '<div class="flex-1"></div>'}
 
-            <button class="buy-now-btn flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2.5 rounded-full hover:shadow-lg transition-all font-medium text-sm" data-product-id="${productId}">
-                Buy Now
-            </button>
+            <div class="mt-auto">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-3xl font-bold text-blue-600">${price}</span>
+                </div>
+
+                <div class="mt-auto space-y-3">
+                    <button class="add-to-cart-btn w-full py-3 px-4 bg-white border-2 border-blue-600 text-blue-600 rounded-xl 
+                                    hover:bg-blue-50 font-semibold text-sm transition-all"
+                            data-product-id="${productId}"
+                            ${stock === 0 ? 'disabled' : ''}>
+                        Add to Cart
+                    </button>
+                    <button class="buy-now-btn w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl 
+                                    hover:from-blue-700 hover:to-indigo-700 font-semibold text-sm transition-all shadow-md"
+                            data-product-id="${productId}"
+                            ${stock === 0 ? 'disabled' : ''}>
+                        Buy Now
+                    </button>
+                </div>
+            </div>
         </div>
     `;
 
-    // go to details page when card clicked (except buttons)
-    card.addEventListener('click', (e) => {
-        if (
-            e.target.classList.contains('add-to-cart-btn') ||
-            e.target.classList.contains('buy-now-btn') ||
-            e.target.closest('.add-to-cart-btn') ||
-            e.target.closest('.buy-now-btn')
-        ) {
-            return;
+    // Card click → go to details page (except buttons)
+    productCard.addEventListener('click', (e) => {
+        if (e.target.closest('.add-to-cart-btn') || e.target.closest('.buy-now-btn')) {
+            return; // Let button handlers work
         }
-        if (!productId) return;
-        window.location.href = `details.html?id=${productId}`;
+        if (productId) {
+            window.location.href = `details.html?id=${productId}`;
+        }
     });
 
-    return card;
+    // Add to Cart Button
+    const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (stock === 0) return;
+
+            try {
+                const response = await productService.addToCart(productId);
+                if(response.success)
+                    showToast(response.message || 'Added to cart!', 'success');
+                else
+                    showToast(response.message || 'Failed to add to cart', 'error');
+            } catch (err) {
+                console.error('Failed to add to cart:', err);
+                showToast('Could not add to cart', 'error');
+            }
+        });
+    }
+
+    // Buy Now Button
+    const buyNowBtn = productCard.querySelector('.buy-now-btn');
+    if (buyNowBtn) {
+        buyNowBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (stock === 0) return;
+
+            try {
+                // await productService.buyNow(productId);
+                // Optionally redirect to checkout
+                // window.location.href = '/checkout.html';
+                showToast('Buy now feature is not implemented yet.', 'info');
+            } catch (err) {
+                console.error('Buy now failed:', err);
+                showToast('Could not proceed to buy', 'error');
+            }
+        });
+    }
+
+    // Disable buttons visually if out of stock
+    if (stock === 0) {
+        addToCartBtn?.classList.add('opacity-60', 'cursor-not-allowed');
+        buyNowBtn?.classList.add('opacity-60', 'cursor-not-allowed');
+    }
+
+    return productCard;
+
+ 
 }
 
 function renderBrandProducts() {

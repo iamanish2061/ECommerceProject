@@ -1,5 +1,4 @@
-//state management for the product page
-
+// State management for the product page
 let state = {
     categories: [],
     brands: [],
@@ -7,39 +6,54 @@ let state = {
     products: [],
     filteredProducts: [],
     selectedCategory: null,
-    selectedSubCategory: null, // { name, slug } when set
+    selectedSubCategory: null, // { name, slug }
     selectedBrand: null,
     selectedTag: null,
     searchQuery: '',
 };
 
-function toSlug(str){
-    if(!str) return '';
-    return str 
-    .toStrin()
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, 'and')
-    .replace(/^-+|-+$/g, '');
+function toSlug(str) {
+    if (!str) return '';
+    return str
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/^-+|-+$/g, '');
 }
 
-// simple helper to get an array from your API response
+function showToast(message,type="info", duration = 3000){
+        const toastContainer = document.getElementById('toast-container');
+        if(!toastContainer) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(()=>{
+            toast.remove();
+        },duration);
+    }
+
+// Helper to extract array from API responses
 function toArray(res) {
     if (!res) return [];
     const data = res.data;
 
-    if (Array.isArray(data)) return data;                // { data: [...] }
-    if (data && Array.isArray(data.content)) return data.content;  // { data: { content: [...] } }
-    if (data && Array.isArray(data.products)) return data.products; // { data: { products: [...] } }
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.content)) return data.content;
+    if (data && Array.isArray(data.products)) return data.products;
 
     return [];
 }
 
-//initializing the page
-
+// Initialize the page
 async function init() {
     try {
-        //fetching all the data using productService
         const [categoriesRes, brandsRes, tagsRes, productsRes] = await Promise.all([
             productService.getProductsByCategory(),
             productService.getProductsByBrandDetails(),
@@ -60,13 +74,11 @@ async function init() {
             products: state.products.length,
         });
 
-        //render all the components
         renderCategories();
         renderBrands();
         renderTags();
         renderProducts();
 
-        // set search / sort / tags dropdown listeners
         setEventListeners();
 
     } catch (error) {
@@ -89,9 +101,8 @@ function showError(message) {
     }
 }
 
-//setting event listeners
+// Event listeners (search, sort, tags dropdown)
 function setEventListeners() {
-    //search functionality
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         let searchTimeout;
@@ -101,13 +112,11 @@ function setEventListeners() {
         });
     }
 
-    //sort functionality
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
         sortSelect.addEventListener('change', handleSort);
     }
 
-    //tags ko dropdown
     const tagBtn = document.getElementById('tagsBtn');
     const tagMenu = document.getElementById('tagsMenu');
     if (tagBtn && tagMenu) {
@@ -116,7 +125,6 @@ function setEventListeners() {
             tagMenu.classList.toggle('active');
         });
 
-        //close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!tagBtn.contains(e.target) && !tagMenu.contains(e.target)) {
                 tagMenu.classList.remove('active');
@@ -125,17 +133,15 @@ function setEventListeners() {
     }
 }
 
-//handling search
+// Search handler
 async function handleSearch(query) {
     state.searchQuery = query.trim();
 
-    //if kei search query cha
     if (state.searchQuery) {
         try {
             const searchResult = await productService.getSearchedProducts(state.searchQuery);
             let products = toArray(searchResult);
 
-            // fallback to simple client-side search if backend returns empty
             if (!products.length) {
                 const q = state.searchQuery.toLowerCase();
                 products = state.products.filter(p =>
@@ -156,7 +162,7 @@ async function handleSearch(query) {
     }
 }
 
-//handling sort 
+// Sort handler
 function handleSort(e) {
     const sortBy = e.target.value;
 
@@ -173,45 +179,34 @@ function handleSort(e) {
     renderProducts();
 }
 
-//filter products based on selected filters
+// Filter products based on current state (fallback when backend fails)
 function filterProducts() {
     state.filteredProducts = state.products.filter(product => {
         let matchesCategory = true;
         let matchesBrand = true;
         let matchesTag = true;
 
-        // derive slugs from product fields if backend doesn't provide them
-        const prodCatName = product.category || '';
-        const prodCatSlug = product.categorySlug || toSlug(prodCatName);
-
-        const prodSubCatName = product.subCategory || product.subcategory || '';
-        const prodSubCatSlug = product.subCategorySlug || product.subcategorySlug || toSlug(prodSubCatName);
+        const prodCatSlug = product.categorySlug || toSlug(product.category || '');
+        const prodSubCatSlug = product.subCategorySlug || product.subcategorySlug || toSlug(product.subCategory || product.subcategory || '');
 
         if (state.selectedSubCategory) {
-            const subName = (state.selectedSubCategory.name || '').toLowerCase();
             const subSlug = (state.selectedSubCategory.slug || '').toLowerCase();
-
-            matchesCategory =
-                prodCatName.toLowerCase() === subName ||
-                prodSubCatName.toLowerCase() === subName ||
-                prodCatSlug === subSlug ||
-                prodSubCatSlug === subSlug;
+            matchesCategory = prodSubCatSlug === subSlug || prodCatSlug === subSlug;
         } else if (state.selectedCategory) {
             const catSlug = state.selectedCategory.toLowerCase();
-            matchesCategory =
-                prodCatSlug === catSlug || prodSubCatSlug === catSlug;
+            matchesCategory = prodCatSlug === catSlug;
         }
 
         if (state.selectedBrand) {
             const brandSlug = state.selectedBrand.toLowerCase();
-            const prodBrandName = product.brand || '';
-            const prodBrandSlug = product.brandSlug || toSlug(prodBrandName);
-            matchesBrand =
-                prodBrandSlug === brandSlug || prodBrandName.toLowerCase() === brandSlug;
+            const prodBrandSlug = product.brandSlug || toSlug(product.brand || '');
+            matchesBrand = prodBrandSlug === brandSlug;
         }
 
         if (state.selectedTag) {
-            matchesTag = Array.isArray(product.tags) && product.tags.includes(state.selectedTag);
+            matchesTag = Array.isArray(product.tags) && product.tags.some(t =>
+                (t.slug || t) === state.selectedTag
+            );
         }
 
         return matchesCategory && matchesBrand && matchesTag;
@@ -220,10 +215,7 @@ function filterProducts() {
     renderProducts();
 }
 
-//render recommended products (not implemented yet)
-function renderRecommendedProducts() { }
-
-//render tags function WITH dropdown + filtering
+// Render tags dropdown
 function renderTags() {
     const container = document.getElementById('tagsMenu');
     if (!container) return;
@@ -232,8 +224,7 @@ function renderTags() {
     const tagsDiv = container.firstChild;
 
     if (!state.tags || state.tags.length === 0) {
-        tagsDiv.innerHTML =
-            '<p class="text-sm text-slate-500 text-center py-2">No tags available</p>';
+        tagsDiv.innerHTML = '<p class="text-sm text-slate-500 text-center py-2">No tags available</p>';
         return;
     }
 
@@ -245,9 +236,7 @@ function renderTags() {
         const tagBtn = document.createElement('button');
         tagBtn.className = `
             w-full text-left px-4 py-2 rounded-lg text-sm transition-all
-            ${isActive
-                ? 'bg-blue-100 text-blue-700 font-medium'
-                : 'text-slate-700 hover:bg-blue-50'}
+            ${isActive ? 'bg-blue-100 text-blue-700 font-medium' : 'text-slate-700 hover:bg-blue-50'}
         `;
         tagBtn.textContent = tagName;
 
@@ -262,14 +251,11 @@ function renderTags() {
                 try {
                     const tagRes = await productService.getProductsTagsSlug(tagSlug);
                     let tagProducts = toArray(tagRes);
-
-                    // fallback to local filter
                     if (!tagProducts.length) {
                         tagProducts = state.products.filter(p =>
-                            Array.isArray(p.tags) && p.tags.includes(tagSlug)
+                            Array.isArray(p.tags) && p.tags.some(t => (t.slug || t) === tagSlug)
                         );
                     }
-
                     state.filteredProducts = tagProducts;
                 } catch (err) {
                     console.error('Tag filter error:', err);
@@ -288,38 +274,29 @@ function renderTags() {
     });
 }
 
-//rendering categories and subcategories
+// Render categories — only first 3 as parents, with manual children
 function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     if (!container) return;
 
     container.innerHTML = '';
 
-    if (!state.categories || state.categories.length === 0) {
-        container.innerHTML =
-            '<div class="text-center py-4 text-slate-500">No categories available</div>';
+    if (!state.categories || state.categories.length < 12) {
+        container.innerHTML = '<div class="text-center py-4 text-slate-500">Not enough categories (need 12)</div>';
         return;
     }
 
-    // find only top-level categories (parent_id / parentId is null)
-    const parents = state.categories.filter(cat => {
-        const parentId = cat.parentId ?? cat.parent_id;
-        return parentId == null;
-    });
+    // First 3 categories are parents
+    const parents = state.categories.slice(0, 3);
 
-    // show first 3 parents (Hair Care, Beard & Moustache, Color & Treatments)
-    const displayCategories = parents.slice(0, 3);
-
-    displayCategories.forEach(category => {
+    parents.forEach((category, index) => {
         const categoryDiv = document.createElement('div');
 
         const button = document.createElement('button');
-        button.className =
-            'w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-blue-50 transition-all text-left group';
+        button.className = 'w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-blue-50 transition-all text-left group';
 
-        const categoryName = category.name || category.title || category;
-        const categorySlug = category.slug || categoryName;
-        const categoryId = category.id ?? category.categoryId;
+        const categoryName = category.name || category.title;
+        const categorySlug = category.slug || toSlug(categoryName);
 
         button.innerHTML = `
             <span class="font-medium text-slate-700 group-hover:text-blue-600">${categoryName}</span>
@@ -328,14 +305,11 @@ function renderCategories() {
             </svg>
         `;
 
-        //creating subcategory container
         const subDiv = document.createElement('div');
-        subDiv.id = `sub-${categorySlug.replace(/\s/g, '')}`;
         subDiv.className = 'subcategory-enter ml-4 mt-2 space-y-1';
 
-        button.addEventListener('click', () =>
-            toggleCategory(categorySlug, categoryId, subDiv)
-        );
+        // Pass index (0,1,2) to identify which parent
+        button.addEventListener('click', () => toggleCategory(categorySlug, index, subDiv));
 
         categoryDiv.appendChild(button);
         categoryDiv.appendChild(subDiv);
@@ -343,87 +317,98 @@ function renderCategories() {
     });
 }
 
-// toggle category and fetch sub categories + filter products
-function toggleCategory(categorySlug, categoryId, subDiv) {
-
+// Toggle category with manual child assignment
+async function toggleCategory(categorySlug, parentIndex, subDiv) {
     if (!subDiv) return;
 
-    const chevron = document.querySelector(`.chevron-${categorySlug.replace(/\s/g, '')}`);
+    const chevronClass = `.chevron-${categorySlug.replace(/\s/g, '')}`;
+    const chevron = document.querySelector(chevronClass);
 
-    // if click same category close
+    // Close if same parent clicked again
     if (state.selectedCategory === categorySlug && subDiv.classList.contains('active')) {
         subDiv.classList.remove('active');
         if (chevron) chevron.style.transform = 'rotate(0deg)';
-        state.selectedCategory = null;
-        state.selectedSubCategory = null;
-        state.selectedTag = null;
-        state.searchQuery = '';
-        state.filteredProducts = [...state.products];
-        renderProducts();
+        resetFilters();
         return;
     }
 
-    //close other categories
-    document.querySelectorAll('.subcategory-enter').forEach(function (el) {
-        el.classList.remove('active');
-    });
-    document.querySelectorAll('[class*="chevron-"]').forEach(function (el) {
-        el.style.transform = 'rotate(0deg)';
-    });
+    // Close all other submenus
+    document.querySelectorAll('.subcategory-enter').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('[class*="chevron-"]').forEach(el => el.style.transform = 'rotate(0deg)');
 
-    //set selected category
+    // Set current parent
     state.selectedCategory = categorySlug;
     state.selectedSubCategory = null;
     state.selectedTag = null;
     state.selectedBrand = null;
     state.searchQuery = '';
 
-    // find subcategories using parent_id / parentId = this parent's id (1,2,3)
-    const subcategories = state.categories.filter(cat => {
-        const pid =
-            cat.parentId ??
-            cat.parent_id ??
-            cat.parentCategoryId;
-        return pid === categoryId;
-    });
+    // Manual child selection: index 0 → items 3-5, index 1 → 6-8, index 2 → 9-11
+    const childStart = 3 + (parentIndex * 3);
+    const subcategories = state.categories.slice(childStart, childStart + 3);
 
     subDiv.innerHTML = '';
 
     if (subcategories.length > 0) {
         subcategories.forEach(subcat => {
-            const subName = subcat.name || subcat.title;
+            const subName = subcat.name || subcat.title || 'Unnamed';
             const subSlug = subcat.slug || toSlug(subName);
 
             const subButton = document.createElement('button');
-            subButton.className =
-                'block w-full text-left px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all';
+            subButton.type = 'button';
+            subButton.className = 'block w-full text-left px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200';
             subButton.textContent = subName;
-            subButton.addEventListener('click', function (e) {
+
+            subButton.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                // pass BOTH name and slug so filtering can match whatever backend uses
-                selectSubcategory({ name: subName, slug: subSlug });
+
+                state.selectedSubCategory = { name: subName, slug: subSlug };
+
+                try {
+                    const res = await productService.getProductsByCategorySlug(subSlug);
+                    const products = toArray(res);
+                    state.filteredProducts = products.length > 0 ? products : state.products;
+                } catch (err) {
+                    console.error(`Error fetching subcategory ${subSlug}:`, err);
+                    // Fallback client-side
+                    state.filteredProducts = state.products.filter(p =>
+                        (p.subCategorySlug || p.subcategorySlug || toSlug(p.subCategory || p.subcategory || '')) === subSlug
+                    );
+                }
+
+                renderProducts();
             });
+
             subDiv.appendChild(subButton);
         });
 
         subDiv.classList.add('active');
         if (chevron) chevron.style.transform = 'rotate(180deg)';
     } else {
-        // If no subcategories, just filter by main category using slug
-        state.selectedSubCategory = null;
-        filterProducts();
+        // No children → filter by parent
+        try {
+            const res = await productService.getProductsByCategorySlug(categorySlug);
+            const products = toArray(res);
+            state.filteredProducts = products.length > 0 ? products : state.products;
+        } catch (err) {
+            console.error(`Error fetching category ${categorySlug}:`, err);
+            filterProducts();
+        }
+        renderProducts();
     }
 }
 
-// Select subcategory and filter products
-function selectSubcategory(subcategory) {
-    state.selectedSubCategory = subcategory;
+function resetFilters() {
+    state.selectedCategory = null;
+    state.selectedSubCategory = null;
     state.selectedTag = null;
+    state.selectedBrand = null;
     state.searchQuery = '';
-    filterProducts();
+    state.filteredProducts = [...state.products];
+    renderProducts();
 }
 
-//rendering brands
+// Render brands with logo
 function renderBrands() {
     const container = document.getElementById('brandsContainer');
     if (!container) return;
@@ -431,21 +416,28 @@ function renderBrands() {
     container.innerHTML = '';
 
     if (!state.brands || state.brands.length === 0) {
-        container.innerHTML =
-            '<div class="text-center py-4 text-slate-500">No brands available</div>';
+        container.innerHTML = '<div class="text-center py-4 text-slate-500">No brands available</div>';
         return;
     }
 
     state.brands.forEach(brand => {
-        const brandName = brand.name || brand.title || brand;
-        const brandSlug = brand.slug || brandName;
+        const brandName = brand.name || brand.title || 'Unknown Brand';
+        const brandSlug = brand.slug || toSlug(brandName);
+        const brandLogo = brand.logo || brand.logoUrl || null;
 
         const btn = document.createElement('button');
-        btn.className =
-            'w-full px-4 py-3 rounded-xl text-left text-slate-700 hover:bg-blue-50 transition-all';
-        btn.textContent = brandName;
+        btn.className = 'w-full px-4 py-3 rounded-xl text-left text-slate-700 hover:bg-blue-50 transition-all flex items-center gap-4';
 
-        // when clicking on brands go to another page
+        btn.innerHTML = `
+            ${brandLogo
+                ? `<img src="${brandLogo}" alt="${brandName}" class="w-10 h-10 object-contain rounded-full border border-gray-200">`
+                : `<div class="w-10 h-10 bg-gray-200 rounded-full border border-gray-300 flex items-center justify-center">
+                     <span class="text-gray-500 font-bold text-lg">${brandName.charAt(0).toUpperCase()}</span>
+                   </div>`
+            }
+            <span class="font-medium">${brandName}</span>
+        `;
+
         btn.addEventListener('click', () => {
             const slugParam = encodeURIComponent(brandSlug);
             window.location.href = `brand.html?brand=${slugParam}`;
@@ -455,135 +447,176 @@ function renderBrands() {
     });
 }
 
-//creating product card
+
 function createProductCard(product) {
-
     const productCard = document.createElement('div');
-    productCard.className =
-        'bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover:scale-105 cursor-pointer flex flex-col h-full';
+    productCard.className = `
+        bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 
+        overflow-hidden flex flex-col h-full border border-gray-100
+        cursor-pointer group
+    `;
 
-    // backend fields
-    const productImage = product.image || product.imageUrl || '📦';
-    const productId = product.id || product._id;
+    const productId = product.id;
+    const productName = product.title || 'Untitled Product';
+    const shortDesc = product.shortDescription || '';
+    const price = product.price ? `Rs. ${product.price}` : 'Price on request';
+    const stock = product.stock;
+    const imageUrl = product.imageUrl || null;
 
-    // fetch name as backend gives it
-    const productName =
-        product.name ||
-        product.productName ||
-        product.title ||
-        'Product';
-
-    //fetch price exactly as backend sends it
-    const priceValue = product.price;  // <- no conversion, no modification
-
-    const isEmoji =
-        typeof productImage === 'string' &&
-        !productImage.includes('/') &&
-        productImage.length <= 4;
+    // Stock status badge
+    const stockStatus = stock > 10 
+        ? `<span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">In Stock</span>`
+        : stock > 0 
+            ? `<span class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">Low Stock</span>`
+            : `<span class="text-xs text-red-700 bg-red-100 px-2 py-1 rounded-full">Out of Stock</span>`;
 
     productCard.innerHTML = `
-        <div class="flex-1">
-            <div class="bg-white rounded-xl h-48 flex items-center justify-center mb-4 overflow-hidden">
-                ${
-                    isEmoji
-                        ? `<span class="text-6xl">${productImage}</span>`
-                        : `<img src="${productImage}" alt="${productName}" class="w-full h-full object-cover">`
+        <div class="relative overflow-hidden rounded-xl">  <!-- ADD overflow-hidden here -->
+            <div class="bg-gray-50 h-64 flex items-center justify-center group">  <!-- ADD group class -->
+                ${imageUrl 
+                    ? `<img src="${imageUrl}" alt="${productName}" 
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'; this.onerror=null;">`
+                    : `<div class="w-full h-full flex items-center justify-center text-6xl text-gray-300">📦</div>`
                 }
             </div>
-
-            <h3 class="font-bold text-lg text-slate-800 mb-4">${productName}</h3>
-
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-2xl font-bold text-blue-600">Rs. ${priceValue}</span>
+            <div class="absolute top-3 right-3">
+                ${stockStatus}
             </div>
         </div>
 
-        <div class="mt-auto flex gap-2">
-            <button class="add-to-cart-btn flex-1 bg-white border-2 border-blue-600 text-blue-600 px-4 py-2.5 rounded-full hover:bg-blue-50 transition-all font-medium text-sm" data-product-id="${productId}">
-                Add to Cart
-            </button>
+        <div class="p-6 flex flex-col flex-1">
+            <h3 class="font-bold text-xl text-gray-800 mb-2 line-clamp-2 leading-tight">
+                ${productName}
+            </h3>
+            
+            ${shortDesc ? `
+                <p class="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
+                    ${shortDesc}
+                </p>
+            ` : '<div class="flex-1"></div>'}
 
-            <button class="buy-now-btn flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2.5 rounded-full hover:shadow-lg transition-all font-medium text-sm" data-product-id="${productId}">
-                Buy Now
-            </button>
+            <div class="mt-auto">
+                <div class="flex items-center justify-between mb-5">
+                    <span class="text-3xl font-bold text-blue-600">${price}</span>
+                </div>
+
+                <div class="mt-auto space-y-3">
+                    <button class="add-to-cart-btn w-full py-3 px-4 bg-white border-2 border-blue-600 text-blue-600 rounded-xl 
+                                    hover:bg-blue-50 font-semibold text-sm transition-all"
+                            data-product-id="${productId}"
+                            ${stock === 0 ? 'disabled' : ''}>
+                        Add to Cart
+                    </button>
+                    <button class="buy-now-btn w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl 
+                                    hover:from-blue-700 hover:to-indigo-700 font-semibold text-sm transition-all shadow-md"
+                            data-product-id="${productId}"
+                            ${stock === 0 ? 'disabled' : ''}>
+                        Buy Now
+                    </button>
+                </div>
+            </div>
         </div>
     `;
 
-    // when clicking on products go to details page
+    // Card click → go to details page (except buttons)
     productCard.addEventListener('click', (e) => {
-
-        // prevent redirect if button clicked
-        if (
-            e.target.classList.contains('add-to-cart-btn') ||
-            e.target.classList.contains('buy-now-btn') ||
-            e.target.closest('.add-to-cart-btn') ||
-            e.target.closest('.buy-now-btn')
-        ) {
-            return;
+        if (e.target.closest('.add-to-cart-btn') || e.target.closest('.buy-now-btn')) {
+            return; // Let button handlers work
         }
-
-        if (!productId) return;
-
-        window.location.href = `details.html?id=${productId}`;
+        if (productId) {
+            window.location.href = `details.html?id=${productId}`;
+        }
     });
+
+    // Add to Cart Button
+    const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (stock === 0) return;
+
+            try {
+                const response = await productService.addToCart(productId);
+                if(response.success)
+                    showToast(response.message || 'Added to cart!', 'success');
+                else
+                    showToast(response.message || 'Failed to add to cart', 'error');
+            } catch (err) {
+                console.error('Failed to add to cart:', err);
+                showToast('Could not add to cart', 'error');
+            }
+        });
+    }
+
+    // Buy Now Button
+    const buyNowBtn = productCard.querySelector('.buy-now-btn');
+    if (buyNowBtn) {
+        buyNowBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (stock === 0) return;
+
+            try {
+                // const response = await productService.buyNow(productId);
+                // Optionally redirect to checkout
+                // window.location.href = '/checkout.html';
+                showToast('Proceeding to buy (not implemented)', 'info');
+            } catch (err) {
+                console.error('Buy now failed:', err);
+                showToast('Could not proceed to buy', 'error');
+            }
+        });
+    }
+
+    // Disable buttons visually if out of stock
+    if (stock === 0) {
+        addToCartBtn?.classList.add('opacity-60', 'cursor-not-allowed');
+        buyNowBtn?.classList.add('opacity-60', 'cursor-not-allowed');
+    }
 
     return productCard;
 }
 
-// update heading text above products grid based on current filters
-function updateProducsHeading() {
+
+// Update heading
+function updateProductsHeading() {
     const headingEl = document.getElementById('productsHeading');
     if (!headingEl) return;
 
     let text = 'All Products';
+
     if (state.selectedTag) {
-        const tagSlug = state.selectedTag;
-        const tagObj = state.tags.find(
-            function (t) {
-                return (t.slug || t.name || t) === tagSlug;
-            }
-        );
-        const tagName = (tagObj && (tagObj.name || tagObj.title)) || tagSlug;
-        text = 'Products tagged "' + tagName + '"';
+        const tagObj = state.tags.find(t => (t.slug || t) === state.selectedTag);
+        text = `Products tagged "${tagObj?.name || state.selectedTag}"`;
     } else if (state.selectedSubCategory) {
-        const subName = state.selectedSubCategory.name || state.selectedSubCategory.slug;
-        text = 'Products in "' + subName + '"';
+        text = `Products in "${state.selectedSubCategory.name || state.selectedSubCategory.slug}"`;
     } else if (state.selectedCategory) {
-        const catSlug = state.selectedCategory;
-        const catObj = state.categories.find(
-            function (c) {
-                return (c.slug || c.name || c.title) === catSlug;
-            }
-        );
-        const catName = (catObj && (catObj.name || catObj.title)) || catSlug;
-        text = 'Products in "' + catName + '"';
+        const catObj = state.categories.find(c => c.slug === state.selectedCategory);
+        text = `Products in "${catObj?.name || state.selectedCategory}"`;
     } else if (state.searchQuery) {
-        text = 'Results for "' + state.searchQuery + '"';
+        text = `Results for "${state.searchQuery}"`;
     }
 
     headingEl.textContent = text;
 }
 
-//rendering products
+// Render products
 function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
 
-    updateProducsHeading();
-
+    updateProductsHeading();
     container.innerHTML = '';
 
     if (!state.filteredProducts || state.filteredProducts.length === 0) {
-        container.innerHTML =
-            '<div class="col-span-full text-center py-12 text-slate-500">No products found</div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">No products found</div>';
         return;
     }
 
     state.filteredProducts.forEach(product => {
-        const card = createProductCard(product);
-        container.appendChild(card);
+        container.appendChild(createProductCard(product));
     });
 }
 
-// initialize when DOM is ready
+// Start app
 document.addEventListener('DOMContentLoaded', init);

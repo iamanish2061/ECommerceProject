@@ -1,55 +1,56 @@
-// ---------- state ----------
+// State
 let detailsState = {
-    product: null
+    product: null,
+    currentImageIndex: 0
 };
 
-// read ?id= from URL
+// Toast
+function showToast(message, type = "info", duration = 3000) {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => toast.remove(), duration);
+}
+
+// Get product ID from URL
 function getProductIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const raw = params.get("id");
     return raw ? decodeURIComponent(raw) : null;
 }
 
-// extract product object from API response
+// Extract product from API response
 function extractProduct(res) {
-    console.log("DETAILS raw response:", res);
-
-    if (!res) return null;
+    if (!res || !res.data) return null;
     const data = res.data;
-    if (!data) return null;
-
-    // { data: { product: {...} } }
     if (data.product) return data.product;
-
-    // { data: { item: {...} } }
     if (data.item) return data.item;
-
-    // { data: [ {...}, ... ] }
-    if (Array.isArray(data)) return data[0] || null;
-
-    // { data: {...product fields...} }
+    if (Array.isArray(data)) return data[0];
     return data;
 }
 
 function showDetailsError(message) {
     const main = document.querySelector("main");
     if (!main) return;
-
     main.innerHTML = `
         <div class="bg-white shadow-md rounded-3xl max-w-md mx-auto mt-16 p-10 text-center">
-            <p class="text-red-500 mb-5 text-sm">${message}</p>
-            <a href="product.html"
-               class="px-6 py-2 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
-               Back to Products
+            <p class="text-red-500 mb-5 text-lg">${message}</p>
+            <a href="product.html" class="px-8 py-3 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700">
+                Back to Products
             </a>
         </div>
     `;
 }
 
-// init
+// Init page
 async function initDetailsPage() {
     const id = getProductIdFromUrl();
-
     if (!id) {
         showDetailsError("No product selected.");
         return;
@@ -57,7 +58,6 @@ async function initDetailsPage() {
 
     try {
         const res = await productService.getProductsById(id);
-
         if (!res || res.success === false) {
             showDetailsError(res?.message || "Failed to load product.");
             return;
@@ -70,150 +70,151 @@ async function initDetailsPage() {
         }
 
         detailsState.product = product;
-        console.log("DETAILS product object:", product);
         renderDetails(product);
     } catch (err) {
-        console.error("Error loading product details:", err);
-        showDetailsError("Error loading product details. Please try again.");
+        console.error("Error loading product:", err);
+        showDetailsError("Error loading product. Please try again.");
     }
 }
 
-// helper: get primary image from product.images or image fields
-function getPrimaryImage(product) {
-    // if single image field is present (same logic as product.js)
-    if (product.image) return product.image;
-    if (product.imageUrl) return product.imageUrl;
-    if (product.image_url) return product.image_url;
-
-    // else, use first entry from images[]
-    if (Array.isArray(product.images) && product.images.length > 0) {
-        const first = product.images[0];
-
-        if (typeof first === "string") {
-            return first;
-        }
-
-        // common object shapes
-        return (
-            first.url ||
-            first.imageUrl ||
-            first.image_url ||
-            first.path ||
-            first.src ||
-            null
-        );
-    }
-
-    return null;
-}
-
-// render details (image, name, price, sku, size, stock, descriptions, tags)
+// Render product details
 function renderDetails(product) {
-    const productId = product.id || product._id;
+    const images = product.images || [];
+    const thumbnailImg = images.find(img => img.thumbnail) || images[0] || null;
+    detailsState.currentImageIndex = images.findIndex(img => img.thumbnail);
+    if (detailsState.currentImageIndex === -1) detailsState.currentImageIndex = 0;
 
-    const productName =
-        product.title ||
-        product.name ||
-        product.productName ||
-        "Product";
-
-    const fullDescription =
-        product.description ||
-        "";
-
-    const shortDescription =
-        product.shortDescription ||
-        "";
-
-    const priceValue = product.price || 0;
-    const sku = product.sku || "-";
-    const size =
-        product.sizeML ??   // e.g. "sizeML"
-        product.sizeMl ??   // e.g. "sizeMl"
-        product.size_ml ??  // e.g. "size_ml"
-        product.size ??
-        product.volume ??
-        "-";
-    const stock =
-        typeof product.stock === "number" ? product.stock : "-";
-
-    const imageUrl = getPrimaryImage(product);
-
-    // IMAGE
-    const imgEl = document.getElementById("productImageMain");
-    const fallbackEl = document.getElementById("noImageFallback");
-
-    if (imgEl && fallbackEl) {
-        if (imageUrl) {
-            // use exactly as backend gives (same as product cards)
-            imgEl.src = imageUrl;
-            imgEl.alt = productName;
-            imgEl.classList.remove("hidden");
-            fallbackEl.classList.add("hidden");
-        } else {
-            imgEl.classList.add("hidden");
-            fallbackEl.classList.remove("hidden");
-        }
+    // Main Image
+    const mainImg = document.getElementById('productImageMain');
+    const noImg = document.getElementById('noImageFallback');
+    if (thumbnailImg) {
+        mainImg.src = thumbnailImg.url;
+        mainImg.alt = product.title;
+        mainImg.classList.remove('hidden');
+        noImg.classList.add('hidden');
+    } else {
+        mainImg.classList.add('hidden');
+        noImg.classList.remove('hidden');
     }
 
-    // BASIC TEXT
-    const titleEl = document.getElementById("productTitle");
-    const longDescEl = document.getElementById("productDescription");
-    const shortDescEl = document.getElementById("productShortDescription");
-    const priceEl = document.getElementById("productPrice");
-    const skuEl = document.getElementById("detailsSku");
-    const sizeEl = document.getElementById("detailsSize");
-    const stockEl = document.getElementById("detailsStock");
+    // Text
+    document.getElementById('productTitle').textContent = product.title || 'Untitled';
+    document.getElementById('productShortDescription').textContent = product.shortDescription || '';
+    document.getElementById('productDescription').textContent = product.description || 'No description available.';
+    document.getElementById('productPrice').textContent = product.price ? `Rs. ${product.price}` : 'Price on request';
+    document.getElementById('detailsSku').textContent = product.sku || '-';
+    document.getElementById('detailsSize').textContent = product.sizeMl || '-';
+    document.getElementById('detailsStock').textContent = product.stock > 0 ? `${product.stock} in stock` : 'Out of stock';
 
-    if (titleEl) titleEl.textContent = productName;
-    if (longDescEl) longDescEl.textContent = fullDescription || "No description available.";
-    if (shortDescEl) shortDescEl.textContent = shortDescription;
-    if (priceEl) priceEl.textContent = `Rs. ${priceValue}`;
-    if (skuEl) skuEl.textContent = sku;
-    if (sizeEl) sizeEl.textContent = size;
-    if (stockEl) stockEl.textContent = stock;
+    // Brand
+    const brandContainer = document.getElementById('detailsBrand');
+    const brand = product.brand;
+    if (brandContainer && brand) {
+        brandContainer.innerHTML = `
+            <div class="flex items-center gap-3">
+                ${brand.logoUrl 
+                    ? `<img src="${brand.logoUrl}" alt="${brand.name}" class="w-12 h-12 object-contain rounded-lg border">`
+                    : `<div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center border">
+                         <span class="text-xl font-bold text-gray-600">${brand.name.charAt(0)}</span>
+                       </div>`
+                }
+                <span class="font-semibold text-lg">${brand.name}</span>
+            </div>
+        `;
+    }
 
-    // TAGS
-    const tagsContainer = document.getElementById("detailsTagsContainer");
-    if (tagsContainer) {
-        tagsContainer.innerHTML = "";
+    // Category
+    document.getElementById('detailsCategory').textContent = product.category?.name || 'Uncategorized';
 
-        const tags = product.tags || [];
-        if (Array.isArray(tags) && tags.length > 0) {
-            tags.forEach(tag => {
-                const tagName = tag.name || tag.slug || tag.label || tag;
-                const chip = document.createElement("span");
-                chip.className =
-                    "px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs";
-                chip.textContent = `#${tagName}`;
-                tagsContainer.appendChild(chip);
-            });
-        } else {
-            const chip = document.createElement("span");
-            chip.className = "text-xs text-slate-400";
-            chip.textContent = "No tags";
+    // Tags
+    const tagsContainer = document.getElementById('detailsTagsContainer');
+    tagsContainer.innerHTML = '';
+    if (product.tags?.length > 0) {
+        product.tags.forEach(tag => {
+            const chip = document.createElement('span');
+            chip.className = 'px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-sm font-medium';
+            chip.textContent = tag.name || tag.slug;
             tagsContainer.appendChild(chip);
-        }
+        });
+    } else {
+        tagsContainer.innerHTML = '<span class="text-gray-500 text-sm">No tags</span>';
     }
 
-    // BUTTONS (placeholder behaviour)
-    const addToCartBtn = document.getElementById("detailsAddToCart");
-    const buyNowBtn = document.getElementById("detailsBuyNow");
-
-    if (addToCartBtn) {
-        addToCartBtn.addEventListener("click", () => {
-            console.log("Add to Cart clicked:", productId);
-            // integrate cart here later
+    // Image Thumbnails
+    const thumbnails = document.getElementById('imageThumbnails');
+    thumbnails.innerHTML = '';
+    if (images.length > 1) {
+        images.forEach((img, i) => {
+            const thumb = document.createElement('div');
+            thumb.className = `cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${i === detailsState.currentImageIndex ? 'border-blue-600 shadow-md' : 'border-transparent'}`;
+            thumb.innerHTML = `<img src="${img.url}" alt="${img.altText || product.title}" class="w-full h-20 object-cover">`;
+            thumb.onclick = () => {
+                mainImg.src = img.url;
+                detailsState.currentImageIndex = i;
+                updateThumbnails();
+            };
+            thumbnails.appendChild(thumb);
         });
     }
 
-    if (buyNowBtn) {
-        buyNowBtn.addEventListener("click", () => {
-            console.log("Buy Now clicked:", productId);
-            // redirect to checkout here later
+    function updateThumbnails() {
+        const thumbs = thumbnails.querySelectorAll('div');
+        thumbs.forEach((t, i) => {
+            t.classList.toggle('border-blue-600', i === detailsState.currentImageIndex);
+            t.classList.toggle('shadow-md', i === detailsState.currentImageIndex);
+            t.classList.toggle('border-transparent', i !== detailsState.currentImageIndex);
         });
+    }
+
+    // Prev/Next Buttons
+    const prevBtn = document.getElementById('prevImage');
+    const nextBtn = document.getElementById('nextImage');
+
+    const changeImage = (dir) => {
+        if (images.length <= 1) return;
+        detailsState.currentImageIndex = (detailsState.currentImageIndex + dir + images.length) % images.length;
+        mainImg.src = images[detailsState.currentImageIndex].url;
+        updateThumbnails();
+    };
+
+    if (prevBtn) prevBtn.onclick = () => changeImage(-1);
+    if (nextBtn) nextBtn.onclick = () => changeImage(1);
+
+    prevBtn.classList.toggle('hidden', images.length <= 1);
+    nextBtn.classList.toggle('hidden', images.length <= 1);
+
+    // Buttons with Toast
+    const addBtn = document.getElementById('detailsAddToCart');
+    const buyBtn = document.getElementById('detailsBuyNow');
+
+    if (addBtn) {
+        addBtn.onclick = async () => {
+            if (product.stock <= 0) return showToast('Out of stock', 'error');
+            try {
+                const response = await productService.addToCart(product.id);
+                if(response.success)
+                    showToast(response.message || 'Added to cart!', 'success');
+                else
+                    showToast(response.message || 'Failed to add to cart', 'error');
+            } catch (err) {
+                showToast('Failed to add to cart', 'error');
+            }
+        };
+    }
+
+    if (buyBtn) {
+        buyBtn.onclick = async () => {
+            if (product.stock <= 0) return showToast('Out of stock', 'error');
+            try {
+                // await productService.buyNow(product.id);
+                showToast('Proceeding to checkout...', 'info');
+                // setTimeout(() => window.location.href = '/checkout.html', 1500);
+            } catch (err) {
+                showToast('Checkout failed', 'error');
+            }
+        };
     }
 }
 
-// bootstrap
-document.addEventListener("DOMContentLoaded", initDetailsPage);
+// Start
+document.addEventListener('DOMContentLoaded', initDetailsPage);

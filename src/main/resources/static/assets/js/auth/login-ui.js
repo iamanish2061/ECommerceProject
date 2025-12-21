@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LOGIN SUBMISSION ---
     const loginBtn = document.getElementById('login-btn');
     loginBtn.addEventListener('click', async (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
 
         const usernameInput = document.getElementById('login-username');
         const passwordInput = document.getElementById('login-password');
@@ -143,9 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(n === 3){
             nextBtn.textContent = `<span>Create Account</span>` ;
         }else if(n === 2){
-            nextBtn.textContent = `<span>Verify</span><i class ='bx bx-right-arrow-alt'></i>` ;
+            nextBtn.innerHTML = `<span>Verify</span><i class ='bx bx-right-arrow-alt'></i>` ;
         }else{
-            nextBtn.textContent = `<span>Next</span><i class='bx bx-right-arrow-alt'></i>`;
+            nextBtn.innerHTML = `<span>Next</span><i class='bx bx-right-arrow-alt'></i>`;
         }
     }
 

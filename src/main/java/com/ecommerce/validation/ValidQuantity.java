@@ -10,7 +10,6 @@ import java.lang.annotation.*;
 
 @NotNull(message = "Quantity is required")
 @Min(value = 0, message = "Quantity cannot be negative")
-@Pattern(regexp = "^[1-9]\\d{0,2}$", message = "Invalid quantity format")
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {})

@@ -51,6 +51,10 @@ const AuthService = {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('tokenType');
         localStorage.removeItem('user');
+    },
+
+    async showProductDetails(productId){
+     return await request(`/api/products/{productId}`, 'GET');
     }
 
 

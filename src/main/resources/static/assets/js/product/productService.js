@@ -32,5 +32,12 @@ const productService = {
     },
     async getProductsByBrandSlug(brandSlug){
         return await request(`/products/brand-details/${brandSlug}`, 'GET');
+    },
+    async addToCart(productId){
+        return await request(`/cart/add-to-cart/${productId}?quantity=1`, 'PUT');
+    },
+    async buyNow(productId){
+        return await request(`/cart/buy-now/${productId}`, 'POST');
     }
+
 };
