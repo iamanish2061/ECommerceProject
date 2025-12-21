@@ -11,9 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 //viewing order details from admin side
@@ -64,6 +62,12 @@ import java.util.Set;
                 )
         }
 )
+//viewing all orders briefly by admin
+@NamedEntityGraph(
+        name = "Order.user",
+        attributeNodes = @NamedAttributeNode("user")
+)
+
 @Entity
 @Table(name = "orders")
 @Getter
