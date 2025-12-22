@@ -86,6 +86,8 @@ public class AdminOrderService {
 
     public List<OrderResponse> getAllOrders() {
         List<OrderModel> allOrders = orderRepository.findAllOrdersWithUsername();
+        if(allOrders.isEmpty())
+            throw new ApplicationException("No order is placed yet!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND);
         return allOrders.stream()
                 .sorted(Comparator.comparing(OrderModel::getCreatedAt).reversed())
                 .map(orderModel ->

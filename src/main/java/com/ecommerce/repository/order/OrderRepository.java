@@ -26,7 +26,7 @@ public interface OrderRepository extends JpaRepository<OrderModel, Long> {
     List<OrderModel> findByUserId(@Param("userId") Long userId);
 
     @EntityGraph(value = "Order.orderItems.product.images.user.address.payment", type = EntityGraph.EntityGraphType.LOAD)
-    @Query("SELECT o FROM OrderModel o where o.id : orderId")
+    @Query("SELECT o FROM OrderModel o where o.id = :orderId")
     Optional<OrderModel> findDetailsOfOrderById(@Param("orderId") Long orderId);
 
 

@@ -11,10 +11,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface OrderMapper {
 
-    @Mapping(source = "id", target = "orderId")
-    @Mapping(source = "totalAmount", target = "totalAmount")
-    @Mapping(source = "createdAt", target = "createdAt")
-    @Mapping(source = "status", target = "status")
+    @Mapping(source = "order.id", target = "orderId")
+    @Mapping(source = "order.totalAmount", target = "totalAmount")
+    @Mapping(source = "order.createdAt", target = "createdAt")
+    @Mapping(source = "order.status", target = "status")
     @Mapping(source = "username", target = "username")
     OrderResponse mapEntityToOrderResponse(OrderModel order, String username);
 

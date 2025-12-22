@@ -10,11 +10,11 @@ public interface AuthMapper {
 
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(source = "accessTokenExpiration", target = "expiresIn")
-    @Mapping(source = "id", target = "userId")
-    @Mapping(source = "fullName", target = "fullName")
-    @Mapping(source = "username", target = "username")
-    @Mapping(source = "email", target = "email")
-    @Mapping(source = "role", target = "role")
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.fullName", target = "fullName")
+    @Mapping(source = "user.username", target = "username")
+    @Mapping(source = "user.email", target = "email")
+    @Mapping(source = "user.role", target = "role")
     AuthResponse mapEntityToResponse(
             UserModel user,
             String accessToken,
