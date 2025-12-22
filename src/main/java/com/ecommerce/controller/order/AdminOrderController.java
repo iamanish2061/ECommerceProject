@@ -1,5 +1,6 @@
 package com.ecommerce.controller.order;
 
+import com.ecommerce.dto.request.order.UpdateOrderStatusRequest;
 import com.ecommerce.dto.request.product.SellProductRequests;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.order.OrderResponse;
@@ -41,7 +42,6 @@ public class AdminOrderController {
         return ResponseEntity.ok(ApiResponse.ok(message));
     }
 
-
 //    for returning all orders
     @GetMapping()
     @Operation(summary = "Fetching all orders in descending order to display in admin side")
@@ -64,7 +64,7 @@ public class AdminOrderController {
 
     //    getting all order of specific user
     @GetMapping("/user/{userId}")
-    @Operation(summary = "can be removed if the filter can be done from frontend only")
+    @Operation(summary = "can be removed if the filter can be done from frontend only - for fetching order of particular user")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersOfSpeificUser(
             @ValidId @PathVariable Long userId
     ){
@@ -75,28 +75,29 @@ public class AdminOrderController {
     }
 
     //    detail of particular order
-//    @GetMapping("/{orderId}")
-//    @Operation(summary = "to fetch detailed information of any order")
-//    public ResponseEntity<ApiResponse<SingleOrderResponse>> getDetailsOfOrder(
-//            @ValidId @PathVariable("orderId") Long orderId
-//    ){
-//        SingleOrderResponse orderResponse = adminOrderService.getDetailOfOrder(orderId);
-//        return ResponseEntity.ok(
-//                ApiResponse.ok(orderResponse, "Details fetched of order: "+orderId)
-//        );
-//    }
+    @GetMapping("/{orderId}")
+    @Operation(summary = "to fetch detailed information of any order")
+    public ResponseEntity<ApiResponse<SingleOrderResponse>> getDetailsOfOrder(
+            @ValidId @PathVariable("orderId") Long orderId
+    ){
+        SingleOrderResponse orderResponse = adminOrderService.getDetailOfOrder(orderId);
+        return ResponseEntity.ok(
+                ApiResponse.ok(orderResponse, "Details fetched of order: "+orderId)
+        );
+    }
 
-    //    updating status of order
-//    @PutMapping("/{orderId}/status")
-//    public ResponseEntity<ApiResponse<?>> updateStatus(
-//            @ValidId @PathVariable Long orderId,
-//            @Valid @RequestBody UpdateOrderStatusRequest status
-//    ){
-//        adminOrderService.updateOrderStatus(orderId, status);
-//        return ResponseEntity.ok(
-//                ApiResponse.ok("Order status updated")
-//        );
-//    }
+//    updating status of order
+    @PutMapping("/{orderId}/status")
+    @Operation(summary = "to change the status of order")
+    public ResponseEntity<ApiResponse<?>> updateStatus(
+            @ValidId @PathVariable Long orderId,
+            @Valid @RequestBody UpdateOrderStatusRequest request
+    ){
+        adminOrderService.updateOrderStatus(orderId, request.status());
+        return ResponseEntity.ok(
+                ApiResponse.ok("Order status updated")
+        );
+    }
 
 
 

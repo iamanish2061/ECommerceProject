@@ -1,11 +1,14 @@
 package com.ecommerce.service.order;
 
 
-import com.ecommerce.dto.request.product.ProductRequest;
 import com.ecommerce.dto.request.product.SellProductRequests;
 import com.ecommerce.dto.response.order.OrderResponse;
+import com.ecommerce.dto.response.order.SingleOrderResponse;
 import com.ecommerce.exception.ApplicationException;
+import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.order.OrderMapper;
+import com.ecommerce.mapper.payment.PaymentMapper;
+import com.ecommerce.mapper.user.UserMapper;
 import com.ecommerce.model.order.OrderItem;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
@@ -33,7 +36,11 @@ public class AdminOrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+
     private final OrderMapper orderMapper;
+    private final UserMapper userMapper;
+    private final PaymentMapper paymentMapper;
+    private final AddressMapper addressMapper;
 
     @Transactional
     public String sellProducts(List<SellProductRequests> requests, UserModel admin) {
@@ -100,40 +107,31 @@ public class AdminOrderService {
                 .toList();
     }
 
-//    public SingleOrderResponse getDetailOfOrder(Long orderId) {
-//        List<Object[]> order = orderRepository.getOrderWithAllDetails(orderId);
-//
-//        if(order.isEmpty()) {
-//            throw new ApplicationException("Order not found with id: " + orderId, "INVALID_ORDER_ID", HttpStatus.BAD_REQUEST);
-//        }
-//
-//        return new SingleOrderResponse(
-//                new OrderResponse(
-//                        order.getId(),
-//                        order.getUserId(),
-//                        order.getTotalAmount(),
-//                        order.getStatus(),
-//                        order.getCreatedAt()
-//                ),
-//                order.getOrderItems().stream()
-//                        .map(oi-> new OrderItemResponse(
-//                                oi.getProductId(),
-//                                oi.getProduct().getTitle(),
-//                                oi.getQuantity(),
-//                                oi.getPriceAtPurchase(),
-//                                oi.getPriceAtPurchase().multiply(BigDecimal.valueOf(oi.getQuantity()))
-//                        )).toList()
-//        );
-//    }
-//
-//    @Transactional
-//    public void updateOrderStatus(Long orderId, UpdateOrderStatusRequest orderStatus) {
-//        OrderModel orderModel = orderRepository.findById(orderId)
-//                .orElseThrow(()->
-//                        new ApplicationException("Order not found!", "NOT_FOUND", HttpStatus.NOT_FOUND));
-//
-//        orderModel.setStatus(orderStatus.status());
-//        orderRepository.save(orderModel);
-//    }
+    public SingleOrderResponse getDetailOfOrder(Long orderId) {
+        OrderModel order = orderRepository.findDetailsOfOrderById(orderId)
+                .orElseThrow(()->new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        return new SingleOrderResponse(
+                order.getId(),
+                userMapper.mapEntityToUserResponse(order.getUser()),
+                order.getTotalAmount(),
+                order.getStatus(),
+                order.getCreatedAt(),
+                order.getOrderItems().stream()
+                        .map(orderMapper::mapEntityToOrderItemResponse).toList(),
+                addressMapper.mapEntityToAddressResponse(order.getAddress()),
+                paymentMapper.mapEntityToPaymentResponse(order.getPayment())
+        );
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus status) {
+        OrderModel orderModel = orderRepository.findById(orderId)
+                .orElseThrow(()->
+                        new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        orderModel.setStatus(status);
+        orderRepository.save(orderModel);
+    }
 
 }
