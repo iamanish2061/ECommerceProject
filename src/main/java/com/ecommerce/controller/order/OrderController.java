@@ -56,7 +56,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     @Operation(summary = "get detail of order that user clicks from the list of orders")
-    public ResponseEntity<ApiResponse<?>> getDetailOfProduct(
+    public ResponseEntity<ApiResponse<UserOrderResponse>> getDetailOfProduct(
             @ValidId @PathVariable Long orderId,
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
@@ -65,7 +65,6 @@ public class OrderController {
         }
         UserOrderResponse response = orderService.getDetailsOfOrder(orderId);
         return ResponseEntity.ok(ApiResponse.ok(response, "Detail of order: "+orderId));
-
     }
 
 
