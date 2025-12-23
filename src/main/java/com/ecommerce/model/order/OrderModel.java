@@ -91,6 +91,9 @@ public class OrderModel {
     @Column(nullable = false)
     private OrderStatus status = OrderStatus.PENDING;
 
+    @Column(nullable =false)
+    private String phoneNumber;
+
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;

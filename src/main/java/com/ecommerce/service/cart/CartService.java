@@ -117,5 +117,9 @@ public class CartService {
         return "Item removed form cart!";
     }
 
-
+    @Transactional
+    public String clearCart(Long id) {
+        int deletedRow = cartRepository.deleteAllByUserId(id);
+        return deletedRow + " items removed";
+    }
 }

@@ -101,5 +101,17 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.ok(msg));
     }
 
+    @DeleteMapping("/clear")
+    @Operation(summary = "clearing cart")
+    public ResponseEntity<ApiResponse<?>> clearCart(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(cartErrorMessage, cartErrorCode));
+        }
+        String msg = cartService.clearCart(currentUser.getUser().getId());
+        return ResponseEntity.ok(ApiResponse.ok(msg));
+    }
 
 }

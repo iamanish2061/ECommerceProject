@@ -111,7 +111,9 @@ public class ProductController {
                 .toList();
         List<BriefProductsResponse> otherProducts = productService.getAllProductsExcept(personalizedIds);
         Map<String, List<BriefProductsResponse>> response = new HashMap<>();
-        response.put("personalized", personalizedProducts);
+        if(!personalizedProducts.isEmpty()){
+            response.put("personalized", personalizedProducts);
+        }
         response.put("products", otherProducts);
 
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched successfully"));

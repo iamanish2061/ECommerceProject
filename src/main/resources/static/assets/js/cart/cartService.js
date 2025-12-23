@@ -18,4 +18,10 @@ const cartService = {
     async deleteCartItem(productId) {
         return await request(`/cart/${productId}`, 'DELETE');
     },
+    
+    async deleteAllCartItems() {
+        return await request(`/cart/clear`, 'DELETE');
+    }
 }
+
+

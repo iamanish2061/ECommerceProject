@@ -13,32 +13,32 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<ProductModel, Long> {
 
-    @EntityGraph(value = "Product.images.tags", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images.tags", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT p FROM ProductModel p JOIN p.tags t WHERE t.slug = :tagSlug")
     List<ProductModel> findAllWithImageFromTagSlug(@Param("tagSlug") String tagSlug);
 
-    @EntityGraph(value = "Product.images.brand", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images.brand", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT p FROM ProductModel p JOIN p.brand b WHERE b.slug = :brandSlug")
     List<ProductModel> findAllWithImageFromBrandSlug(@Param("brandSlug") String brandSlug);
 
-    @EntityGraph(value = "Product.images.category.parent", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images.category.parent", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT p FROM ProductModel p JOIN p.category c WHERE c.slug = :categorySlug")
     List<ProductModel> findAllWithImageFromCategorySlug(@Param("categorySlug") String categorySlug);
 
-    @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT p FROM ProductModel p")
     List<ProductModel> findAllProductsWithImages();
 
-    @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.FETCH)
     List<ProductModel> findAllByIdIn(@Param("recommendedIds") List<Long> recommendedIds);
 
-    @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images", type = EntityGraph.EntityGraphType.FETCH)
     List<ProductModel> findAllByIdNotIn(@Param("recommendedIds") List<Long> recommendedIds);
 
-    @EntityGraph(value = "Product.images.brand.category.tags", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.images.brand.category.tags", type = EntityGraph.EntityGraphType.FETCH)
     Optional<ProductModel> findProductDetailsById(@Param("id") Long id);
 
-    @EntityGraph(value = "Product.tags", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Product.tags", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT p FROM ProductModel p WHERE p.id = :productId")
     Optional<ProductModel> findProductByIdWithTags(@Param("productId") Long productId);
 }

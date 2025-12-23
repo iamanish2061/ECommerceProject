@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
 
-    @EntityGraph(value = "Staff.leave.services", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Staff.leave.services", type = EntityGraph.EntityGraphType.FETCH)
     Optional<Staff> findStaffDetailWithLeaveInfoById(Long id);
 
 }

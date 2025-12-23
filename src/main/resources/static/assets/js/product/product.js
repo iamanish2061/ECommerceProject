@@ -79,6 +79,7 @@ async function init() {
         renderTags();
         renderProducts();
 
+        updateCartCount();
         setEventListeners();
 
     } catch (error) {
@@ -538,9 +539,10 @@ function createProductCard(product) {
 
             try {
                 const response = await productService.addToCart(productId);
-                if(response.success)
+                if(response.success){
+                    updateCartCount();
                     showToast(response.message || 'Added to cart!', 'success');
-                else
+                }else
                     showToast(response.message || 'Failed to add to cart', 'error');
             } catch (err) {
                 console.error('Failed to add to cart:', err);
@@ -617,6 +619,23 @@ function renderProducts() {
         container.appendChild(createProductCard(product));
     });
 }
+
+document.getElementById('cartButton').addEventListener('click', () => {
+    window.location.href = 'cart.html';
+});
+
+async function updateCartCount() {
+        try {
+            const response = await cartService.getCartCount();
+            const countElement = document.getElementById('cartCount');
+
+            if (response.success && countElement) {
+                countElement.textContent = response.data.totalCartItems || 0;
+            }
+        } catch (error) {
+            console.error("error updating cart count", error)
+        }
+    }
 
 // Start app
 document.addEventListener('DOMContentLoaded', init);

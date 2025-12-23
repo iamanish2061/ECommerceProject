@@ -37,7 +37,7 @@ const productService = {
         return await request(`/cart/add-to-cart/${productId}?quantity=1`, 'PUT');
     },
     async buyNow(productId){
-        return await request(`/cart/buy-now/${productId}`, 'POST');
+        return await request(`/order/buy-now/${productId}`, 'POST');
     }
 
 };

@@ -3,6 +3,7 @@ package com.ecommerce.repository.cart;
 import com.ecommerce.model.cart.CartModel;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,8 +18,12 @@ public interface CartRepository extends JpaRepository<CartModel, Long> {
 
     Long countByUserId(Long userId);
 
-    @EntityGraph(value = "CartItem.product.images", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "CartItem.product.images", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT c from CartModel c where c.userId = :userId")
     List<CartModel> findCartItemsByUserId(@Param("userId") Long userId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM CartModel c WHERE c.userId = :userId")
+    int deleteAllByUserId(@Param("userId") Long userId);
 
 }

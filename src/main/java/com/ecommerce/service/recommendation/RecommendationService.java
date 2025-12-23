@@ -3,6 +3,7 @@ package com.ecommerce.service.recommendation;
 
 import com.ecommerce.dto.response.product.BriefProductsResponse;
 import com.ecommerce.exception.ApplicationException;
+import com.ecommerce.mapper.product.ProductMapper;
 import com.ecommerce.model.product.ProductModel;
 import com.ecommerce.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ public class RecommendationService  {
 
     private final ProductRepository productRepository;
     private final RedisTemplate<String, String> redisTemplate;
+
+    private final ProductMapper productMapper;
 
     private static final int RECOMMENDATION_COUNT =15;
 
@@ -60,12 +63,13 @@ public class RecommendationService  {
 
 //        work here for mapping products to recommendation
         List<ProductModel> unfilteredProducts = productRepository.findAllByIdIn(recommendedIds);
-        recommendationProducts = null;
-        if(recommendationProducts.isEmpty()){
-            throw new ApplicationException("No products found!", "NOT_FOUND", HttpStatus.BAD_REQUEST);
-        }else {
-            return recommendationProducts;
-        }
+
+        recommendationProducts = unfilteredProducts.stream()
+                        .map(productMapper::mapEntityToBriefProductsResponse)
+                .toList();
+
+        return recommendationProducts;
+
     }
 
 }

@@ -17,6 +17,6 @@ public interface UserRepository extends JpaRepository<UserModel, Long> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
-    @EntityGraph(value = "User.addresses", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "User.addresses", type = EntityGraph.EntityGraphType.FETCH)
     Optional<UserModel> findUserDetailWithAddressById(@Param("id") Long id);
 }

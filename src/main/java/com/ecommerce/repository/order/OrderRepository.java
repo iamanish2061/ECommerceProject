@@ -1,6 +1,7 @@
 package com.ecommerce.repository.order;
 
 import com.ecommerce.model.order.OrderModel;
+import jakarta.persistence.Entity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,11 +14,11 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderModel, Long> {
 
-    @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.FETCH)
     @Query("Select o from OrderModel o")
     List<OrderModel> findAllOrdersWithUsername();
 
-    @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.FETCH)
     @Query("""
         select o from OrderModel o
         where o.user.id = :userId
@@ -25,10 +26,14 @@ public interface OrderRepository extends JpaRepository<OrderModel, Long> {
     """)
     List<OrderModel> findByUserId(@Param("userId") Long userId);
 
-    @EntityGraph(value = "Order.orderItems.product.images.user.address.payment", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Order.orderItems.product.images.user.address.payment", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT o FROM OrderModel o where o.id = :orderId")
     Optional<OrderModel> findDetailsOfOrderById(@Param("orderId") Long orderId);
 
+    @Query("SELECT o from OrderModel o where o.user.id = :userId")
+    List<OrderModel> findAllByUserId(@Param("userId") Long userId);
 
-    List<OrderModel> findAllByUserId(Long id);
+    @EntityGraph(value = "Order.orderItems.product.images.address.payment", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("SELECT o FROM OrderModel o where o.id = :orderId")
+    Optional<OrderModel> findOrderOfUserInDetail(@Param("orderId") Long orderId);
 }
