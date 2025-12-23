@@ -1,4 +1,3 @@
-
 let cartState = {
     items: [],
     total: 0
@@ -131,7 +130,7 @@ function createCartItemElement(item) {
         </div>
 
         <!-- Quantity Controls & Remove -->
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex justify-around gap-6 mt-6">
             <div class="flex items-center gap-3 bg-slate-100 rounded-full px-4 py-2">
                 <button class="quantity-btn text-slate-600 hover:text-blue-600 font-bold text-xl" data-action="decrease" data-product-id="${productId}">
                     −
@@ -155,6 +154,13 @@ function createCartItemElement(item) {
                 </svg>
                 Remove
             </button>
+
+            <button class="save-btn text-green-500 hover:text-green-700 font-medium flex items-center gap-2 transition-colors" data-product-id="${productId}">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Save
+            </button>
         </div>
     </div>
 
@@ -165,58 +171,116 @@ function createCartItemElement(item) {
     </div>
 `;
 
+   
     //adding event listeners
-    const increaseButton = itemDiv.querySelector('[data-action="increase"]');
-    const decreaseButton = itemDiv.querySelector('[data-action="decrease"]');
-    const quantityInput = itemDiv.querySelector('.quantity-input');
-    const removeBtn = itemDiv.querySelector('.remove-btn');
+const increaseButton = itemDiv.querySelector('[data-action="increase"]');
+const decreaseButton = itemDiv.querySelector('[data-action="decrease"]');
+const quantityInput  = itemDiv.querySelector('.quantity-input');
+const removeBtn      = itemDiv.querySelector('.remove-btn');
+const saveBtn        = itemDiv.querySelector('.save-btn');
 
-    increaseButton.addEventListener('click', () => handleQuantityChange(productId, itemQuantity +1 ));
-    decreaseButton.addEventListener('click', () => handleQuantityChange(productId, itemQuantity -1 ));
-    quantityInput.addEventListener('change', (e) => handleQuantityChange(productId, parseInt(e.target.value) || 1));
+// IMPORTANT: null-safety so it doesn't crash
+if (increaseButton && quantityInput) {
+    increaseButton.addEventListener('click', () => {
+        const current = parseInt(quantityInput.value, 10) || 1;
+        const next = Math.min(99, current + 1);
+        quantityInput.value = next; // UI ONLY
+    });
+}
+
+if (decreaseButton && quantityInput) {
+    decreaseButton.addEventListener('click', () => {
+        const current = parseInt(quantityInput.value, 10) || 1;
+        const next = Math.max(1, current - 1);
+        quantityInput.value = next; // UI ONLY
+    });
+}
+
+
+// (no endpoint call here)
+if (quantityInput) {
+    quantityInput.addEventListener('change', (e) => {
+        let val = parseInt(e.target.value, 10) || 1;
+        if (val < 1) val = 1;
+        if (val > 99) val = 99;
+        e.target.value = val; // UI ONLY
+    });
+}
+
+if (removeBtn) {
     removeBtn.addEventListener('click', () => handleRemoveItem(productId));
+}
+
+// NEW: Save button -> hits endpoint
+if (saveBtn) {
+    saveBtn.addEventListener('click', () => saveCartItem(productId));
+}
 
     return itemDiv;
 }
 
-//Handle quantityChange
-async function handleQuantityChange(productId, newQuantity){
-    if(newQuantity < 1) return;
+async function saveCartItem(productId){
+    const item = cartState.items.find(i=> i.product.id === productId);
+    if(!item) return
 
-    const item = cartState.items.find(i => i.product.id === productId);
-    if (!item) return;
+    //read the input 
+    const input = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+    const newQuantity = parseInt(input?.value, 10) || 1;
 
-    const oldQty = item.quantity;
-    item.quantity = newQuantity;
-
-    // Re-render only this item + total
-    const itemElement = document.getElementById(`cart-item-${productId}`);
-    if (itemElement) {
-        itemElement.replaceWith(createCartItemElement(item));
+    if(newQuantity < 1){
+    showToast("Quantity must be at least 1", "error");
+    return;
     }
-
-    calculateTotal();
 
     try{
         const response = await cartService.updateCartItem(productId, newQuantity);
-
-        if(!response.success){
-            item.quantity = oldQty;
-            itemElement?.replaceWith(createCartItemElement(item));
-            calculateTotal();
-            updateCartCount();
-            showToast('Failed to update quantity', 'error');
-        }
         
-    updateCartCount();
-    }catch(err){
-        item.quantity = oldQty;
-        itemElement?.replaceWith(createCartItemElement(item));
+        if(!response.success){
+            showToast("Failed to save quantity", "error");
+            return;
+        }
+
+        //commit the saved quantity
+        item.quantity = newQuantity;
+
+        //update the item total
+        const itemElement = document.getElementById(`cart-Item${productId}`);
+        if(itemElement){
+            itemElement.replaceWith(createCartItemElement(item));
+        }
+
         calculateTotal();
         updateCartCount();
-        showToast('Network error', 'error');
+
+        showToast("Saved quantity successfullly", "success");
+
+    }catch(error){
+        console.error("Network erro failed to save quantity", error);
+        showToast("Network error","error");
     }
+
 }
+
+//Handle quantityChange
+//  function handleQuantityChange(productId, newQuantity){
+//     if(newQuantity < 1) return;
+
+//     const item = cartState.items.find(i => i.product.id === productId);
+//     if (!item) return;
+
+   
+//     item.quantity = newQuantity;
+
+//     // Re-render only this item + total
+//     const itemElement = document.getElementById(`cart-item-${productId}`);
+//     if (itemElement) {
+//         itemElement.replaceWith(createCartItemElement(item));
+//     }
+
+//     calculateTotal();
+
+    
+// }
 
 //Handle remove item
 async function handleRemoveItem(productId){
@@ -268,9 +332,10 @@ function calculateTotal(){
         priceRow.className = 'flex justify-between text-slate-700 py-1';
         priceRow.innerHTML = `
             <span class="flex-1 truncate pr-2">${product.title || product.name} (x${quantity})</span>
-            <span class="font-medium">$${itemTotal.toFixed(2)}</span>
+            <span class="font-medium">Rs.${itemTotal.toFixed(2)}</span>
         `;
 
+        productPriceList.appendChild(priceRow);
     });
 
     if(totalEl){
