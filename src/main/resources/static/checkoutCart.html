@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckoutCart | CutLab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
+
+    <!-- Abstract Background Blobs -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-slate-800">
+                    Cut<span class="text-blue-600">Lab</span>
+                </h1>
+                <a href="cart.html" class="text-blue-600 font-medium">&larr; Back to Cart</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-8 text-gray-800">&larr; Checkout</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Checkout Forms -->
+            <div class="lg:col-span-2 space-y-8">
+
+                <!-- 1. Contact Information -->
+                <section class="bg-white rounded-3xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold mb-5 text-slate-800">1. Contact Information</h2>
+                     <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <input type="tel" placeholder="9841****" class="border rounded-lg px-4 py-3 w-full mt-2" value="">
+                    </div>
+                </div>
+                </section>
+
+                <!-- 2. Address Type -->
+                <section class="bg-white rounded-3xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold mb-5 text-slate-800 mb-6">2. Address Type</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="address_type" value="home" checked class="peer sr-only" id="homeAddress">
+                            <div class="border-2 border-blue-500 rounded-xl px-6 py-5 text-center font-semibold text-blue-600 bg-blue-50 peer-checked:bg-blue-100 peer-checked:border-blue-600 transition-all">
+                                <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                Home Address
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="address_type" value="work" class="peer sr-only" id="workAddress">
+                            <div class="border-2 border-gray-300 rounded-xl px-6 py-5 text-center font-medium text-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-600 transition-all">
+                                <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                                Work Address
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                                <!-- Address Information -->
+                <div class="bg-white rounded-3xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">3. Address Information</h2>
+                    
+                    <!-- Map Container (Empty for now) -->
+                    <div id="mapContainer" class="w-full h-64 bg-slate-100 rounded-2xl mb-6 flex items-center justify-center border-2 border-dashed border-slate-300">
+                        <div class="text-center text-slate-500">
+                            <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <p class="font-medium">Map will be displayed here</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Province</label>
+                            <input 
+                                type="text" 
+                                id="province"
+                                placeholder="Enter province" 
+                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">District</label>
+                            <input 
+                                type="text" 
+                                id="district"
+                                placeholder="Enter district" 
+                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">City</label>
+                            <input 
+                                type="text" 
+                                id="city"
+                                placeholder="Enter city" 
+                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Ward</label>
+                            <input 
+                                type="text" 
+                                id="ward"
+                                placeholder="Enter ward number" 
+                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all"
+                            >
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Landmark</label>
+                            <input 
+                                type="text" 
+                                id="landmark"
+                                placeholder="Enter nearby landmark" 
+                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all"
+                            >
+                        </div>
+                    </div>
+
+                      <!-- Confirm Address Checkbox -->
+                    <div class="mt-6 p-4 bg-blue-50 rounded-2xl">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" id="confirmAddress" class="mt-1 w-5 h-5 text-blue-600 border-2 border-slate-300 rounded focus:ring-2 focus:ring-blue-500">
+                            <div>
+                                <p class="font-semibold text-slate-800">Confirm your address</p>
+                                <p class="text-sm text-slate-600">Please verify that all address details are correct</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+               <!-- 4. Payment Method -->
+                <section class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-5 text-gray-800">4. Payment Method</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                       <label class="cursor-pointer">
+                        <input type="radio" name="payment_method" value="esewa" checked class="hidden peer" id="esewaPayment">
+                        <div class="border-2 border-gray-300 rounded-2xl p-6 text-center font-semibold text-gray-700  peer-checked:bg-green-100 peer-checked:border-green-500 peer-checked:text-green-600 transition-all">
+                            <img src="assets/svg/esewa-seeklogo.svg" alt="eSewa Logo" class="w-32 h-auto mx-auto mb-4 block">
+                            <div class="text-sm">Pay with eSewa</div>
+                        </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="payment_method" value="khalti" class="peer sr-only">
+                            <div class="border-2 border-slate-300 bg-white rounded-2xl p-6 text-center font-semibold text-slate-700 peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600 transition-all hover:shadow-md">
+                                <img src="assets/svg/khalti-seeklogo.svg" alt="khalti logo" class="w-32 h-auto mx-auto mb-4 block">
+                                <div class="text-sm">Pay with Khalti</div>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right: Total Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl shadow-lg p-8 sticky top-24">
+                    <h2 class="text-lg font-semibold mb-4">Order</h2>
+                    
+                    <div class="border-t-2 border-dashed border-gray-300 pt-6">
+                        <div class="flex justify-between text-2xl font-bold text-gray-800">
+                            <span>Total Amount</span>
+                            <span id="total-amount">Rs. 2,500</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600"><span>Shipping</span><span>-</span></div>
+                    </div>
+
+                    <div class="mt-8 space-y-4">
+
+                        <button class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg text-lg">
+                            Proceed to Payment →
+                        </button>
+
+                         <div class="mt-6 p-4 bg-blue-50 rounded-2xl">
+                        <p class="text-sm text-slate-600 flex items-start gap-2">
+                            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <span>Your payment information is secure and encrypted</span>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/validation.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/checkout/checkoutService.js"></script>
+    <script src="assets/js/checkout/checkoutCart.js"></script>
+</body>
+</html>
