@@ -261,26 +261,7 @@ async function saveCartItem(productId){
 
 }
 
-//Handle quantityChange
-//  function handleQuantityChange(productId, newQuantity){
-//     if(newQuantity < 1) return;
 
-//     const item = cartState.items.find(i => i.product.id === productId);
-//     if (!item) return;
-
-   
-//     item.quantity = newQuantity;
-
-//     // Re-render only this item + total
-//     const itemElement = document.getElementById(`cart-item-${productId}`);
-//     if (itemElement) {
-//         itemElement.replaceWith(createCartItemElement(item));
-//     }
-
-//     calculateTotal();
-
-    
-// }
 
 //Handle remove item
 async function handleRemoveItem(productId){

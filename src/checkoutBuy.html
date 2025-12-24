@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>checkoutBuy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/toast.css">
+
+    <style>
+        *{
+                    * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
+
+      <!-- Abstract Background Blobs -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+
+    <header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <h1 class="text-3xl font-bold text-slate-800">
+                    Cut<span class="text-blue-600">Lab</span>
+                </h1>
+
+
+<div class="max-w-6xl mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-6">&larr; Checkout</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left: Forms -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- 1. Contact Information -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">1. Contact Information</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <select class="border rounded-lg px-4 py-3 w-full appearance-none bg-white">
+                            <option>+977</option>
+                        </select>
+                        <input type="tel" placeholder="९८०-१२३४५६७" class="border rounded-lg px-4 py-3 w-full mt-2" value="555-0115">
+                    </div>
+                  
+                </div>
+            </div>
+
+            <!-- Address Type Selection -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">2. Address Type</h2>
+                <div class="flex gap-4">
+                    <label class="flex-1">
+                        <input type="radio" name="address_type" value="home" checked class="hidden peer">
+                        <div class="border-2 border-blue-500 rounded-lg px-6 py-4 text-center font-medium text-blue-600 bg-blue-50 peer-checked:bg-blue-100">
+                            Home Address
+                        </div>
+                    </label>
+                    <label class="flex-1">
+                        <input type="radio" name="address_type" value="work" class="hidden peer">
+                        <div class="border-2 border-gray-300 rounded-lg px-6 py-4 text-center font-medium peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-600">
+                            Work Address
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">3. Address Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" placeholder="Province" class="border rounded-lg px-4 py-3">
+                    <input type="text" placeholder="District" class="border rounded-lg px-4 py-3">
+                    <input type="text" placeholder="City" value="New Jersey" class="border rounded-lg px-4 py-3">
+                    <input type="text" placeholder="Ward" class="border rounded-lg px-4 py-3">
+                    <input type="text" placeholder="Landmark" value="2464 Royal Ln. Mesa" class="border rounded-lg px-4 py-3 md:col-span-2">
+                    
+                    <!-- Latitude & Longitude (leave space for entry/auto-fill) -->
+                    <input type="text" placeholder="Latitude (e.g. 27.7172)" class="border rounded-lg px-4 py-3">
+                    <input type="text" placeholder="Longitude (e.g. 85.3240)" class="border rounded-lg px-4 py-3">
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">4. Payment Method</h2>
+                <div class="flex gap-4 justify-center">
+                    <button class="border-2 border-blue-500 rounded-lg px-8 py-4 bg-blue-50 text-blue-600">Esewa</button>
+                    <button class="border rounded-lg px-8 py-4">Khalti</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="bg-white rounded-lg shadow p-6 h-fit">
+            <h2 class="text-lg font-semibold mb-4">Order</h2>
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 border-b pb-4">
+                    <!-- Product Placeholder (no image) -->
+                    <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">Nike T-Shirt</div>
+                    <div class="flex-1">
+                        <p class="font-medium">Product</p>
+                        <p class="text-sm text-gray-600">Description and other information</p>
+                        <p class=" text-gray-500">Price</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between"><span>Shipping</span><span>-</span></div>
+                    <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Total</span><span>Price</span></div>
+                </div>
+                <button class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold text-sm transition-all shadow-md">Checkout →</button>
+                <label class="flex items-center text-sm text-gray-600">
+                    <input type="checkbox" class="mr-2" checked>
+                    By confirming the order, I accept the terms of the user agreement
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
