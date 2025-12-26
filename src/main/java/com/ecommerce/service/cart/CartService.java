@@ -49,11 +49,13 @@ public class CartService {
         cart.setQuantity(cart.getQuantity() + quantity);
         CartModel savedCart = cartRepository.save(cart);
 
-        userActivityService.recordActivity(userId, productId, ActivityType.CART_ADD, 5);
-
-        redisService.incrementUserVector(userId, productId, 5);
+        if(savedCart.getQuantity() == 1){
+            userActivityService.recordActivity(userId, productId, ActivityType.CART_ADD, 5);
+            redisService.incrementUserVector(userId, productId, 5);
+        }else{
+            redisService.incrementUserVector(userId, productId, 2);
+        }
         similarUserUpdater.updateSimilarUsersAsync(userId);
-
         return "Added to cart! Quantity: "+ savedCart.getQuantity();
     }
 
