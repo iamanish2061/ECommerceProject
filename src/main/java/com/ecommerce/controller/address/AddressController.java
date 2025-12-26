@@ -1,7 +1,7 @@
 package com.ecommerce.controller.address;
 
 import com.ecommerce.dto.response.ApiResponse;
-import com.ecommerce.dto.response.address.AddressResponse;
+import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
 import com.ecommerce.model.user.AddressType;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.address.AddressService;
@@ -28,15 +28,15 @@ public class AddressController {
 
     @GetMapping("/type/{addressType}")
     @Operation(summary = "to get address of user (home and work) if exists")
-    public ResponseEntity<ApiResponse<AddressResponse>> getAddressOfUser(
+    public ResponseEntity<ApiResponse<AddressWithDeliveryChargeResponse>> getAddressOfUser(
         @AuthenticationPrincipal UserPrincipal currentUser,
         @PathVariable AddressType addressType
     ){
-        if(currentUser!= null){
+        if(currentUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
         }
-        AddressResponse address = addressService.getAddressOfType(addressType);
+        AddressWithDeliveryChargeResponse address = addressService.getAddressOfType(currentUser.getUser(), addressType);
         if(address!= null)
             return ResponseEntity.ok(ApiResponse.ok(address, "Fetched address successfully"));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.ok("Address not found"));

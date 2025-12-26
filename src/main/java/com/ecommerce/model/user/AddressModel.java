@@ -6,10 +6,7 @@ import lombok.*;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Entity @Builder
 @Table(
-        name = "address",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"user_id", "type"}
-        )
+        name = "address"
 )
 public class AddressModel {
 
@@ -36,8 +33,10 @@ public class AddressModel {
     @Column(nullable = false)
     private String landmark;
 
-
+    @Column(nullable = false)
     private Double latitude;
+
+    @Column(nullable = false)
     private Double longitude;
 }
 
