@@ -6,8 +6,7 @@ import com.ecommerce.dto.request.email.EmailSenderRequest;
 import com.ecommerce.dto.response.auth.AuthResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.AuthMapper;
-import com.ecommerce.model.user.UserModel;
-import com.ecommerce.model.user.UserPrincipal;
+import com.ecommerce.model.user.*;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.user.UserRepository;
 import com.ecommerce.service.email.EmailService;
@@ -170,5 +169,6 @@ public class AuthService {
         // clear Spring Security context
         SecurityContextHolder.clearContext();
     }
+
 
 }

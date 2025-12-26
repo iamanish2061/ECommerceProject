@@ -15,6 +15,7 @@ public record SingleOrderResponse(
     AllUsersResponse user,
     BigDecimal totalAmount,
     OrderStatus status,
+    String phoneNumber,
     LocalDateTime createdAt,
     List<OrderItemResponse> orderItems,
     AddressResponse address,

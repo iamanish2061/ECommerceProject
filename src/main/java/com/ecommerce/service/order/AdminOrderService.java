@@ -96,7 +96,7 @@ public class AdminOrderService {
     }
 
     public List<String> getStatusList() {
-        return Arrays.asList("PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED");
+        return Arrays.asList("PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED", "INSTORE_COMPLETED");
     }
 
     public List<OrderResponse> getOrderOfUser(Long userId) {
@@ -118,6 +118,7 @@ public class AdminOrderService {
                 userMapper.mapEntityToUserResponse(order.getUser()),
                 order.getTotalAmount(),
                 order.getStatus(),
+                order.getPhoneNumber(),
                 order.getCreatedAt(),
                 order.getOrderItems().stream()
                         .map(orderMapper::mapEntityToOrderItemResponse).toList(),

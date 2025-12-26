@@ -10,5 +10,6 @@ public record OrderResponse(
         String username,
         BigDecimal totalAmount,
         LocalDateTime createdAt,
-        OrderStatus status
+        OrderStatus status,
+        String phoneNumber
 ) {}
