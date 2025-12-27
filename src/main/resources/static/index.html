@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CutLab - Premium Barbershop Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        .animation-delay-6000 { animation-delay: 6s; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+
+         body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(147, 197, 253, 0.1) 0%, transparent 50%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+         }
+
+
+        body::after{
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(59, 130, 246, 0.03) 2px, rgba(59, 130, 246, 0.03) 4px),
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(99, 102, 241, 0.03) 2px, rgba(99, 102, 241, 0.03) 4px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .product-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card .product-image-extend {
+            position: absolute;
+            right: -100%;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            transition: right 0.5s ease-out;
+            z-index: 10;
+        }
+
+        .product-card:hover .product-image-extend {
+            right: 0;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .review-card:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
+    
+    <!-- Abstract Background Blobs -->
+    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-0 left-1/2 w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+    <div class="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-35 animate-blob animation-delay-6000"></div>
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                    Cut<span class="text-blue-600">Lab</span>
+                </a>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">Home</a>
+                    <a href="products.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">Shop</a>
+                    <a href="about.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">About</a>
+                </div>
+
+                <!-- Auth & Profile -->
+                <div class="flex items-center gap-12">
+                    <a href="profile.html" id="profileBtn" class="hidden text-slate-700 hover:text-blue-600 transition-colors">
+                        <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="hover:scale-110 transition-transform">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </a>
+                    <button id="authBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all hover:scale-105">
+                        Login
+                    </button>
+                    <button id="notifyBtn" class="font-medium hover:shadow-lg transition-all hover:scale-105">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <!-- Left: Text Content -->
+            <div class="space-y-6">
+                <h1 class="text-5xl md:text-6xl font-bold text-slate-800 leading-tight">
+                    Premium <span class="text-blue-600">Grooming</span><br/>
+                    For Modern Men
+                </h1>
+                <p class="text-xl text-slate-600 leading-relaxed">
+                    Experience the perfect blend of traditional barbering and modern style. At CutLab, we craft more than haircuts – we create confidence.
+                </p>
+                <div class="flex gap-4">
+                    <a href="products.html" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                        Shop Now
+                    </a>
+                    <a href="#about" class="bg-white border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Hero Image -->
+            <div class="relative animate-float">
+                <div class="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl p-8 shadow-2xl">
+                    <div class="text-9xl text-center">
+                        <img class="w-full h-80" src="assets/svg/CutLab.svg" alt="cutLab">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Featured Products</h2>
+            <p class="text-xl text-slate-600">Handpicked essentials for your grooming routine</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Product Card 1 -->
+            <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
+                    <span class="text-7xl">s</span>
+                    <div class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                        <span class="text-7xl"></span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Premium Hair Wax</h3>
+                    <p class="text-slate-600 mb-4">Professional hold & shine</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-blue-600">$24.99</span>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card 2 -->
+            <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
+                    <span class="text-7xl">✂️</span>
+                    <div class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                        <span class="text-7xl">✂️</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Hair Clipper Pro</h3>
+                    <p class="text-slate-600 mb-4">Precision cutting tool</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-blue-600">$89.99</span>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card 3 -->
+            <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
+                    <span class="text-7xl">🧴</span>
+                    <div class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                        <span class="text-7xl">🧴</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Beard Oil</h3>
+                    <p class="text-slate-600 mb-4">Nourish & condition</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-blue-600">$15.99</span>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Left: Image -->
+            <div class="relative">
+                <div class="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-12 shadow-2xl transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-9xl text-center text-white">
+                        <img class="w-full h-64" src="assets/svg/AboutUs.svg" alt="AboutUs">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Content -->
+            <div class="space-y-6">
+                <h2 class="text-4xl font-bold text-slate-800">About CutLab</h2>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Founded in 2020, CutLab has revolutionized the barbershop experience. We combine traditional craftsmanship with modern techniques to deliver exceptional grooming services.
+                </p>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Our team of expert barbers is dedicated to making every client look and feel their absolute best. From classic cuts to contemporary styles, we've got you covered.
+                </p>
+                <div class="grid grid-cols-3 gap-4 pt-4">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">500+</div>
+                        <div class="text-slate-600">Happy Clients</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">5★</div>
+                        <div class="text-slate-600">Rated Service</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">10+</div>
+                        <div class="text-slate-600">Years Experience</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">What Our Clients Say</h2>
+            <p class="text-xl text-slate-600">Real reviews from real people</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Review 1 -->
+            <div class="review-card bg-white rounded-3xl shadow-lg p-8 transition-all duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                        J
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">John Doe</h4>
+                        <div class="flex text-yellow-400">
+                            ★★★★★
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-600 italic">
+                    "Best barbershop experience I've ever had! The attention to detail is incredible. Highly recommend!"
+                </p>
+            </div>
+
+            <!-- Review 2 -->
+            <div class="review-card bg-white rounded-3xl shadow-lg p-8 transition-all duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                        M
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Mike Smith</h4>
+                        <div class="flex text-yellow-400">
+                            ★★★★★
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-600 italic">
+                    "Professional service, great products, and friendly staff. CutLab is now my go-to spot!"
+                </p>
+            </div>
+
+            <!-- Review 3 -->
+            <div class="review-card bg-white rounded-3xl shadow-lg p-8 transition-all duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                        A
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Alex Brown</h4>
+                        <div class="flex text-yellow-400">
+                            ★★★★★
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-600 italic">
+                    "Amazing products and exceptional service. I always leave feeling confident and looking sharp!"
+                </p>
+            </div>
+        </div>
+    </section>
+
+      <!-- BestSeller Products -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4"> Best Sellers</h2>
+            <p class="text-xl text-slate-600">Handpicked essentials for your grooming routine</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Product Card 1 -->
+            <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
+                    <span class="text-7xl">💎</span>
+                    <div class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                        <span class="text-7xl">💎</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Premium Hair Wax</h3>
+                    <p class="text-slate-600 mb-4">Professional hold & shine</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-blue-600">$24.99</span>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card 2 -->
+            <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
+                    <span class="text-7xl">✂️</span>
+                    <div class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                        <span class="text-7xl">✂️</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Hair Clipper Pro</h3>
+                    <p class="text-slate-600 mb-4">Precision cutting tool</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-blue-600">$89.99</span>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card 3 -->
+            <div class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
+                    <span class="text-7xl">🧴</span>
+                    <div class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                        <span class="text-7xl">🧴</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Beard Oil</h3>
+                    <p class="text-slate-600 mb-4">Nourish & condition</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-bold text-blue-600">$15.99</span>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Services Section -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">Our Services</h2>
+            <p class="text-xl text-slate-600">Excellence in every detail</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Service 1 -->
+            <div class="service-card bg-white rounded-3xl shadow-lg p-8 text-center transition-all duration-300 hover:shadow-2xl">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">Easy Booking</h3>
+                <p class="text-slate-600">
+                    Book your appointment online anytime, anywhere. Simple and hassle-free scheduling.
+                </p>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="service-card bg-white rounded-3xl shadow-lg p-8 text-center transition-all duration-300 hover:shadow-2xl">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">Fast Delivery</h3>
+                <p class="text-slate-600">
+                    Get your favorite grooming products delivered to your door within 24-48 hours.
+                </p>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-card bg-white rounded-3xl shadow-lg p-8 text-center transition-all duration-300 hover:shadow-2xl">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">Expert Barbers</h3>
+                <p class="text-slate-600">
+                    Our certified professionals have years of experience in creating perfect styles.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+<footer class="relative bg-slate-900 text-white mt-20 w-full">
+    <div class="w-full px-4 sm:px-6 lg:px-8 py-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">Cut<span class="text-blue-400">Lab</span></h3>
+                    <p class="text-slate-400">Premium grooming for modern men. Excellence in every detail.</p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-slate-400 hover:text-blue-400 transition-colors">Home</a></li>
+                        <li><a href="products.html" class="text-slate-400 hover:text-blue-400 transition-colors">Shop</a></li>
+                        <li><a href="about.html" class="text-slate-400 hover:text-blue-400 transition-colors">About</a></li>
+                        <li><a href="cart.html" class="text-slate-400 hover:text-blue-400 transition-colors">Cart</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-slate-400">
+                        <li>📧 info@cutlab.com</li>
+                        <li>📞 +1 (555) 123-4567</li>
+                        <li>📍 123 Barber St, City</li>
+                    </ul>
+                </div>
+
+                <!-- Social -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Follow Us</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">f</a>
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">𝕏</a>
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">in</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+                <p>&copy; 2025 CutLab. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth/authService.js"></script>
+    <script src="assets/js/auth/auth.js"></script>
+</body>
+</html>
