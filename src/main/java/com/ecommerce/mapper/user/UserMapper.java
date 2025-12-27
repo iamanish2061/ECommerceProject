@@ -1,7 +1,7 @@
 package com.ecommerce.mapper.user;
 
 import com.ecommerce.dto.response.user.*;
-import com.ecommerce.model.user.AddressModel;
+import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.user.Driver;
 import com.ecommerce.model.user.Staff;
 import com.ecommerce.model.user.UserModel;

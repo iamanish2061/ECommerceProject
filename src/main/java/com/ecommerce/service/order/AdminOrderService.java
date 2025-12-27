@@ -75,7 +75,7 @@ public class AdminOrderService {
                 .amount(totalAmount)
                 .transactionId(HelperClass.generateTransactionIdForInStoreOperation())
                 .paymentMethod(PaymentMethod.INSTORE_CASH)
-                .paymentStatus(PaymentStatus.SUCCESS)
+                .paymentStatus(PaymentStatus.COMPLETE)
                 .build());
         admin.addProductsOrder(order);
 

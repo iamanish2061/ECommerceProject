@@ -11,6 +11,8 @@ import com.ecommerce.service.order.OrderService;
 import com.ecommerce.service.order.RouteService;
 import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -80,14 +82,15 @@ public class OrderController {
     public ResponseEntity<ApiResponse<?>> checkoutSingleProduct(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @ValidId @PathVariable Long productId,
-            @Valid @RequestBody PlaceOrderRequest request
+            @Valid @RequestBody PlaceOrderRequest request,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
     ){
         if(currentUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
         }
-        orderService.checkoutSingleProduct(currentUser.getUser(), productId, request);
-
+        orderService.checkoutSingleProduct(currentUser.getUser(), productId, request, httpServletRequest, httpServletResponse);
         return ResponseEntity.ok(ApiResponse.ok("Order placed successfully"));
     }
 
@@ -95,13 +98,15 @@ public class OrderController {
     @Operation(summary = "checkout api for cart products")
     public ResponseEntity<ApiResponse<?>> checkout(
             @AuthenticationPrincipal UserPrincipal currentUser,
-            @Valid @RequestBody PlaceOrderRequest request
+            @Valid @RequestBody PlaceOrderRequest request,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
     ){
         if(currentUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
         }
-        orderService.checkout(currentUser.getUser(), request);
+        orderService.checkout(currentUser.getUser(), request, httpServletRequest, httpServletResponse);
         return ResponseEntity.ok(ApiResponse.ok("Order placed successfully"));
     }
 

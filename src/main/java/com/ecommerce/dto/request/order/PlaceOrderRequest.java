@@ -1,7 +1,7 @@
 package com.ecommerce.dto.request.order;
 
 import com.ecommerce.model.payment.PaymentMethod;
-import com.ecommerce.model.user.AddressType;
+import com.ecommerce.model.address.AddressType;
 import com.ecommerce.validation.ValidNumber;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
