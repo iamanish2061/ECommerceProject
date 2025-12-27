@@ -1,7 +1,6 @@
 package com.ecommerce.utils;
 
 import java.util.UUID;
-import java.util.random.RandomGenerator;
 
 public class HelperClass {
 
@@ -34,10 +33,11 @@ public class HelperClass {
                 .replaceAll("^-|-$", "");
     }
 
-
     public static String generateTransactionIdForInStoreOperation() {
         return "InStore "+ UUID.randomUUID().toString();
     }
+
+
 }
 
 

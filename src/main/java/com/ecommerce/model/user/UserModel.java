@@ -113,6 +113,17 @@ public class UserModel {
     )
     private Set<Appointment> appointments = new HashSet<>();
 
+
+
+
+
+
+
+
+
+
+
+
 //    helper method (driver)
     public void addDriver(Driver driver){
         if(driver != null){

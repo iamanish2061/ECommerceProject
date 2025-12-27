@@ -2,12 +2,16 @@ package com.ecommerce.dto.response.address;
 
 import com.ecommerce.model.user.AddressType;
 
-public record AddressResponse(
-        Long addressId,
+import java.math.BigDecimal;
+
+public record AddressWithDeliveryChargeResponse(
         AddressType addressType,
         String province,
         String district,
         String place,
-        String landmark
+        String landmark,
+        Double longitude,
+        Double latitude,
+        BigDecimal deliveryCharge
 ) {
 }

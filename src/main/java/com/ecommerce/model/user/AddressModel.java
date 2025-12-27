@@ -1,18 +1,12 @@
 package com.ecommerce.model.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-@Entity
+@Entity @Builder
 @Table(
-        name = "address",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"user_id", "type"}
-        )
+        name = "address"
 )
 public class AddressModel {
 
@@ -34,16 +28,15 @@ public class AddressModel {
     private String district;
 
     @Column(nullable = false)
-    private String city;
-
-    @Column(nullable = false)
-    private String ward;
+    private String place;
 
     @Column(nullable = false)
     private String landmark;
 
-
+    @Column(nullable = false)
     private Double latitude;
+
+    @Column(nullable = false)
     private Double longitude;
 }
 

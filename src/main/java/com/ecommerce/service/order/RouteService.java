@@ -1,0 +1,233 @@
+package com.ecommerce.service.order;
+
+import com.ecommerce.dto.intermediate.DistanceAndTimeResponse;
+import com.ecommerce.dto.intermediate.Route;
+import com.ecommerce.exception.ApplicationException;
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class RouteService {
+
+    @Value("${location.latitude}")
+    private Double myLatitude;
+
+    @Value("${location.longitude}")
+    private Double myLongitude;
+
+    private static final double MIN_CHARGE = 50.0;
+
+    private static final double BASE_DISTANCE_KM = 2.0;
+    private static final double RATE_PER_KM = 20.0;
+
+    private static final double BASE_TIME_MIN = 15.0;
+    private static final double RATE_PER_MIN = 2.0;
+
+    private static final Logger log = LoggerFactory.getLogger(RouteService.class);
+    private RestTemplate restTemplate;
+
+    // starting the process
+//    public RouteResponse startRoutingAlgorithm(OpenCageRequest request){
+//        List<String> places = new ArrayList<>(request.getAddresses());
+//        if(places.size()<2){
+//            throw new RuntimeException("At Least two addresses are required to find route!");
+//        }
+//
+//        log.info("Fetching distance matrix from osrm!");
+//        double[][] distanceMatrix = buildDistanceMatrix(coordinates);
+//
+//        log.info("Applying Nearest Neighbour!");
+//        List<Integer> routeIdx = nearestNeighbor(distanceMatrix, places.size());
+//        log.info("After nearest neighbour");
+//        printRoute(routeIdx, places, distanceMatrix);
+//
+//        routeIdx = twoOpt(routeIdx, distanceMatrix);
+//        log.info("After nearest neighbour");
+//        printRoute(routeIdx, places, distanceMatrix);
+//
+//        return generateRouteWithDistances(places, distanceMatrix, routeIdx);
+//
+//    }
+//
+//    private RouteResponse generateRouteWithDistances(List<String> places, double[][] distanceMatrix, List<Integer> routeIdx) {
+//
+//        List<String> routePlaces = new ArrayList<>();
+//        List<Double> distanceResult = new ArrayList<>();
+//
+//        for(int i=0; i<routeIdx.size()-1; i++){
+//            int from = routeIdx.get(i);
+//            int to = routeIdx.get(i + 1);
+//            routePlaces.add(places.get(from));
+//            distanceResult.add(distanceMatrix[from][to]);
+//        }
+//
+//        routePlaces.add(places.get(routeIdx.get(routeIdx.size()-1)));
+//
+//        double totalDistance = routeCost(routeIdx, distanceMatrix);
+//
+//        return new RouteResponse(routePlaces, distanceResult, totalDistance);
+//    }
+
+    // distance matrix using OSRM
+    private double[][] buildDistanceMatrix(List<double[]> coordinates) {
+        coordinates.removeIf(c->c[0]==0.00 && c[1]==0.00);
+
+        int n = coordinates.size();
+        double[][] matrix = new double[n][n];
+
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < n; i++) {
+                double lat = coordinates.get(i)[0];
+                double lon = coordinates.get(i)[1];
+                sb.append(lon).append(",").append(lat);
+                if (i < n - 1) sb.append(";");
+            }
+
+            String url = "http://router.project-osrm.org/table/v1/driving/" + sb.toString() +"?annotations=distance";
+
+            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+
+            if (response != null && response.has("distances")) {
+                JsonNode distances = response.get("distances");
+                for (int i = 0; i < n; i++) {
+                    for (int j = 0; j < n; j++) {
+                        matrix[i][j] = distances.get(i).get(j).asDouble() / 1000.0;
+                    }
+                }
+                System.out.println("Distances: "+ Arrays.deepToString(matrix));
+            }else{
+                System.out.println("Failed");
+            }
+        } catch (Exception e) {
+            log.error("OSRM distance matrix request failed or returned empty response.");
+        }
+        return matrix;
+    }
+
+
+    //    algorithm
+    //applying nearest neighbour
+    private List<Integer> nearestNeighbor(double[][] distances, int size) {
+        boolean[] visited = new boolean[size];
+        List<Integer> route = new ArrayList<>();
+        int current = 0; // from first
+        route.add(current);
+        visited[current] = true;
+
+        for (int step = 1; step < size; step++) {
+            double best = Double.MAX_VALUE;
+            int next = -1;
+            for (int j = 0; j < size; j++) {
+                if (!visited[j] && distances[current][j] < best) {
+                    best = distances[current][j];
+                    next = j;
+                }
+            }
+            route.add(next);
+            visited[next] = true;
+            current = next;
+        }
+        route.add(0); // return to first
+        return route;
+    }
+
+
+    // improving the result of nearest neighbour using 2-opt
+    private List<Integer> twoOpt(List<Integer> routeIdx, double[][] distances) {
+        boolean improved = true;
+        while (improved) {
+            improved = false;
+            for (int i = 1; i < routeIdx.size() - 2; i++) {
+                for (int j = i + 1; j < routeIdx.size() - 1; j++) {
+                    double before = distances[routeIdx.get(i - 1)][routeIdx.get(i)] +
+                            distances[routeIdx.get(j)][routeIdx.get(j + 1)];
+                    double after  = distances[routeIdx.get(i - 1)][routeIdx.get(j)] +
+                            distances[routeIdx.get(i)][routeIdx.get(j + 1)];
+                    if (after < before) {
+                        Collections.reverse(routeIdx.subList(i, j + 1));
+                        improved = true;
+                    }
+                }
+            }
+        }
+        return routeIdx;
+    }
+
+
+    // Print route with names and total cost
+    void printRoute(List<Integer> routeIdx, List<String> places, double[][] distances) {
+        StringBuilder sb = new StringBuilder();
+        for (int idx : routeIdx)
+            sb.append(places.get(idx)).append(" -> ");
+        sb.append("END");
+        log.info("Route: {}", sb);
+        log.info("Total distance: {} km", routeCost(routeIdx, distances));
+    }
+
+
+    //    finding total cost
+    private double routeCost(List<Integer> route, double[][] distances) {
+        double cost = 0;
+        for (int i = 0; i < route.size() - 1; i++)
+            cost += distances[route.get(i)][route.get(i + 1)];
+        return cost;
+    }
+
+
+    //getting distance and time between two points
+    public Route calculateDistanceAndTime(Double latitude, Double longitude){
+
+        String latAndLong = myLongitude + "," +myLatitude + ";" +longitude+ "," +latitude;
+        String url = "http://router.project-osrm.org/route/v1/driving/" + latAndLong+"?overview=false&steps=false";
+        try {
+            DistanceAndTimeResponse response =
+                    restTemplate.getForObject(url, DistanceAndTimeResponse.class);
+
+            if (response == null || !"Ok".equals(response.code()) || response.routes() == null || response.routes().isEmpty()) {
+                return new Route(0.0,0.0);
+            }
+
+            return response.routes().get(0);
+        } catch (Exception e) {
+            throw new ApplicationException("Failed to calculate delivery charge!", "Failed_TO_CALCULATE", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //for delivery charge
+    public BigDecimal calculateDeliveryCharge(Double latitude, Double longitude){
+        double charge = MIN_CHARGE;
+        Route route = calculateDistanceAndTime(latitude, longitude);
+        if(route.distance() == 0.0 || route.duration()==0.0)
+            return BigDecimal.valueOf(50.0);
+
+        double distanceKm = route.distance() / 1000.0;
+        double timeMin = route.duration() / 60.0;
+
+        // Distance charge
+        if (distanceKm > BASE_DISTANCE_KM) {
+            charge += (distanceKm - BASE_DISTANCE_KM) * RATE_PER_KM;
+        }
+        // Time charge
+        if (timeMin > BASE_TIME_MIN) {
+            charge += (timeMin - BASE_TIME_MIN) * RATE_PER_MIN;
+        }
+
+        return BigDecimal.valueOf(Math.ceil(charge));
+
+    }
+
+}

@@ -119,6 +119,16 @@ public class OrderModel {
     private PaymentModel payment;
 
 
+
+
+
+
+
+
+
+
+
+
 //    helper method for orderItems
     public void addOrderItem(OrderItem orderItem){
         if(orderItem != null){
