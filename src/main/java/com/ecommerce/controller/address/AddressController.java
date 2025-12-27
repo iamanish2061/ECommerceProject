@@ -2,7 +2,7 @@ package com.ecommerce.controller.address;
 
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
-import com.ecommerce.model.user.AddressType;
+import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.address.AddressService;
 import io.swagger.v3.oas.annotations.Operation;

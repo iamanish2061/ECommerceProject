@@ -2,8 +2,8 @@ package com.ecommerce.service.address;
 
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
 import com.ecommerce.mapper.address.AddressMapper;
-import com.ecommerce.model.user.AddressModel;
-import com.ecommerce.model.user.AddressType;
+import com.ecommerce.model.address.AddressModel;
+import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.UserModel;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.address.AddressRepository;

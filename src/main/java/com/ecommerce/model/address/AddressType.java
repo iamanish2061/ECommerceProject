@@ -1,4 +1,4 @@
-package com.ecommerce.model.user;
+package com.ecommerce.model.address;
 
 public enum AddressType {
     HOME,
