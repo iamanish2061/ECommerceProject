@@ -1,12 +1,14 @@
-package com.ecommerce.model.user;
+package com.ecommerce.model.address;
 
+import com.ecommerce.model.user.UserModel;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Entity @Builder
 @Table(
-        name = "address"
+        name = "address",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "type"})
 )
 public class AddressModel {
 

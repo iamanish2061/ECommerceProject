@@ -2,7 +2,9 @@ package com.ecommerce.mapper.address;
 
 import com.ecommerce.dto.response.address.AddressResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
-import com.ecommerce.model.user.AddressModel;
+import com.ecommerce.model.address.AddressModel;
+import com.ecommerce.model.address.DeliveryAddress;
+import com.ecommerce.repository.address.AddressRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -12,8 +14,7 @@ import java.math.BigDecimal;
 public interface AddressMapper {
 
     @Mapping(source = "id", target = "addressId")
-    @Mapping(source = "type", target = "addressType")
-    AddressResponse mapEntityToAddressResponse(AddressModel address);
+    AddressResponse mapEntityToAddressResponse(DeliveryAddress address);
 
 
     @Mapping(source = "address.type", target = "addressType")

@@ -2,8 +2,11 @@ package com.ecommerce.model.payment;
 
 public enum PaymentStatus {
     PENDING,
-    SUCCESS,
-    FAILED,
+    COMPLETE,
+    FULL_REFUND,
+    PARTIAL_REFUND,
     REFUNDED,
-    PROCESSING
+    NOT_FOUND,
+    CANCELED,
+    EXPIRED
 }

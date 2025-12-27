@@ -1,5 +1,6 @@
 package com.ecommerce.model.user;
 
+import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.service.Appointment;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

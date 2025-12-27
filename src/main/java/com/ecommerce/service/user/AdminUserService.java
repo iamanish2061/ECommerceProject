@@ -3,6 +3,8 @@ package com.ecommerce.service.user;
 import com.ecommerce.dto.response.user.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.user.UserMapper;
+import com.ecommerce.model.address.AddressModel;
+import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.*;
 import com.ecommerce.repository.user.DriverRepository;
 import com.ecommerce.repository.user.StaffRepository;

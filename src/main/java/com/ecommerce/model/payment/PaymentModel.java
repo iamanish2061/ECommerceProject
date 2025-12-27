@@ -56,7 +56,6 @@ public class PaymentModel {
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus;
 
-
     @Column(name = "payment_date", updatable = false)
     @CreationTimestamp
     private LocalDateTime paymentDate;

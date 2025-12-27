@@ -1,8 +1,8 @@
 package com.ecommerce.model.order;
 
 
+import com.ecommerce.model.address.DeliveryAddress;
 import com.ecommerce.model.payment.PaymentModel;
-import com.ecommerce.model.user.AddressModel;
 import com.ecommerce.model.user.UserModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -108,7 +108,7 @@ public class OrderModel {
             cascade = CascadeType.ALL
     )
     @JoinColumn(name = "address_id")
-    private AddressModel address;
+    private DeliveryAddress address;
 
     @OneToOne(
             mappedBy = "order",

@@ -1,6 +1,6 @@
 package com.ecommerce.dto.response.address;
 
-import com.ecommerce.model.user.AddressType;
+import com.ecommerce.model.address.AddressType;
 
 import java.math.BigDecimal;
 

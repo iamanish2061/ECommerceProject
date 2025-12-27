@@ -33,7 +33,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/driver/**", "/api/driver/**").hasAuthority("ROLE_DRIVER")
 //                        .requestMatchers("/staff/**", "/api/staff/**").hasAuthority("ROLE_STAFF")
 //                        .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER", "ROLE_DRIVER", "ROLE_STAFF")
-//                        .requestMatchers("/*", "/assets/**", "/auth/**", "/ws/**", "/uploads/**", "/api/auth/**", "/api/products/**").permitAll()
+//                        .requestMatchers("/*", "/assets/**", "/auth/**", "/ws/**", "/uploads/**", "/api/auth/**", "/api/products/**", "/api/payment/**").permitAll()
 //                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 //                        .anyRequest().authenticated())
                         .anyRequest().permitAll())

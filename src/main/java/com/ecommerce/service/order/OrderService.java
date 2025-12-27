@@ -1,5 +1,6 @@
 package com.ecommerce.service.order;
 
+import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.dto.request.order.PlaceOrderRequest;
 import com.ecommerce.dto.response.order.OrderResponse;
 import com.ecommerce.dto.response.order.UserOrderResponse;
@@ -7,29 +8,40 @@ import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.order.OrderMapper;
 import com.ecommerce.mapper.payment.PaymentMapper;
+import com.ecommerce.model.activity.ActivityType;
+import com.ecommerce.model.address.AddressModel;
+import com.ecommerce.model.address.AddressType;
+import com.ecommerce.model.address.DeliveryAddress;
 import com.ecommerce.model.cart.CartModel;
 import com.ecommerce.model.order.OrderItem;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
 import com.ecommerce.model.payment.PaymentMethod;
 import com.ecommerce.model.product.ProductModel;
-import com.ecommerce.model.user.AddressModel;
-import com.ecommerce.model.user.AddressType;
 import com.ecommerce.model.user.UserModel;
+import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.address.AddressRepository;
 import com.ecommerce.repository.cart.CartRepository;
 import com.ecommerce.repository.order.OrderRepository;
+import com.ecommerce.repository.payment.PaymentRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.repository.user.UserRepository;
 import com.ecommerce.service.payment.PaymentService;
+import com.ecommerce.service.recommendation.SimilarUserUpdater;
+import com.ecommerce.service.recommendation.UserActivityService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,10 +55,15 @@ public class OrderService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final CartRepository cartRepository;
+    private final PaymentRepository paymentRepository;
 
     private final OrderMapper orderMapper;
     private final AddressMapper addressMapper;
     private final PaymentMapper paymentMapper;
+
+    private final RedisService redisService;
+    private final UserActivityService userActivityService;
+    private final SimilarUserUpdater similarUserUpdater;
 
     public List<OrderResponse> getAllOrdersOf(UserModel user) {
         List<OrderModel> orders = orderRepository.findAllByUserId(user.getId());
@@ -72,23 +89,34 @@ public class OrderService {
         );
     }
 
-    public void checkoutSingleProduct(UserModel user, Long productId, PlaceOrderRequest request) {
+    @Transactional
+    public void checkoutSingleProduct(UserModel user, Long productId, PlaceOrderRequest request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        ProductModel product = productRepository.findById(productId).orElseThrow(
+                ()->new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND)
+        );
+        if(product.getStock()<1)
+            throw new ApplicationException("Out of Stock!", "OUT_OF_STOCK", HttpStatus.NOT_FOUND);
+
+        BigDecimal totalIncludingDeliveryCharge = product.getSellingPrice().add(BigDecimal.valueOf(request.deliveryCharge()));
+
+        TempOrderDetails orderDetails = new TempOrderDetails(
+                user.getId(),
+                productId,
+                request
+        );
+
         if(request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY){
-            ProductModel product = productRepository.findById(productId).orElseThrow(
-                    ()->new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND)
-            );
+            int newStock = product.getStock()-1;
+
             OrderItem item = OrderItem.builder()
                     .quantity(1)
                     .priceAtPurchase(product.getSellingPrice())
                     .product(product)
                     .build();
 
-            AddressModel savedAddressModel;
-
+            DeliveryAddress address;
             if(request.type() == AddressType.OTHER){
-                AddressModel addressModel = AddressModel.builder()
-                        .user(user)
-                        .type(AddressType.OTHER)
+                address = DeliveryAddress.builder()
                         .province(request.province())
                         .district(request.district())
                         .place(request.place())
@@ -96,60 +124,125 @@ public class OrderService {
                         .latitude(request.latitude())
                         .longitude(request.longitude())
                         .build();
-                savedAddressModel = addressRepository.save(addressModel);
-            }else{
-                savedAddressModel = addressRepository.findByUserIdAndType(user.getId(), request.type())
+            }
+            else{
+                AddressModel savedAddress = addressRepository.findByUserIdAndType(user.getId(), request.type())
                         .orElseThrow(()-> new ApplicationException(request.type()+" address not found!", "NOT_FOUND", HttpStatus.NOT_FOUND));
+                address = DeliveryAddress.builder()
+                        .province(savedAddress.getProvince())
+                        .district(savedAddress.getDistrict())
+                        .place(savedAddress.getPlace())
+                        .landmark(savedAddress.getLandmark())
+                        .latitude(savedAddress.getLatitude())
+                        .longitude(savedAddress.getLongitude())
+                        .build();
             }
 
             OrderModel orderModel = new OrderModel();
-            orderModel.setTotalAmount(product.getSellingPrice().add(BigDecimal.valueOf(request.deliveryCharge())));
-            orderModel.setStatus(OrderStatus.PENDING);
+            orderModel.setTotalAmount(totalIncludingDeliveryCharge);
+            orderModel.setStatus(OrderStatus.CONFIRMED);
             orderModel.setPhoneNumber(request.contactNumber());
             orderModel.addOrderItem(item);
-            orderModel.setAddress(savedAddressModel);
+            orderModel.setAddress(address);
             orderModel.setPayment(null);
-            if(request.type() == AddressType.OTHER){
-                user.getAddresses().add(savedAddressModel);
-            }
+
             user.addProductsOrder(orderModel);
+            product.setStock(newStock);
 
+            productRepository.save(product);
             userRepository.save(user);
-
-        } else if (request.paymentMethod() == PaymentMethod.KHALTI) {
-            paymentService.payWithKhalti(user, productId, request);
-        } else if (request.paymentMethod() == PaymentMethod.ESEWA) {
-            paymentService.payWithEsewa(user, productId, request);
+            userActivityService.recordActivity(user.getId(), productId, ActivityType.PURCHASE, 10);
+            redisService.incrementUserVector(user.getId(), productId, 10);
+            similarUserUpdater.updateSimilarUsersAsync(user.getId());
+        }
+        else if (request.paymentMethod() == PaymentMethod.KHALTI) {
+            paymentService.payWithKhalti(orderDetails, totalIncludingDeliveryCharge, httpServletRequest, httpServletResponse);
+        }
+        else if (request.paymentMethod() == PaymentMethod.ESEWA) {
+            paymentService.payWithEsewa(orderDetails, totalIncludingDeliveryCharge, httpServletRequest,httpServletResponse);
         }
     }
 
-    public void checkout(UserModel user, PlaceOrderRequest request) {
+    @Transactional
+    public void checkout(UserModel user, PlaceOrderRequest request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+
+        List<CartModel> cartItems = cartRepository.findCartItemsByUserId(user.getId());
+        if (cartItems.isEmpty()) {
+            throw new ApplicationException("Cart is empty", "CART_EMPTY", HttpStatus.BAD_REQUEST);
+        }
+
+        List<Long> productIds = cartItems.stream()
+                .map(item-> item.getProduct().getId())
+                .toList();
+
+        Map<Long, ProductModel> productsInCart = productRepository.findAllByIdIn(productIds)
+                .stream()
+                .collect(Collectors.toMap(ProductModel::getId, p->p));
+
+        BigDecimal totalAmountFromCart = BigDecimal.ZERO;
+
+//        calculating total and validating quantity
+        for(CartModel cart : cartItems){
+            ProductModel product = productsInCart.get(cart.getProduct().getId());
+            if (product == null) {
+                throw new ApplicationException(
+                        "Product not found",
+                        "PRODUCT_NOT_FOUND",
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            if (product.getStock() < cart.getQuantity()) {
+                throw new ApplicationException(
+                        "Not enough stock for product: " + product.getTitle(),
+                        "NOT_ENOUGH_STOCK",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+            BigDecimal lineTotal = product.getSellingPrice()
+                    .multiply(BigDecimal.valueOf(cart.getQuantity()));
+
+            totalAmountFromCart = totalAmountFromCart.add(lineTotal);
+        }
+
+        BigDecimal totalIncludingDeliveryCharge =
+                totalAmountFromCart.add(BigDecimal.valueOf(request.deliveryCharge()));
+
+        TempOrderDetails orderDetails = new TempOrderDetails(user.getId(),0L,request);
+
 
         if(request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY){
             OrderModel orderModel = new OrderModel();
-            BigDecimal totalAmountFromCart = BigDecimal.ZERO;
-            List<CartModel> cartItems = cartRepository.findCartItemsByUserId(user.getId());
 
-            for(CartModel c: cartItems){
-                ProductModel product = productRepository.findById(c.getProduct().getId()).orElseThrow(
-                        ()->new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND)
-                );
+            for (CartModel cart : cartItems) {
+                ProductModel product = productsInCart.get(cart.getProduct().getId());
+
                 OrderItem item = OrderItem.builder()
-                        .quantity(c.getQuantity())
+                        .quantity(cart.getQuantity())
                         .priceAtPurchase(product.getSellingPrice())
                         .product(product)
                         .build();
-                BigDecimal total = product.getSellingPrice().multiply(BigDecimal.valueOf(c.getQuantity()));
-                totalAmountFromCart = totalAmountFromCart.add(total);
                 orderModel.addOrderItem(item);
+
+                product.setStock(product.getStock() - cart.getQuantity());
+
+                userActivityService.recordActivity(
+                        user.getId(),
+                        product.getId(),
+                        ActivityType.PURCHASE,
+                        10
+                );
+
+                redisService.incrementUserVector(
+                        user.getId(),
+                        product.getId(),
+                        10
+                );
             }
 
-            AddressModel savedAddressModel;
-
+            DeliveryAddress address;
             if(request.type() == AddressType.OTHER){
-                AddressModel addressModel = AddressModel.builder()
-                        .user(user)
-                        .type(AddressType.OTHER)
+                address = DeliveryAddress.builder()
                         .province(request.province())
                         .district(request.district())
                         .place(request.place())
@@ -157,29 +250,40 @@ public class OrderService {
                         .latitude(request.latitude())
                         .longitude(request.longitude())
                         .build();
-                savedAddressModel = addressRepository.save(addressModel);
-            }else{
-                savedAddressModel = addressRepository.findByUserIdAndType(user.getId(), request.type())
+            }
+            else{
+                AddressModel savedAddressModel = addressRepository.findByUserIdAndType(user.getId(), request.type())
                         .orElseThrow(()-> new ApplicationException(request.type()+" address not found!", "NOT_FOUND", HttpStatus.NOT_FOUND));
+                address = DeliveryAddress.builder()
+                        .province(savedAddressModel.getProvince())
+                        .district(savedAddressModel.getDistrict())
+                        .place(savedAddressModel.getPlace())
+                        .landmark(savedAddressModel.getLandmark())
+                        .latitude(savedAddressModel.getLatitude())
+                        .longitude(savedAddressModel.getLongitude())
+                        .build();
             }
 
-
-            orderModel.setTotalAmount(totalAmountFromCart.add(BigDecimal.valueOf(request.deliveryCharge())));
-            orderModel.setStatus(OrderStatus.PENDING);
+            orderModel.setTotalAmount(totalIncludingDeliveryCharge);
+            orderModel.setStatus(OrderStatus.CONFIRMED);
             orderModel.setPhoneNumber(request.contactNumber());
-            orderModel.setAddress(savedAddressModel);
+            orderModel.setAddress(address);
             orderModel.setPayment(null);
-            if(request.type() == AddressType.OTHER){
-                user.getAddresses().add(savedAddressModel);
-            }
             user.addProductsOrder(orderModel);
 
-            userRepository.save(user);
+            productRepository.saveAll(productsInCart.values());
+            userRepository.saveAndFlush(user);
+            cartRepository.deleteAllByUserId(user.getId());
+            similarUserUpdater.updateSimilarUsersAsync(user.getId());
 
-        } else if (request.paymentMethod() == PaymentMethod.KHALTI) {
-            paymentService.payWithKhalti(user, request);
-        } else if (request.paymentMethod() == PaymentMethod.ESEWA) {
-            paymentService.payWithEsewa(user, request);
+        }
+        else if (request.paymentMethod() == PaymentMethod.KHALTI) {
+            paymentService.payWithKhalti(orderDetails, totalIncludingDeliveryCharge, httpServletRequest, httpServletResponse);
+        }
+        else if (request.paymentMethod() == PaymentMethod.ESEWA) {
+            paymentService.payWithEsewa(orderDetails, totalIncludingDeliveryCharge, httpServletRequest, httpServletResponse);
         }
     }
+
+
 }
