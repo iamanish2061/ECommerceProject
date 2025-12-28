@@ -2,7 +2,7 @@ package com.ecommerce.khalti;
 
 import com.ecommerce.mapper.payment.PaymentMapper;
 import com.ecommerce.model.payment.PaymentModel;
-import com.ecommerce.service.order.SuccessPaymentOrderService;
+import com.ecommerce.service.order.OrderPersistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -20,7 +20,7 @@ public class KhaltiService {
 
     private final KhaltiConfig config;
     private final RestTemplate restTemplate;
-    private final SuccessPaymentOrderService successPaymentOrderService;
+    private final OrderPersistService successPaymentOrderService;
     private final PaymentMapper paymentMapper;
 
     public KhaltiResponse initiatePayment(KhaltiRequest khalti){

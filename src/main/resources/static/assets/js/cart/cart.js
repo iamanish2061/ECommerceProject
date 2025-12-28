@@ -347,7 +347,7 @@ function handleCheckout(){
     }
 
     //reidirect to checkout page for now and later add checkout logic
-    window.location.href = 'checkout.html';
+    window.location.href = 'checkoutCart.html';
 }
 
 //handle clear cart

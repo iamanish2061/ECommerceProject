@@ -559,10 +559,11 @@ function createProductCard(product) {
             if (stock === 0) return;
 
             try {
-                // const response = await productService.buyNow(productId);
-                // Optionally redirect to checkout
-                // window.location.href = '/checkout.html';
-                showToast('Proceeding to buy (not implemented)', 'info');
+                showToast('Redirecting to checkout...', 'info');
+                setTimeout(() => {
+                    window.location.href = '/checkoutBuy.html?productId=' + encodeURIComponent(productId);
+                }, 500);
+                
             } catch (err) {
                 console.error('Buy now failed:', err);
                 showToast('Could not proceed to buy', 'error');

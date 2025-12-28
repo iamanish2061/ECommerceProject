@@ -2,8 +2,6 @@ package com.ecommerce.model.user;
 
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.order.OrderModel;
-import com.ecommerce.model.service.Appointment;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -91,28 +89,13 @@ public class UserModel {
 
     @OneToMany(
             mappedBy = "user",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    @JsonIgnoreProperties("user")
-    private Set<OrderModel> orders = new HashSet<>();
-
-    @OneToMany(
-            mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
     private Set<AddressModel> addresses = new HashSet<>();
 
-    @OneToMany(
-            mappedBy = "customer",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private Set<Appointment> appointments = new HashSet<>();
+
 
 
 
@@ -146,22 +129,6 @@ public class UserModel {
         if(address != null){
             this.addresses.add(address);
             address.setUser(this);
-        }
-    }
-
-//    helper method for orders
-    public void addProductsOrder(OrderModel order){
-        if(order != null){
-            this.orders.add(order);
-            order.setUser(this);
-        }
-    }
-
-//    helper method for appointment
-    public void addAppointment(Appointment appointment){
-        if(appointment != null){
-            this.appointments.add(appointment);
-            appointment.setCustomer(this);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.ecommerce.redis;
 
 import com.ecommerce.dto.intermediate.TempOrderDetails;
+import com.ecommerce.esewa.Esewa;
 import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +20,7 @@ public class RedisService {
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
     private final RedisTemplate redisTemplate;
     private final SimilarUserUpdater similarUserUpdater;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
 
 
@@ -97,6 +98,42 @@ public class RedisService {
         }
     }
 
+
+    public void saveEsewaObject(String redisKeyTransactionUuid, Esewa esewa) {
+        try {
+            String key = "esewa"+redisKeyTransactionUuid;
+            String json = objectMapper.writeValueAsString(esewa);
+            redisTemplate.opsForValue().set(key, json, 30, TimeUnit.MINUTES);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize TempOrderDetails record for Redis", e);
+        } catch (Exception e) {
+            log.error("Failed to save order details to Redis", e);
+        }
+    }
+
+    public Esewa getEsewaObject(String redisKeyTransactionUuid){
+        String key = "esewa"+redisKeyTransactionUuid;
+        try {
+            Object value = redisTemplate.opsForValue().get(key);
+            if (value == null) return null;
+            return objectMapper.readValue(value.toString(), Esewa.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to deserialize TempOrderDetails record from Redis", e);
+            return null;
+        } catch (Exception e) {
+            log.error("Failed to retrieve order details from Redis", e);
+            return null;
+        }
+    }
+
+    public void deleteEsewaObjectDetails(String redisKeyTransactionUuid){
+        try {
+            String key = "esewa"+redisKeyTransactionUuid;
+            redisTemplate.delete(key);
+        } catch (Exception e) {
+            log.error("Failed to delete order details from Redis", e);
+        }
+    }
 
 }
 

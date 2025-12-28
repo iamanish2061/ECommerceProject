@@ -36,19 +36,20 @@ function updateAuthUI(isLoggedIn){
 }
 
 function handleLogin(){
-    window.location.href = 'login.html';
+    window.location.href = '/auth/login.html';
 }
 
 async function handleLogout(){
     if(confirm('Are you sure you want to logout?')){
 
         try{
-            const response = await authService.logout();
+            const response = await AuthService.logout();
 
             if(response?.success){
                 updateAuthUI(false);
-
-                window.location.href = 'product.html';
+                showToast("Logging out...", "success");
+                
+                setTimeout(()=>window.location.href = '/auth/login.html', 1000);
             }else{
                 showToast("Failed to logout", "error");
             }

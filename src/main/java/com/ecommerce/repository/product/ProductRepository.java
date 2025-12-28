@@ -1,8 +1,10 @@
 package com.ecommerce.repository.product;
 
 import com.ecommerce.model.product.ProductModel;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -41,5 +43,10 @@ public interface ProductRepository extends JpaRepository<ProductModel, Long> {
     @EntityGraph(value = "Product.tags", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT p FROM ProductModel p WHERE p.id = :productId")
     Optional<ProductModel> findProductByIdWithTags(@Param("productId") Long productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM ProductModel p WHERE p.id = :id")
+    Optional<ProductModel> findByIdForUpdate(@Param("id") Long id);
+
 }
 

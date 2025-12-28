@@ -203,16 +203,21 @@ function renderDetails(product) {
     }
 
     if (buyBtn) {
-        buyBtn.onclick = async () => {
-            if (product.stock <= 0) return showToast('Out of stock', 'error');
+        buyBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (product.stock === 0) return;
+
             try {
-                // await productService.buyNow(product.id);
-                showToast('Proceeding to checkout...', 'info');
-                // setTimeout(() => window.location.href = '/checkout.html', 1500);
+                showToast('Redirecting to checkout...', 'info');
+                setTimeout(() => {
+                    window.location.href = '/checkoutBuy.html?productId=' + encodeURIComponent(product.id);
+                }, 500);
+                
             } catch (err) {
-                showToast('Checkout failed', 'error');
+                console.error('Buy now failed:', err);
+                showToast('Could not proceed to buy', 'error');
             }
-        };
+        });
     }
 }
 

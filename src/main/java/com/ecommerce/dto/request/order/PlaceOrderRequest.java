@@ -11,7 +11,7 @@ public record PlaceOrderRequest (
         @ValidNumber
         String contactNumber,
 
-        @NotBlank(message = "AddressType is required!")
+        @NotNull(message = "AddressType is required!")
         AddressType type,
 
         @NotNull(message = "Latitude is required!")
@@ -32,7 +32,7 @@ public record PlaceOrderRequest (
         @NotBlank(message = "Landmark is required!")
         String landmark,
 
-        @NotBlank(message = "Payment method is required!")
+        @NotNull(message = "Payment method is required!")
         PaymentMethod paymentMethod,
 
         @NotNull(message = "Invalid delivery charge")

@@ -7,15 +7,11 @@ import com.ecommerce.khalti.KhaltiRequest;
 import com.ecommerce.khalti.KhaltiResponse;
 import com.ecommerce.khalti.KhaltiService;
 import com.ecommerce.redis.RedisService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
 @Slf4j
@@ -27,29 +23,21 @@ public class PaymentService {
     private final RedisService redisService;
     private final KhaltiService khaltiService;
 
-    public void payWithKhalti(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge,
-                              HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public String payWithKhalti(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge) {
         String purchaseId = khaltiService.generateUniqueId();
-        KhaltiRequest khaltiRequest= new KhaltiRequest(
+        KhaltiRequest khaltiRequest = new KhaltiRequest(
                 totalIncludingDeliveryCharge.multiply(BigDecimal.valueOf(100)),
                 purchaseId,
                 "Order");
 
-//        saving into redis
         redisService.saveOrderDetails(purchaseId, orderDetails);
+        KhaltiResponse khaltiResponse = khaltiService.initiatePayment(khaltiRequest);
 
-        httpServletRequest.setAttribute("khaltiInfo", khaltiRequest);
-        try {
-            httpServletRequest.getRequestDispatcher("/api/payment/initiate-khalti-payment").forward(httpServletRequest, httpServletResponse);
-        } catch (Exception e) {
-            log.error("Error: {}",e.getMessage());
-        }
-
+        return khaltiResponse.getPayment_url();
     }
 
-    public void payWithEsewa(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public String payWithEsewa(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge) {
         String redisKeyTransactionUuid = esewaService.generateTransactionUuid();
-
         Esewa esewa = new Esewa();
         esewa.setAmount(totalIncludingDeliveryCharge);
         esewa.setTaxAmt(BigDecimal.ZERO);
@@ -60,17 +48,11 @@ public class PaymentService {
         String data = esewaService.prepareDataForSignature(esewa.getTotal_amount(), esewa.getTransaction_uuid());
         esewa.setSignature(esewaService.getSignature(data));
 
-        //insert redis
         redisService.saveOrderDetails(redisKeyTransactionUuid, orderDetails);
+        redisService.saveEsewaObject(redisKeyTransactionUuid, esewa);
 
-        httpServletRequest.setAttribute("EsewaInfo", esewa);
-        try {
-            httpServletRequest.getRequestDispatcher("/api/payment/send-form-to-esewa").forward(httpServletRequest, httpServletResponse);
-        } catch (Exception e) {
-            log.error("Error: {}",e.getMessage());
-        }
-
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return baseUrl + "/api/payment/send-form-to-esewa?uuid=" + redisKeyTransactionUuid;
     }
-
 
 }

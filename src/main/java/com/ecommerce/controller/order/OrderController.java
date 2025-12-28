@@ -11,8 +11,6 @@ import com.ecommerce.service.order.OrderService;
 import com.ecommerce.service.order.RouteService;
 import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -79,34 +78,35 @@ public class OrderController {
 
     @PostMapping("/single-product-checkout/{productId}")
     @Operation(summary = "checkout api for single product")
-    public ResponseEntity<ApiResponse<?>> checkoutSingleProduct(
+    public ResponseEntity<?> checkoutSingleProduct(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @ValidId @PathVariable Long productId,
-            @Valid @RequestBody PlaceOrderRequest request,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse
+            @Valid @RequestBody PlaceOrderRequest request
     ){
         if(currentUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
         }
-        orderService.checkoutSingleProduct(currentUser.getUser(), productId, request, httpServletRequest, httpServletResponse);
+        String url = orderService.checkoutSingleProduct(currentUser.getUser(), productId, request);
+        if(url != null){
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(url))
+                    .build();
+        }
         return ResponseEntity.ok(ApiResponse.ok("Order placed successfully"));
     }
 
     @PostMapping("/checkout")
     @Operation(summary = "checkout api for cart products")
-    public ResponseEntity<ApiResponse<?>> checkout(
+    public ResponseEntity<?> checkout(
             @AuthenticationPrincipal UserPrincipal currentUser,
-            @Valid @RequestBody PlaceOrderRequest request,
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse
+            @Valid @RequestBody PlaceOrderRequest request
     ){
         if(currentUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
         }
-        orderService.checkout(currentUser.getUser(), request, httpServletRequest, httpServletResponse);
+        orderService.checkout(currentUser.getUser(), request);
         return ResponseEntity.ok(ApiResponse.ok("Order placed successfully"));
     }
 

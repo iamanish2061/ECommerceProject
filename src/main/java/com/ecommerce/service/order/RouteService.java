@@ -31,13 +31,13 @@ public class RouteService {
     private static final double MIN_CHARGE = 50.0;
 
     private static final double BASE_DISTANCE_KM = 2.0;
-    private static final double RATE_PER_KM = 20.0;
+    private static final double RATE_PER_KM = 10.0;
 
     private static final double BASE_TIME_MIN = 15.0;
-    private static final double RATE_PER_MIN = 2.0;
+    private static final double RATE_PER_MIN = 1.0;
 
     private static final Logger log = LoggerFactory.getLogger(RouteService.class);
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     // starting the process
 //    public RouteResponse startRoutingAlgorithm(OpenCageRequest request){
@@ -203,6 +203,7 @@ public class RouteService {
 
             return response.routes().get(0);
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new ApplicationException("Failed to calculate delivery charge!", "Failed_TO_CALCULATE", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
