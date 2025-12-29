@@ -3,7 +3,6 @@ package com.ecommerce.mapper.payment;
 import com.ecommerce.dto.response.payment.PaymentResponse;
 import com.ecommerce.esewa.Esewa;
 import com.ecommerce.khalti.KhaltiCallbackDTO;
-import com.ecommerce.model.payment.PaymentMethod;
 import com.ecommerce.model.payment.PaymentModel;
 import com.ecommerce.model.payment.PaymentStatus;
 import org.mapstruct.Mapper;

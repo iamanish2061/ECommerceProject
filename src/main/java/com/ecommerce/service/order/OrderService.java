@@ -4,6 +4,8 @@ import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.dto.request.order.PlaceOrderRequest;
 import com.ecommerce.dto.response.order.OrderResponse;
 import com.ecommerce.dto.response.order.UserOrderResponse;
+import com.ecommerce.dto.response.payment.PaymentRedirectResponse;
+import com.ecommerce.esewa.Esewa;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.order.OrderMapper;
@@ -27,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -76,7 +79,8 @@ public class OrderService {
         );
     }
 
-    public String checkoutSingleProduct(UserModel user, Long productId, PlaceOrderRequest request) {
+    @Transactional
+    public PaymentRedirectResponse checkoutSingleProduct(UserModel user, Long productId, PlaceOrderRequest request) {
         ProductModel product = productRepository.findByIdForUpdate(productId).orElseThrow(
                 ()->new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND)
         );
@@ -125,22 +129,39 @@ public class OrderService {
 
         TempOrderDetails orderDetails = new TempOrderDetails(
                 productId,
+                null,
+                null,
                 orderModel
         );
 
         if(request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY) {
-            return orderPersistService.executeSingleCodOrder(product, orderModel);
+            String url = orderPersistService.executeSingleCodOrder(product, orderModel);
+            return new PaymentRedirectResponse(
+                    PaymentMethod.CASH_ON_DELIVERY,
+                    url,
+                    null
+            );
         }
         else if (request.paymentMethod() == PaymentMethod.KHALTI) {
-            return paymentService.payWithKhalti(orderDetails, totalIncludingDeliveryCharge);
+            String url = paymentService.payWithKhalti(orderDetails, totalIncludingDeliveryCharge);
+            return new PaymentRedirectResponse(
+                    PaymentMethod.KHALTI,
+                    url,
+                    null
+            );
         }
         else if (request.paymentMethod() == PaymentMethod.ESEWA) {
-            return paymentService.payWithEsewa(orderDetails, totalIncludingDeliveryCharge);
+            Esewa esewa= paymentService.payWithEsewa(orderDetails, totalIncludingDeliveryCharge);
+            return new PaymentRedirectResponse(
+                    PaymentMethod.ESEWA,
+                    null,
+                    esewa
+            );
         }
         return null;
     }
 
-    public String checkout(UserModel user, PlaceOrderRequest request) {
+    public PaymentRedirectResponse checkout(UserModel user, PlaceOrderRequest request) {
         List<CartModel> cartItems = cartRepository.findCartItemsByUserId(user.getId());
         if (cartItems.isEmpty()) {
             throw new ApplicationException("Cart is empty", "CART_EMPTY", HttpStatus.BAD_REQUEST);
@@ -221,15 +242,36 @@ public class OrderService {
         orderModel.setAddress(address);
 
 
-        TempOrderDetails orderDetails = new TempOrderDetails(0L, orderModel);
-        if(request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY){
-            return orderPersistService.executeCodOrder(cartItems, productsInCart, orderModel);
+        TempOrderDetails orderDetails = new TempOrderDetails(
+                0L,
+                cartItems,
+                productsInCart,
+                orderModel
+        );
+
+        if(request.paymentMethod() == PaymentMethod.CASH_ON_DELIVERY) {
+            String url = orderPersistService.executeCodOrder(cartItems, productsInCart, orderModel);
+            return new PaymentRedirectResponse(
+                    PaymentMethod.CASH_ON_DELIVERY,
+                    url,
+                    null
+            );
         }
         else if (request.paymentMethod() == PaymentMethod.KHALTI) {
-            return paymentService.payWithKhalti(orderDetails, totalIncludingDeliveryCharge);
+            String url = paymentService.payWithKhalti(orderDetails, totalIncludingDeliveryCharge);
+            return new PaymentRedirectResponse(
+                    PaymentMethod.KHALTI,
+                    url,
+                    null
+            );
         }
         else if (request.paymentMethod() == PaymentMethod.ESEWA) {
-            return paymentService.payWithEsewa(orderDetails, totalIncludingDeliveryCharge);
+            Esewa esewa= paymentService.payWithEsewa(orderDetails, totalIncludingDeliveryCharge);
+            return new PaymentRedirectResponse(
+                    PaymentMethod.ESEWA,
+                    null,
+                    esewa
+            );
         }
         return null;
     }

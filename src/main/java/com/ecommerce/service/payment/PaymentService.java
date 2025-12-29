@@ -10,7 +10,6 @@ import com.ecommerce.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.math.BigDecimal;
 
@@ -36,7 +35,7 @@ public class PaymentService {
         return khaltiResponse.getPayment_url();
     }
 
-    public String payWithEsewa(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge) {
+    public Esewa payWithEsewa(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge) {
         String redisKeyTransactionUuid = esewaService.generateTransactionUuid();
         Esewa esewa = new Esewa();
         esewa.setAmount(totalIncludingDeliveryCharge);
@@ -51,8 +50,7 @@ public class PaymentService {
         redisService.saveOrderDetails(redisKeyTransactionUuid, orderDetails);
         redisService.saveEsewaObject(redisKeyTransactionUuid, esewa);
 
-        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-        return baseUrl + "/api/payment/send-form-to-esewa?uuid=" + redisKeyTransactionUuid;
+        return esewa;
     }
 
 }

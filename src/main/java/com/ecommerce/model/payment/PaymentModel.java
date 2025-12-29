@@ -3,6 +3,7 @@ package com.ecommerce.model.payment;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.service.Appointment;
 import com.ecommerce.model.user.UserModel;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,6 +33,7 @@ public class PaymentModel {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
+    @JsonIgnoreProperties("payment")
     private OrderModel order;
 
     @ManyToOne(fetch = FetchType.LAZY)

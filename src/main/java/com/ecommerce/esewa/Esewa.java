@@ -1,7 +1,6 @@
 package com.ecommerce.esewa;
 
 import com.ecommerce.model.payment.PaymentMethod;
-import com.ecommerce.model.payment.PaymentModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

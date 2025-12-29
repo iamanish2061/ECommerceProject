@@ -10,6 +10,7 @@ let state = {
     selectedBrand: null,
     selectedTag: null,
     searchQuery: '',
+    cartCount: 0,
 };
 
 function toSlug(str) {
@@ -54,11 +55,12 @@ function toArray(res) {
 // Initialize the page
 async function init() {
     try {
-        const [categoriesRes, brandsRes, tagsRes, productsRes] = await Promise.all([
+        const [categoriesRes, brandsRes, tagsRes, productsRes, cartRes] = await Promise.all([
             productService.getProductsByCategory(),
             productService.getProductsByBrandDetails(),
             productService.getProductsTags(),
-            productService.getProducts()
+            productService.getProducts(),
+            cartService.getCartCount()
         ]);
 
         state.categories = toArray(categoriesRes);
@@ -66,6 +68,9 @@ async function init() {
         state.tags = toArray(tagsRes);
         state.products = toArray(productsRes);
         state.filteredProducts = [...state.products];
+        if(cartRes.success){
+            state.cartCount = cartRes.data.totalCartItems || 0;
+        }
 
         console.log('Loaded lengths:', {
             categories: state.categories.length,
@@ -538,9 +543,10 @@ function createProductCard(product) {
             if (stock === 0) return;
 
             try {
+                showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(productId);
-                if(response.success){
-                    updateCartCount();
+                if(response && response.success){
+                    await updateCartCountByFetching();
                     showToast(response.message || 'Added to cart!', 'success');
                 }else
                     showToast(response.message || 'Failed to add to cart', 'error');
@@ -625,18 +631,22 @@ document.getElementById('cartButton').addEventListener('click', () => {
     window.location.href = 'cart.html';
 });
 
-async function updateCartCount() {
-        try {
-            const response = await cartService.getCartCount();
-            const countElement = document.getElementById('cartCount');
-
-            if (response.success && countElement) {
-                countElement.textContent = response.data.totalCartItems || 0;
-            }
-        } catch (error) {
-            console.error("error updating cart count", error)
-        }
+function updateCartCount() {
+    const countElement = document.getElementById('cartCount');
+    if (countElement) {
+            countElement.textContent = state.cartCount || 0;
     }
+}
+
+async function updateCartCountByFetching() {
+    const resp = await cartService.getCartCount();
+    if(resp.success){
+        state.cartCount = resp.data.totalCartItems || 0;
+        updateCartCount();
+    }else{
+        console.error("Failed to fetch cart count");
+    }
+}
 
 // Start app
 document.addEventListener('DOMContentLoaded', init);

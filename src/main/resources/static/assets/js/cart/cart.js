@@ -1,6 +1,7 @@
 let cartState = {
     items: [],
-    total: 0
+    total: 0,
+    totalCartItems: 0,
 };
 
 //toast
@@ -19,11 +20,33 @@ function showToast(message, type = "info", duration = 3000) {
     }, duration);
 }
 
+function toArray(res) {
+    if (!res) return [];
+    const data = res.data;
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.content)) return data.content;
+    if (data && Array.isArray(data.products)) return data.products;
+
+    return [];
+}
+
 //initialze cart page
 async function initCart() {
     try {
-        await loadCartItems();
-        await updateCartCount();
+        const[cartItemRes, cartCountRes] = await Promise.all([
+            cartService.getAllCartItems(),
+            cartService.getCartCount()
+        ]);
+
+        cartState.items = toArray(cartItemRes);
+        if(cartCountRes && cartCountRes.success){
+            cartState.totalCartItems = cartCountRes.data.totalCartItems || 0;
+        }
+
+        loadCartItems();
+        updateCartCount();
+
         setupEventListeners();
     } catch (error) {
         console.error('Erro initializing cart', error);
@@ -46,12 +69,9 @@ function setupEventListeners() {
 }
 
 //first load all cart items
-async function loadCartItems() {
+function loadCartItems() {
     try {
-        const response = await cartService.getAllCartItems();
-
-        if (response.success && response.data && response.data.length > 0) {
-            cartState.items = response.data;
+        if (cartState.items && cartState.items.length > 0) {
             renderCartItems();
             calculateTotal();
         }else{
@@ -65,16 +85,12 @@ async function loadCartItems() {
 }
 
 //update cart counter
-async function updateCartCount() {
-    try {
-        const response = await cartService.getCartCount();
-       
-        if (response.success) {
-            const countElement = document.getElementById('cartCount');
-            if(countElement) countElement.textContent = response.data.totalCartItems || 0;
-        }
-    } catch (error) {
-        console.error("error updating cart count", error)
+function updateCartCount() {
+    const countElement = document.getElementById('cartCount');
+    if(countElement) 
+        countElement.textContent = cartState.totalCartItems || 0;
+    else{
+        console.error("Failed to fetch cart count");
     }
 }
 
@@ -87,11 +103,6 @@ function renderCartItems() {
 
     container.innerHTML = '';
     emptyState.style.display = 'none';
-
-    if (cartState.items.length === 0) {
-        showEmptyCart();
-        return;
-    }
 
     cartState.items.forEach(item => {
         const cartItem = createCartItemElement(item);
@@ -173,48 +184,46 @@ function createCartItemElement(item) {
 
    
     //adding event listeners
-const increaseButton = itemDiv.querySelector('[data-action="increase"]');
-const decreaseButton = itemDiv.querySelector('[data-action="decrease"]');
-const quantityInput  = itemDiv.querySelector('.quantity-input');
-const removeBtn      = itemDiv.querySelector('.remove-btn');
-const saveBtn        = itemDiv.querySelector('.save-btn');
+    const increaseButton = itemDiv.querySelector('[data-action="increase"]');
+    const decreaseButton = itemDiv.querySelector('[data-action="decrease"]');
+    const quantityInput  = itemDiv.querySelector('.quantity-input');
+    const removeBtn      = itemDiv.querySelector('.remove-btn');
+    const saveBtn        = itemDiv.querySelector('.save-btn');
 
-// IMPORTANT: null-safety so it doesn't crash
-if (increaseButton && quantityInput) {
-    increaseButton.addEventListener('click', () => {
-        const current = parseInt(quantityInput.value, 10) || 1;
-        const next = Math.min(99, current + 1);
-        quantityInput.value = next; // UI ONLY
-    });
-}
+    // IMPORTANT: null-safety so it doesn't crash
+    if (increaseButton && quantityInput) {
+        increaseButton.addEventListener('click', () => {
+            const current = parseInt(quantityInput.value, 10) || 1;
+            const next = Math.min(99, current + 1);
+            quantityInput.value = next; // UI ONLY
+        });
+    }
 
-if (decreaseButton && quantityInput) {
-    decreaseButton.addEventListener('click', () => {
-        const current = parseInt(quantityInput.value, 10) || 1;
-        const next = Math.max(1, current - 1);
-        quantityInput.value = next; // UI ONLY
-    });
-}
+    if (decreaseButton && quantityInput) {
+        decreaseButton.addEventListener('click', () => {
+            const current = parseInt(quantityInput.value, 10) || 1;
+            const next = Math.max(1, current - 1);
+            quantityInput.value = next; // UI ONLY
+        });
+    }
 
+    if (quantityInput) {
+        quantityInput.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value, 10) || 1;
+            if (val < 1) val = 1;
+            if (val > 99) val = 99;
+            e.target.value = val; // UI ONLY
+        });
+    }
 
-// (no endpoint call here)
-if (quantityInput) {
-    quantityInput.addEventListener('change', (e) => {
-        let val = parseInt(e.target.value, 10) || 1;
-        if (val < 1) val = 1;
-        if (val > 99) val = 99;
-        e.target.value = val; // UI ONLY
-    });
-}
+    if (removeBtn) {
+        removeBtn.addEventListener('click', () => handleRemoveItem(productId));
+    }
 
-if (removeBtn) {
-    removeBtn.addEventListener('click', () => handleRemoveItem(productId));
-}
-
-// NEW: Save button -> hits endpoint
-if (saveBtn) {
-    saveBtn.addEventListener('click', () => saveCartItem(productId));
-}
+    // NEW: Save button -> hits endpoint
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => saveCartItem(productId));
+    }
 
     return itemDiv;
 }
@@ -261,32 +270,29 @@ async function saveCartItem(productId){
 
 }
 
-
-
 //Handle remove item
 async function handleRemoveItem(productId){
     if(!confirm("Are you sure you want to remove this item from you cart?")){
         return
     }
 
-    cartState.items = cartState.items.filter(i => (i.product.id || i.product._id) !== productId);
-    renderCartItems();
-    calculateTotal();
-
     try{
         const response = await cartService.deleteCartItem(productId);
 
         if(!response.success){
             showToast('Failed to remove item', 'error');
-            // Optionally reload to sync
-            await loadCartItems();
+            loadCartItems();
         }
-        
+        cartState.items = cartState.items.filter(i => (i.product.id || i.product._id) !== productId);
+        cartState.totalCartItems -= 1;
+        renderCartItems();
+        calculateTotal();
         updateCartCount();
+        showToast('Item removed from cart', 'success');
     }catch(error){
         console.error("Network error Please try again later", error);
         alert("Network error failed to remove item");
-        await loadCartItems();
+        loadCartItems();
     }
 }
 
@@ -345,9 +351,10 @@ function handleCheckout(){
     if(cartState.items.length === 0){
         showToast("Your cart is empty", "error");
     }
-
-    //reidirect to checkout page for now and later add checkout logic
-    window.location.href = 'checkoutCart.html';
+    showToast("Proceeding to checkout...", "info");
+    setTimeout(() => {
+        window.location.href = 'checkoutCart.html';
+    }, 500);
 }
 
 //handle clear cart
@@ -357,14 +364,15 @@ async function handleClearCart(){
     }
     
     cartState.items = [];
+    cartState.totalCartItems = 0;
     showEmptyCart();
 
     try{
         const res = await cartService.deleteAllCartItems();
         if(res.success){
             showToast("Cart cleared!", "success");
-            await loadCartItems();
-            await updateCartCount();
+            loadCartItems();
+            updateCartCount();
         }    
     }catch(err){
         console.error("Error clearing cart", err);

@@ -77,7 +77,7 @@ public class AdminOrderService {
                 .paymentMethod(PaymentMethod.INSTORE_CASH)
                 .paymentStatus(PaymentStatus.COMPLETE)
                 .build());
-        admin.addProductsOrder(order);
+        order.setUser(admin);
 
         orderRepository.save(order);
 

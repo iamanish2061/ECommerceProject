@@ -32,7 +32,7 @@ public class EsewaController {
     private static final Logger log = LoggerFactory.getLogger(EsewaController.class);
     private final EsewaService eSewaService;
     private final EsewaConfig config;
-    private final OrderPersistService successPaymentOrderService;
+    private final OrderPersistService orderPersistService;
     private final PaymentMapper paymentMapper;
     private final RedisService redisService;
 
@@ -96,7 +96,7 @@ public class EsewaController {
             @RequestParam(required = false) String data
     ) throws IOException{
         if (data == null || data.isEmpty()) {
-            successPaymentOrderService.handleEsewaOrderDetails(false, null);
+            orderPersistService.handleEsewaOrderDetails(false, null);
             return new RedirectView("/failure.html");
         }
         Esewa paymentResponse = eSewaService.parseEsewaResponse(data);
@@ -108,10 +108,10 @@ public class EsewaController {
 
         System.out.println(paymentResponse.toString());
         if(validity){
-            successPaymentOrderService.handleEsewaOrderDetails(true, payment);
+            orderPersistService.handleEsewaOrderDetails(true, payment);
             return new RedirectView("/success.html?"+query);
         }else{
-            successPaymentOrderService.handleEsewaOrderDetails(false, payment);
+            orderPersistService.handleEsewaOrderDetails(false, payment);
             return new RedirectView("/failure.html?"+query);
         }
     }

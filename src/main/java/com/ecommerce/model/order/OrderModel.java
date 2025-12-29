@@ -116,6 +116,7 @@ public class OrderModel {
             fetch = FetchType.LAZY,
             orphanRemoval = true
     )
+    @JsonIgnoreProperties("order")
     private PaymentModel payment;
 
 

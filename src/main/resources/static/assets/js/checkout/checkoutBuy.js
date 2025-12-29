@@ -236,12 +236,23 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try{
+            showToast("Placing order...", "info");
             const response = await checkoutService.processSingleProductCheckout(productId, body);
             if(response.success) {
-                showToast(response.message || "Order placed successfully", "success");
-                setTimeout(() => {
-                    window.location.href = "/profile.html";
-                }, 1500);
+                const paymentData = response.data;
+                console.log("Payment Data:", paymentData);
+
+                if(paymentData.method === "CASH_ON_DELIVERY" ){
+                    showToast("Order placed successfully! Pay on delivery.", "success");
+                    setTimeout(() => {
+                        window.location.href = "/orders";
+                    }, 1500);
+                }else if(paymentData.method === "ESEWA" ){
+                    populateEsewaFormAndSubmit(paymentData.esewa);
+                }else if(paymentData.method === "KHALTI" ){
+                    window.location.href = paymentData.url;
+                }
+
             } else {
                 showToast(response.message || "Failed to place order", "error");
             }
@@ -269,5 +280,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams(window.location.search);
         return params.get(productId);
     }
+
+    function populateEsewaFormAndSubmit(esewaData) {
+
+        document.getElementById("esewa_amount").value = esewaData.amount;
+        document.getElementById("esewa_tax_amount").value = esewaData.taxAmt;
+        document.getElementById("esewa_total_amount").value = esewaData.total_amount;
+        document.getElementById("esewa_transaction_uuid").value = esewaData.transaction_uuid;
+        document.getElementById("esewa_product_code").value = "EPAYTEST";
+
+        document.getElementById("esewa_product_service_charge").value = esewaData.productServiceCharge;
+        document.getElementById("esewa_product_delivery_charge").value = esewaData.productDeliveryCharge;
+        document.getElementById("esewa_success_url").value = "http://localhost:8080/api/payment/esewa-response-handle";
+        document.getElementById("esewa_failure_url").value = "http://localhost:8080/api/payment/esewa-response-handle";
+        document.getElementById("esewa_signature").value = esewaData.signature;
+
+        document.getElementById("esewaForm").submit();
+
+    }
+
 
 });

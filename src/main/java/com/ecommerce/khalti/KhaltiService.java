@@ -50,7 +50,7 @@ public class KhaltiService {
         PaymentModel payment = paymentMapper.mapKhaltiToPaymentModel(response);
 
         if(!"COMPLETED".equalsIgnoreCase(response.getStatus())){
-            successPaymentOrderService.handleOrderDetails(false, payment, response.getPurchase_order_id());
+            successPaymentOrderService.handleKhaltiOrderDetails(false, payment, response.getPurchase_order_id());
             return false;
         }
 
@@ -71,10 +71,10 @@ public class KhaltiService {
                 String status = (String) body.get("status");
                 String transactionId = (String) body.get("transaction_id");
                 if(!transactionId.isEmpty() && transactionId.equalsIgnoreCase(response.getTransaction_id()) && status.equalsIgnoreCase("Completed")){
-                    successPaymentOrderService.handleOrderDetails(true, payment, response.getPurchase_order_id());
+                    successPaymentOrderService.handleKhaltiOrderDetails(true, payment, response.getPurchase_order_id());
                     return true;
                 }else{
-                    successPaymentOrderService.handleOrderDetails(false, payment, response.getPurchase_order_id());
+                    successPaymentOrderService.handleKhaltiOrderDetails(false, payment, response.getPurchase_order_id());
                     return false;
                 }
             }
