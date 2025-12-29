@@ -353,7 +353,7 @@ function handleCheckout(){
     }
     showToast("Proceeding to checkout...", "info");
     setTimeout(() => {
-        window.location.href = 'checkoutCart.html';
+        window.location.href = 'checkoutCart.html?total=' + cartState.total;
     }, 500);
 }
 

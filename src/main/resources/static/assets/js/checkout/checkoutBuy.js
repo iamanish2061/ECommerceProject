@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
 
-        if(type.value === "" || latitude === -1 || longitude.value === -1 || !addressConfirmed || deliveryCharge === -1) {
+        if(type.value === "" || latitude === -1 || longitude === -1 || !addressConfirmed || deliveryCharge === -1) {
             showToast("Please select on map and confirm!", "info");
             return;
         }
