@@ -1,17 +1,17 @@
 package com.ecommerce.dto.intermediate;
 
-import com.ecommerce.model.cart.CartModel;
-import com.ecommerce.model.order.OrderModel;
-import com.ecommerce.model.product.ProductModel;
+import com.ecommerce.model.address.DeliveryAddress;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
-
 
 public record TempOrderDetails(
-        Long productId,
-        List<CartModel> cartItems,
-        Map<Long, ProductModel> productsInCart,
-        OrderModel order
-) {
-}
+        Long productId,        // 0 for cart, specific ID for "Buy Now"
+        List<OrderItemDTO> items,
+        Long userId,
+        DeliveryAddress address,
+        BigDecimal deliveryCharge,
+        String contactNumber,
+        BigDecimal totalIncludingDeliveryCharge
+) {}
+

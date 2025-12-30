@@ -23,7 +23,6 @@ public class RedisService {
     private final ObjectMapper objectMapper;
 
 
-
     public String getCode(String key){
         try{
             Object o = redisTemplate.opsForValue().get(key);
@@ -48,6 +47,7 @@ public class RedisService {
         redisTemplate.delete(email);
     }
 
+
     public void incrementUserVector(Long userId, Long productId, int score) {
         String key = "user_vector:" + userId;
         redisTemplate.opsForHash().increment(key, productId.toString(), score);
@@ -63,6 +63,7 @@ public class RedisService {
         }
         similarUserUpdater.updateSimilarUsersAsync(userId);
     }
+
 
     public void saveOrderDetails(String key, TempOrderDetails orderDetails){
         try {

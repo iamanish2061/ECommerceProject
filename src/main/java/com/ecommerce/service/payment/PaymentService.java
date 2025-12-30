@@ -22,10 +22,10 @@ public class PaymentService {
     private final RedisService redisService;
     private final KhaltiService khaltiService;
 
-    public String payWithKhalti(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge) {
+    public String payWithKhalti(TempOrderDetails orderDetails) {
         String purchaseId = khaltiService.generateUniqueId();
         KhaltiRequest khaltiRequest = new KhaltiRequest(
-                totalIncludingDeliveryCharge.multiply(BigDecimal.valueOf(100)),
+                orderDetails.totalIncludingDeliveryCharge().multiply(BigDecimal.valueOf(100)),
                 purchaseId,
                 "Order");
 
@@ -35,20 +35,20 @@ public class PaymentService {
         return khaltiResponse.getPayment_url();
     }
 
-    public Esewa payWithEsewa(TempOrderDetails orderDetails, BigDecimal totalIncludingDeliveryCharge) {
+    public Esewa payWithEsewa(TempOrderDetails orderDetails) {
         String redisKeyTransactionUuid = esewaService.generateTransactionUuid();
         Esewa esewa = new Esewa();
-        esewa.setAmount(totalIncludingDeliveryCharge);
+        esewa.setAmount(orderDetails.totalIncludingDeliveryCharge());
         esewa.setTaxAmt(BigDecimal.ZERO);
-        esewa.setTotal_amount(totalIncludingDeliveryCharge+"");
+        esewa.setTotal_amount(orderDetails.totalIncludingDeliveryCharge()+"");
         esewa.setTransaction_uuid(redisKeyTransactionUuid);
         esewa.setProductServiceCharge(BigDecimal.ZERO);
         esewa.setProductDeliveryCharge(BigDecimal.ZERO);
         String data = esewaService.prepareDataForSignature(esewa.getTotal_amount(), esewa.getTransaction_uuid());
         esewa.setSignature(esewaService.getSignature(data));
 
-        redisService.saveOrderDetails(redisKeyTransactionUuid, orderDetails);
         redisService.saveEsewaObject(redisKeyTransactionUuid, esewa);
+        redisService.saveOrderDetails(redisKeyTransactionUuid, orderDetails);
 
         return esewa;
     }

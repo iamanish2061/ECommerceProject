@@ -2,13 +2,11 @@ package com.ecommerce.service.recommendation;
 
 
 import com.ecommerce.dto.response.product.BriefProductsResponse;
-import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.product.ProductMapper;
 import com.ecommerce.model.product.ProductModel;
 import com.ecommerce.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -61,7 +59,6 @@ public class RecommendationService  {
                 .toList();
 
 
-//        work here for mapping products to recommendation
         List<ProductModel> unfilteredProducts = productRepository.findAllByIdIn(recommendedIds);
 
         recommendationProducts = unfilteredProducts.stream()

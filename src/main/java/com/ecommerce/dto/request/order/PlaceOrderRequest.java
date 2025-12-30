@@ -6,6 +6,8 @@ import com.ecommerce.validation.ValidNumber;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 public record PlaceOrderRequest (
 
         @ValidNumber
@@ -36,5 +38,5 @@ public record PlaceOrderRequest (
         PaymentMethod paymentMethod,
 
         @NotNull(message = "Invalid delivery charge")
-        Double deliveryCharge
+        BigDecimal deliveryCharge
 ){}

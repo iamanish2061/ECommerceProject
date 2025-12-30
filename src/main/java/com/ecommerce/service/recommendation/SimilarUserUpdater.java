@@ -29,6 +29,7 @@ public class SimilarUserUpdater {
     }
 
     public void updateSimilarUsers(Long changedUserId) {
+        System.out.println("-------------------hehe i am inside similarity updater!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         String changedVectorKey = "user_vector:" + changedUserId;
         Map<Object, Object> changedVector = redisTemplate.opsForHash().entries(changedVectorKey);
         if (changedVector.isEmpty()) return;

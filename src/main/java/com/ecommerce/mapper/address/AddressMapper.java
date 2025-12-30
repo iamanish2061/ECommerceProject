@@ -1,10 +1,10 @@
 package com.ecommerce.mapper.address;
 
+import com.ecommerce.dto.request.order.PlaceOrderRequest;
 import com.ecommerce.dto.response.address.AddressResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.DeliveryAddress;
-import com.ecommerce.repository.address.AddressRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -28,4 +28,5 @@ public interface AddressMapper {
     AddressWithDeliveryChargeResponse mapEntityToAddressWithDeliveryChargeResponse(AddressModel address, BigDecimal charge);
 
 
+    DeliveryAddress mapRequestToDeliveryAddress(PlaceOrderRequest request);
 }

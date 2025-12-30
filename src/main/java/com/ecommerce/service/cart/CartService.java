@@ -121,6 +121,13 @@ public class CartService {
 
     @Transactional
     public String clearCart(Long id) {
+        List<CartModel> cartItems = cartRepository.findCartItemsByUserId(id);
+
+        cartItems.forEach(c->{
+            redisService.incrementUserVector(id, c.getProduct().getId(), -5);
+            similarUserUpdater.updateSimilarUsersAsync(id);
+        });
+
         int deletedRow = cartRepository.deleteAllByUserId(id);
         return deletedRow + " items removed";
     }

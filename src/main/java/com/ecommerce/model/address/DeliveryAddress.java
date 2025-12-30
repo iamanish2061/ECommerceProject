@@ -1,6 +1,5 @@
 package com.ecommerce.model.address;
 
-import com.ecommerce.model.user.UserModel;
 import jakarta.persistence.*;
 import lombok.*;
 

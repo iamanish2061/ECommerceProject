@@ -1,19 +1,22 @@
 package com.ecommerce.service.order;
 
+import com.ecommerce.dto.intermediate.OrderItemDTO;
 import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.model.activity.ActivityType;
-import com.ecommerce.model.cart.CartModel;
+import com.ecommerce.model.order.OrderItem;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
 import com.ecommerce.model.payment.PaymentModel;
 import com.ecommerce.model.payment.PaymentStatus;
 import com.ecommerce.model.product.ProductModel;
+import com.ecommerce.model.user.UserModel;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.cart.CartRepository;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.payment.PaymentRepository;
 import com.ecommerce.repository.product.ProductRepository;
+import com.ecommerce.repository.user.UserRepository;
 import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import com.ecommerce.service.recommendation.UserActivityService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +25,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,59 +40,79 @@ public class OrderPersistService {
     private final CartRepository cartRepository;
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-
+    private final UserRepository userRepository;
 
     private final RedisService redisService;
     private final UserActivityService userActivityService;
     private final SimilarUserUpdater similarUserUpdater;
 
-    @Transactional
-    public String executeSingleCodOrder(ProductModel product, OrderModel order) {
-        int newStock = product.getStock()-1;
-        product.setStock(newStock);
+    public String executeSingleCodOrder(ProductModel product, UserModel user, TempOrderDetails tempOrder) {
+        OrderModel orderToBePersisted = OrderModel.builder()
+                .user(user)
+                .totalAmount(tempOrder.totalIncludingDeliveryCharge())
+                .status(OrderStatus.CONFIRMED)
+                .phoneNumber(tempOrder.contactNumber())
+                .address(tempOrder.address())
+                .payment(null)
+                .build();
+        OrderItem orderItem = OrderItem.builder()
+                .quantity(tempOrder.items().get(0).quantity())
+                .priceAtPurchase(tempOrder.items().get(0).priceAtPurchase())
+                .product(product)
+                .build();
+        orderToBePersisted.addOrderItem(orderItem);
+
+        product.setStock(product.getStock()-1);
         productRepository.save(product);
+        orderRepository.save(orderToBePersisted);
 
-        order.setStatus(OrderStatus.CONFIRMED);
-        order.setPayment(null);
-        orderRepository.save(order);
+        userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.PURCHASE, 10);
+        redisService.incrementUserVector(user.getId(), product.getId(), 10);
+        similarUserUpdater.updateSimilarUsersAsync(user.getId());
+        return null;
+    }
 
-        userActivityService.recordActivity(order.getUser().getId(), product.getId(), ActivityType.PURCHASE, 10);
-        redisService.incrementUserVector(order.getUser().getId(), product.getId(), 10);
-        similarUserUpdater.updateSimilarUsersAsync(order.getUser().getId());
+    public String executeCodOrder(UserModel user, List<ProductModel> products, TempOrderDetails tempOrder) {
+        Map<Long, OrderItemDTO> itemDtoMap = tempOrder.items().stream()
+                .collect(Collectors.toMap(OrderItemDTO::productId, item -> item));
+
+        OrderModel orderToBePersisted = OrderModel.builder()
+                .user(user)
+                .totalAmount(tempOrder.totalIncludingDeliveryCharge())
+                .status(OrderStatus.CONFIRMED)
+                .phoneNumber(tempOrder.contactNumber())
+                .address(tempOrder.address())
+                .payment(null)
+                .build();
+
+        for (ProductModel product : products) {
+            OrderItemDTO dto = itemDtoMap.get(product.getId());
+
+            if (product.getStock() < dto.quantity()) {
+                throw new ApplicationException("Stock ran out for " + product.getTitle(), "OUT_OF_STOCK", HttpStatus.CONFLICT);
+            }
+            OrderItem orderItem = OrderItem.builder()
+                    .quantity(dto.quantity())
+                    .priceAtPurchase(dto.priceAtPurchase())
+                    .product(product)
+                    .build();
+
+            orderToBePersisted.addOrderItem(orderItem);
+            product.setStock(product.getStock() - dto.quantity());
+            userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.PURCHASE, 10);
+            redisService.incrementUserVector(user.getId(), product.getId(), 10);
+        }
+
+        productRepository.saveAll(products);
+        orderRepository.save(orderToBePersisted);
+
+        cartRepository.deleteAllByUserId(user.getId());
+        similarUserUpdater.updateSimilarUsersAsync(user.getId());
+
         return null;
     }
 
     @Transactional
-    public String executeCodOrder(List<CartModel> cartItems, Map<Long, ProductModel> products, OrderModel order){
-
-        for(CartModel cart : cartItems){
-            ProductModel product = products.get(cart.getProduct().getId());
-            product.setStock(product.getStock()-cart.getQuantity());
-            userActivityService.recordActivity(
-                    order.getUser().getId(),
-                    product.getId(),
-                    ActivityType.PURCHASE,
-                    10
-            );
-
-            redisService.incrementUserVector(
-                    order.getUser().getId(),
-                    product.getId(),
-                    10
-            );
-        }
-        productRepository.saveAll(products.values());
-
-        order.setStatus(OrderStatus.CONFIRMED);
-        order.setPayment(null);
-        orderRepository.save(order);
-
-        cartRepository.deleteAllByUserId(order.getUser().getId());
-        similarUserUpdater.updateSimilarUsersAsync(order.getUser().getId());
-
-        return null;
-    }
-
     public void handleEsewaOrderDetails(boolean success, PaymentModel payment){
         if(success){
             PaymentModel existingPayment = paymentRepository.findByTransactionId(payment.getTransactionId()).orElse(null);
@@ -96,6 +122,13 @@ public class OrderPersistService {
             TempOrderDetails orderDetails = redisService.getOrderDetails(payment.getTransactionId());
             if(orderDetails == null){
                 throw new ApplicationException("Request time out!", "SESSION_TIMEOUT", HttpStatus.NOT_FOUND);
+            }
+
+            BigDecimal expected = orderDetails.totalIncludingDeliveryCharge().setScale(5, RoundingMode.HALF_UP);
+            BigDecimal actual = payment.getAmount().setScale(5, RoundingMode.HALF_UP);
+
+            if (expected.compareTo(actual) != 0) {
+                throw new ApplicationException("Invalid Payment!", "INVALID_PAYMENT", HttpStatus.BAD_REQUEST);
             }
 
             if(orderDetails.productId() == 0L){
@@ -111,70 +144,6 @@ public class OrderPersistService {
     }
 
     @Transactional
-    public void handleSingleProductOrder(PaymentModel payment, TempOrderDetails orderDetails) {
-        OrderModel orderModel = orderDetails.order();
-
-        ProductModel product= productRepository.findByIdForUpdate(orderDetails.productId())
-                        .orElseThrow(()-> new ApplicationException("Product not found!", "PRODUCT NOT FOUND", HttpStatus.NOT_FOUND));
-
-        product.setStock(product.getStock()-1);
-        productRepository.save(product);
-
-        payment.setUser(orderModel.getUser());
-        if(payment.getPaymentStatus()== PaymentStatus.COMPLETE){
-            orderModel.setStatus(OrderStatus.CONFIRMED);
-        }else{
-            orderModel.setStatus(OrderStatus.PENDING);
-        }
-        orderModel.addPayment(payment);
-        orderRepository.save(orderModel);
-
-        userActivityService.recordActivity(orderModel.getUser().getId(), product.getId(), ActivityType.PURCHASE, 10);
-        redisService.incrementUserVector(orderModel.getUser().getId(), product.getId(), 10);
-        similarUserUpdater.updateSimilarUsersAsync(orderModel.getUser().getId());
-    }
-
-    @Transactional
-    public void handleCartOrders(PaymentModel payment, TempOrderDetails orderDetails) {
-        OrderModel orderModel = orderDetails.order();
-        List<CartModel> cartItems = orderDetails.cartItems();
-        Map<Long, ProductModel> productsInCart = orderDetails.productsInCart();
-
-//        calculating total and validating quantity
-        for(CartModel cart : cartItems){
-            ProductModel product = productsInCart.get(cart.getProduct().getId());
-            product.setStock(product.getStock() - cart.getQuantity());
-
-            userActivityService.recordActivity(
-                    orderModel.getUser().getId(),
-                    product.getId(),
-                    ActivityType.PURCHASE,
-                    10
-            );
-
-            redisService.incrementUserVector(
-                    orderModel.getUser().getId(),
-                    product.getId(),
-                    10
-            );
-        }
-        productRepository.saveAll(productsInCart.values());
-
-        payment.setUser(orderModel.getUser());
-        if(payment.getPaymentStatus()== PaymentStatus.COMPLETE){
-            orderModel.setStatus(OrderStatus.CONFIRMED);
-        }else{
-            orderModel.setStatus(OrderStatus.PENDING);
-        }
-        orderModel.addPayment(payment);
-        orderRepository.save(orderModel);
-
-
-        cartRepository.deleteAllByUserId(orderModel.getUser().getId());
-        similarUserUpdater.updateSimilarUsersAsync(orderModel.getUser().getId());
-    }
-
-    @Transactional
     public void handleKhaltiOrderDetails(boolean success, PaymentModel payment, String purchaseId){
         if(success){
             PaymentModel existingPayment = paymentRepository.findByTransactionId(payment.getTransactionId()).orElse(null);
@@ -186,6 +155,12 @@ public class OrderPersistService {
                 throw new ApplicationException("Request time out!", "SESSION_TIMEOUT", HttpStatus.NOT_FOUND);
             }
 
+            BigDecimal expected = orderDetails.totalIncludingDeliveryCharge().setScale(5, RoundingMode.HALF_UP);
+            BigDecimal actual = payment.getAmount().setScale(5, RoundingMode.HALF_UP);
+
+            if (expected.compareTo(actual) != 0) {
+                throw new ApplicationException("Invalid Payment!", "INVALID_PAYMENT", HttpStatus.BAD_REQUEST);
+            }
             if(orderDetails.productId() == 0L){
                 handleCartOrders(payment, orderDetails);
             }else{
@@ -195,6 +170,86 @@ public class OrderPersistService {
         redisService.deleteOrderDetails(purchaseId);
 
     }
+
+    public void handleSingleProductOrder(PaymentModel payment, TempOrderDetails tempOrder) {
+        ProductModel product= productRepository.findByIdForUpdate(tempOrder.productId())
+                        .orElseThrow(()-> new ApplicationException("Product not found!", "PRODUCT NOT FOUND", HttpStatus.NOT_FOUND));
+        UserModel user = userRepository.findById(tempOrder.userId())
+                        .orElseThrow(()-> new ApplicationException("User not found!", "USER NOT FOUND", HttpStatus.NOT_FOUND));
+
+        payment.setUser(user);
+        OrderModel orderToBePersisted = OrderModel.builder()
+                .user(user)
+                .totalAmount(tempOrder.totalIncludingDeliveryCharge())
+                .status(payment.getPaymentStatus() == PaymentStatus.COMPLETE ? OrderStatus.CONFIRMED: OrderStatus.PENDING)
+                .phoneNumber(tempOrder.contactNumber())
+                .address(tempOrder.address())
+                .payment(payment)
+                .build();
+        OrderItem orderItem = OrderItem.builder()
+                .quantity(tempOrder.items().get(0).quantity())
+                .priceAtPurchase(tempOrder.items().get(0).priceAtPurchase())
+                .product(product)
+                .build();
+        orderToBePersisted.addOrderItem(orderItem);
+
+        product.setStock(product.getStock()-1);
+        productRepository.save(product);
+        orderRepository.save(orderToBePersisted);
+
+        userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.PURCHASE, 10);
+        redisService.incrementUserVector(user.getId(), product.getId(), 10);
+        similarUserUpdater.updateSimilarUsersAsync(user.getId());
+    }
+
+    public void handleCartOrders(PaymentModel payment, TempOrderDetails tempOrder) {
+        UserModel user = userRepository.findById(tempOrder.userId())
+                .orElseThrow(()-> new ApplicationException("User not found!", "USER NOT FOUND", HttpStatus.NOT_FOUND));
+
+        List<Long> ids = tempOrder.items().stream().map(OrderItemDTO::productId).toList();
+        List<ProductModel> products = productRepository.findAllByIdIn(ids);
+
+        Map<Long, OrderItemDTO> itemDtoMap = tempOrder.items().stream()
+                .collect(Collectors.toMap(OrderItemDTO::productId, item -> item));
+
+        payment.setUser(user);
+        OrderModel orderToBePersisted = OrderModel.builder()
+                .user(user)
+                .totalAmount(tempOrder.totalIncludingDeliveryCharge())
+                .status(payment.getPaymentStatus() == PaymentStatus.COMPLETE ? OrderStatus.CONFIRMED : OrderStatus.PENDING)
+                .phoneNumber(tempOrder.contactNumber())
+                .address(tempOrder.address())
+                .payment(payment)
+                .build();
+
+        for (ProductModel product : products) {
+            OrderItemDTO dto = itemDtoMap.get(product.getId());
+
+            if (product.getStock() < dto.quantity()) {
+                throw new ApplicationException("Stock ran out for " + product.getTitle(), "OUT_OF_STOCK", HttpStatus.CONFLICT);
+            }
+            OrderItem orderItem = OrderItem.builder()
+                    .quantity(dto.quantity())
+                    .priceAtPurchase(dto.priceAtPurchase())
+                    .product(product)
+                    .build();
+
+            orderToBePersisted.addOrderItem(orderItem);
+
+            product.setStock(product.getStock() - dto.quantity());
+            userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.PURCHASE, 10);
+            redisService.incrementUserVector(user.getId(), product.getId(), 10);
+        }
+
+        productRepository.saveAll(products);
+        orderRepository.save(orderToBePersisted);
+
+        cartRepository.deleteAllByUserId(user.getId());
+        similarUserUpdater.updateSimilarUsersAsync(user.getId());
+
+    }
+
+
 
 }
 
