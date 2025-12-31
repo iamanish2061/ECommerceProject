@@ -3,10 +3,9 @@ package com.ecommerce.service.recommendation;
 
 import com.ecommerce.dto.response.product.BriefProductsResponse;
 import com.ecommerce.mapper.product.ProductMapper;
-import com.ecommerce.model.product.ProductModel;
+import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,58 +15,65 @@ import java.util.*;
 public class RecommendationService  {
 
     private final ProductRepository productRepository;
-    private final RedisTemplate<String, String> redisTemplate;
-
+    private final RedisService redisService;
     private final ProductMapper productMapper;
 
     private static final int RECOMMENDATION_COUNT =15;
 
-    public List<BriefProductsResponse> getPersonalizedRecommendation(Long userId){
-        List<BriefProductsResponse> recommendationProducts;
-        String vectorKey = "user_vector:" + userId;
-
-        Long size = redisTemplate.opsForHash().size(vectorKey);
-        if(size == null || size == 0){
+    public List<BriefProductsResponse> getPersonalizedRecommendation(Long userId) {
+        // 1. Get the current user's vector to know what they've already seen
+        Map<Object, Object> userVector = redisService.getUserVector(userId);
+        if (userVector.isEmpty()) {
             return new ArrayList<>();
         }
 
-        Set<Object> userProductIds = redisTemplate.opsForHash().keys(vectorKey);
+        // 2. Fetch IDs of similar users (Neighbors) from our ZSET
+        Set<Object> similarUserIds = redisService.getSimilarUserIds(userId);
+        if (similarUserIds == null || similarUserIds.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-        Set<String> similarUserIdStrings = redisTemplate.opsForZSet()
-                .reverseRange("user_similar:"+userId, 0,29);
+        // 3. Aggregate product scores from those similar users
+        Map<Long, Double> productScores = new HashMap<>();
 
-        List<Long> similarUserIds = similarUserIdStrings ==null ?
-                new ArrayList<>(): similarUserIdStrings.stream()
-                .map(Long::parseLong)
-                .toList();
+        for (Object simUserIdObj : similarUserIds) {
+            Long simUserId = Long.parseLong(simUserIdObj.toString());
+            Map<Object, Object> neighborVector = redisService.getUserVector(simUserId);
 
-        // Aggregate products from similar users (exclude already interacted)
-        Map<String, Double> productScores = new HashMap<>();
-        for (Long simUserId : similarUserIds) {
-            Map<Object, Object> map = redisTemplate.opsForHash().entries("user_vector:" + simUserId);
-            map.forEach((pid, score) -> {
+            neighborVector.forEach((pid, score) -> {
+                // Ensure we handle the PID as a clean string/long
                 String productIdStr = pid.toString();
-                if (userProductIds.contains(productIdStr)) return; // skip already seen
-                productScores.merge(productIdStr, Double.valueOf(score.toString()), Double::sum);
+
+                // SKIP if the current user has already interacted with this product
+                if (userVector.containsKey(productIdStr)) return;
+
+                Long productId = Long.parseLong(productIdStr);
+                double productScore = Double.parseDouble(score.toString());
+
+                // Add score to the map; if product exists, sum the scores
+                productScores.merge(productId, productScore, Double::sum);
             });
         }
 
+        // 4. Sort products by score (highest first) and take the top 15
         List<Long> recommendedIds = productScores.entrySet().stream()
-                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
                 .limit(RECOMMENDATION_COUNT)
-                .map(e -> Long.parseLong(e.getKey()))
+                .map(Map.Entry::getKey)
                 .toList();
 
+        if (recommendedIds.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-        List<ProductModel> unfilteredProducts = productRepository.findAllByIdIn(recommendedIds);
-
-        recommendationProducts = unfilteredProducts.stream()
-                        .map(productMapper::mapEntityToBriefProductsResponse)
+        // 5. Fetch product details from DB and map to Response DTO
+        return productRepository.findAllByIdIn(recommendedIds).stream()
+                .map(productMapper::mapEntityToBriefProductsResponse)
                 .toList();
-
-        return recommendationProducts;
-
     }
 
 }
+
+
+
 

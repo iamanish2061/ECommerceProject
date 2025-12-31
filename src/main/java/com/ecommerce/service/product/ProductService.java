@@ -14,6 +14,7 @@ import com.ecommerce.repository.product.BrandRepository;
 import com.ecommerce.repository.product.CategoryRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.repository.product.TagRepository;
+import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import com.ecommerce.service.recommendation.UserActivityService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -42,6 +43,7 @@ public class ProductService {
     private final BrandMapper brandMapper;
     private final CategoryMapper categoryMapper;
     private final ProductImageMapper productImageMapper;
+    private final SimilarUserUpdater similarUserUpdater;
 
     @PersistenceContext
     private EntityManager em;
@@ -147,6 +149,7 @@ public class ProductService {
             Long userId = currentUser.getUser().getId();
             userActivityService.recordActivity(userId, id, ActivityType.VIEW, 1);
             redisService.updateViewedProduct(userId, id);
+            similarUserUpdater.updateSimilarUsersAsync(userId);
         }
 
         product.getImages().forEach(productImageModel -> System.out.println(productImageModel.getAltText()));

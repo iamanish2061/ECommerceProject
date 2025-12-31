@@ -1,7 +1,6 @@
 package com.ecommerce.redis;
 
 import com.ecommerce.dto.intermediate.TempOrderDetails;
-import com.ecommerce.esewa.Esewa;
 import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -18,8 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
-    private final RedisTemplate redisTemplate;
-    private final SimilarUserUpdater similarUserUpdater;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
 
@@ -61,8 +62,28 @@ public class RedisService {
             incrementUserVector(userId, productId, 1);
             redisTemplate.opsForValue().set(viewedKey, "1", 48, TimeUnit.HOURS);
         }
-        similarUserUpdater.updateSimilarUsersAsync(userId);
     }
+
+    // 1. Get a user's interest vector safely
+    public Map<Object, Object> getUserVector(Long userId) {
+        return redisTemplate.opsForHash().entries("user_vector:" + userId);
+    }
+
+    // 2. Save the calculated similarities as a Sorted Set
+    public void saveSimilarUsers(Long userId, List<Map.Entry<Long, Double>> topSimilar) {
+        String key = "user_similar:" + userId;
+        redisTemplate.delete(key);
+        topSimilar.forEach(entry ->
+                redisTemplate.opsForZSet().add(key, entry.getKey().toString(), entry.getValue())
+        );
+    }
+
+    // 3. Get the IDs of similar users
+    public Set<Object> getSimilarUserIds(Long userId) {
+        // Fetches top 30 most similar users
+        return redisTemplate.opsForZSet().reverseRange("user_similar:" + userId, 0, 29);
+    }
+
 
 
     public void saveOrderDetails(String key, TempOrderDetails orderDetails){
@@ -100,42 +121,7 @@ public class RedisService {
     }
 
 
-    public void saveEsewaObject(String redisKeyTransactionUuid, Esewa esewa) {
-        try {
-            String key = "esewa"+redisKeyTransactionUuid;
-            String json = objectMapper.writeValueAsString(esewa);
-            redisTemplate.opsForValue().set(key, json, 30, TimeUnit.MINUTES);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize TempOrderDetails record for Redis", e);
-        } catch (Exception e) {
-            log.error("Failed to save order details to Redis", e);
-        }
-    }
-
-    public Esewa getEsewaObject(String redisKeyTransactionUuid){
-        String key = "esewa"+redisKeyTransactionUuid;
-        try {
-            Object value = redisTemplate.opsForValue().get(key);
-            if (value == null) return null;
-            return objectMapper.readValue(value.toString(), Esewa.class);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to deserialize TempOrderDetails record from Redis", e);
-            return null;
-        } catch (Exception e) {
-            log.error("Failed to retrieve order details from Redis", e);
-            return null;
-        }
-    }
-
-    public void deleteEsewaObjectDetails(String redisKeyTransactionUuid){
-        try {
-            String key = "esewa"+redisKeyTransactionUuid;
-            redisTemplate.delete(key);
-        } catch (Exception e) {
-            log.error("Failed to delete order details from Redis", e);
-        }
-    }
-
 }
+
 
 

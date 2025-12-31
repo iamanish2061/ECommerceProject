@@ -47,7 +47,6 @@ public class EsewaController {
 
         boolean validity = eSewaService.validateResponse(paymentResponse);
         PaymentModel payment = paymentMapper.mapEsewaToPaymentModel(paymentResponse);
-        redisService.deleteEsewaObjectDetails(payment.getTransactionId());
         String query = "amount=" + URLEncoder.encode(payment.getAmount().toString(), StandardCharsets.UTF_8)
                 + "&transactionId=" + URLEncoder.encode(payment.getTransactionId(), StandardCharsets.UTF_8);
 

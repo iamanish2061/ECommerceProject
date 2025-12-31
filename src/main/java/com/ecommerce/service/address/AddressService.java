@@ -5,7 +5,6 @@ import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.UserModel;
-import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.address.AddressRepository;
 import com.ecommerce.service.order.RouteService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import java.math.BigDecimal;
 public class AddressService {
 
     private final AddressRepository addressRepository;
-    private final RedisService redisService;
     private final RouteService routeService;
 
     private final AddressMapper addressMapper;
