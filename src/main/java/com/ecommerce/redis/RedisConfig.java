@@ -10,15 +10,22 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate redisTemplate(RedisConnectionFactory factory){
-        RedisTemplate rT= new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> rT = new RedisTemplate<>();
         rT.setConnectionFactory(factory);
 
-        rT.setKeySerializer(new StringRedisSerializer());
-        rT.setValueSerializer(new StringRedisSerializer());
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
 
+        // 1. Regular Key/Value (for viewed products, codes, etc.)
+        rT.setKeySerializer(stringSerializer);
+        rT.setValueSerializer(stringSerializer);
+
+        // 2. Hash Key/Value (CRITICAL for user_vector and similar_user logic)
+        rT.setHashKeySerializer(stringSerializer);
+        rT.setHashValueSerializer(stringSerializer);
+
+        rT.afterPropertiesSet();
         return rT;
     }
-
 }
 

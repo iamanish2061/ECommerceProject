@@ -1,5 +1,6 @@
 package com.ecommerce.service.recommendation;
 
+import com.ecommerce.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,7 +15,9 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class SimilarUserUpdater {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
+
     private static final int TOP_SIMILAR_USERS = 50;
     private static final double MIN_SIMILARITY = 0.3;
 
@@ -29,53 +32,51 @@ public class SimilarUserUpdater {
     }
 
     public void updateSimilarUsers(Long changedUserId) {
-        System.out.println("-------------------hehe i am inside similarity updater!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        String changedVectorKey = "user_vector:" + changedUserId;
-        Map<Object, Object> changedVector = redisTemplate.opsForHash().entries(changedVectorKey);
+        // 1. Get the target user's vector using our new service method
+        Map<Object, Object> changedVector = redisService.getUserVector(changedUserId);
         if (changedVector.isEmpty()) return;
 
-        // Get all user vectors (still KEYS — but runs in background, not on request!)
+        // 2. Find all other users
         Set<String> allUserKeys = redisTemplate.keys("user_vector:*");
         Map<Long, Double> similarityScores = new HashMap<>();
 
         for (String key : allUserKeys) {
-            if (key.equals(changedVectorKey)) continue;
+            // key format is "user_vector:ID"
             Long otherId = Long.parseLong(key.split(":")[1]);
+            if (otherId.equals(changedUserId)) continue;
 
-            double similarity = cosineSimilarity(changedUserId, otherId);
+            // 3. Fetch the other user's vector
+            Map<Object, Object> otherVector = redisService.getUserVector(otherId);
+
+            // 4. Calculate similarity using the local maps (fast)
+            double similarity = calculateCosine(changedVector, otherVector);
+
             if (similarity >= MIN_SIMILARITY) {
                 similarityScores.put(otherId, similarity);
             }
         }
 
+        // 5. Sort and get top matches
         List<Map.Entry<Long, Double>> top = similarityScores.entrySet().stream()
                 .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
                 .limit(TOP_SIMILAR_USERS)
                 .toList();
 
-        // Write to Redis as ZSET
-        String similarKey = "user_similar:" + changedUserId;
-        redisTemplate.delete(similarKey);
-
-        top.forEach(entry -> redisTemplate.opsForZSet()
-                .add(similarKey, entry.getKey().toString(), entry.getValue()));
+        // 6. Save using redis method
+        redisService.saveSimilarUsers(changedUserId, top);
 
         log.debug("Updated similar users for user {}: {} matches", changedUserId, top.size());
     }
 
-    private Double cosineSimilarity(Long user1, Long user2) {
-        String key1 = "user_vector:" + user1;
-        String key2 = "user_vector:" + user2;
-
-        Map<Object, Object> vec1 = redisTemplate.opsForHash().entries(key1);
-        Map<Object, Object> vec2 = redisTemplate.opsForHash().entries(key2);
-
+    private double calculateCosine(Map<Object, Object> vec1, Map<Object, Object> vec2) {
         double dot = 0.0, norm1 = 0.0, norm2 = 0.0;
-        Set<String> allPids = new HashSet<>();
-        vec1.keySet().forEach(k-> allPids.add(k.toString()));
-        vec2.keySet().forEach(k-> allPids.add(k.toString()));
 
-        for (String pid: allPids) {
+        // Collect all Product IDs involved from both users
+        Set<Object> allPids = new HashSet<>(vec1.keySet());
+        allPids.addAll(vec2.keySet());
+
+        for (Object pid : allPids) {
+            // With new serialization, these will be clean strings like "101"
             double score1 = Double.parseDouble(vec1.getOrDefault(pid, "0").toString());
             double score2 = Double.parseDouble(vec2.getOrDefault(pid, "0").toString());
 

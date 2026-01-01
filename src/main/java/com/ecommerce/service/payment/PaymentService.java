@@ -47,7 +47,6 @@ public class PaymentService {
         String data = esewaService.prepareDataForSignature(esewa.getTotal_amount(), esewa.getTransaction_uuid());
         esewa.setSignature(esewaService.getSignature(data));
 
-        redisService.saveEsewaObject(redisKeyTransactionUuid, esewa);
         redisService.saveOrderDetails(redisKeyTransactionUuid, orderDetails);
 
         return esewa;
