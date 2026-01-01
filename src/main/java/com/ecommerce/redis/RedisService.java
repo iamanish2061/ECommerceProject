@@ -1,7 +1,7 @@
 package com.ecommerce.redis;
 
 import com.ecommerce.dto.intermediate.TempOrderDetails;
-import com.ecommerce.service.recommendation.SimilarUserUpdater;
+import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -48,13 +48,14 @@ public class RedisService {
         redisTemplate.delete(email);
     }
 
-
+//for incrementing user vector after any activity
     public void incrementUserVector(Long userId, Long productId, int score) {
         String key = "user_vector:" + userId;
         redisTemplate.opsForHash().increment(key, productId.toString(), score);
         redisTemplate.expire(key, 90, TimeUnit.DAYS);           // Optional: expire in 90 days if user inactive
     }
 
+//    for updating viewed product
     public void updateViewedProduct(Long userId, Long productId){
         String viewedKey = "viewed:"+userId+":"+productId;
         boolean alreadyViewed = redisTemplate.hasKey(viewedKey);
@@ -64,12 +65,12 @@ public class RedisService {
         }
     }
 
-    // 1. Get a user's interest vector safely
+//    Get a user's interest vector safely
     public Map<Object, Object> getUserVector(Long userId) {
         return redisTemplate.opsForHash().entries("user_vector:" + userId);
     }
 
-    // 2. Save the calculated similarities as a Sorted Set
+//    Save the calculated similarities as a Sorted Set
     public void saveSimilarUsers(Long userId, List<Map.Entry<Long, Double>> topSimilar) {
         String key = "user_similar:" + userId;
         redisTemplate.delete(key);
@@ -78,14 +79,15 @@ public class RedisService {
         );
     }
 
-    // 3. Get the IDs of similar users
+//    Get the IDs of similar users
     public Set<Object> getSimilarUserIds(Long userId) {
         // Fetches top 30 most similar users
         return redisTemplate.opsForZSet().reverseRange("user_similar:" + userId, 0, 29);
     }
 
 
-
+//    temporary order service
+//    for saving order details before redirecting to payment
     public void saveOrderDetails(String key, TempOrderDetails orderDetails){
         try {
             String json = objectMapper.writeValueAsString(orderDetails);
@@ -97,6 +99,7 @@ public class RedisService {
         }
     }
 
+//    for getting order details to store in db after successful payment
     public TempOrderDetails getOrderDetails(String key){
         try {
             Object value = redisTemplate.opsForValue().get(key);
@@ -112,12 +115,85 @@ public class RedisService {
         }
     }
 
+//    for deleting order details to store in db after successful payment
     public void deleteOrderDetails(String key){
         try {
             redisTemplate.delete(key);
         } catch (Exception e) {
             log.error("Failed to delete order details from Redis", e);
         }
+    }
+
+
+
+//    notification
+//    Gets the current unread count.
+    public Integer getUnreadCount(String userId) {
+        try {
+            Object count = redisTemplate.opsForValue().get("unread_notifications:" + userId);
+            return count != null ? Integer.parseInt(count.toString()) : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+//    Adds the full notification DTO to a Redis List for the user.
+    public void addUnreadNotification(String userId, NotificationEvent event) {
+        try {
+            String key = "unread_list:" + userId;
+            String json = objectMapper.writeValueAsString(event);
+
+            // Push to the front of the list (LPUSH) so newest are first
+            redisTemplate.opsForList().leftPush(key, json);
+
+            // Optional: Keep only the last 50 unread to save memory
+            redisTemplate.opsForList().trim(key, 0, 49);
+
+            log.info("Notification added to Redis list for user: {}", userId);
+        } catch (Exception e) {
+            log.error("Failed to cache unread notification", e);
+        }
+    }
+
+//    Fetches all unread notification objects for the user icon.
+    public List<NotificationEvent> getUnreadNotifications(String userId) {
+        String key = "unread_list:" + userId;
+        List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
+
+        if (rawList == null) return List.of();
+
+        return rawList.stream()
+                .map(obj -> {
+                    try {
+                        return objectMapper.readValue(obj.toString(), NotificationEvent.class);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
+//    Removes a specific notification from the Redis list when marked as read.
+    public void removeNotificationFromRedis(String userId, String notificationId) {
+        String key = "unread_list:" + userId;
+        List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
+
+        if (rawList != null) {
+            for (Object obj : rawList) {
+                if (obj.toString().contains(notificationId)) {
+                    // Remove this specific JSON string from the list
+                    redisTemplate.opsForList().remove(key, 1, obj);
+                    break;
+                }
+            }
+        }
+    }
+
+//    removes all notification of that user
+    public void removeAllNotificationFromRedis(String userId){
+        String key = "unread_list:" + userId;
+        redisTemplate.delete(key);
     }
 
 
