@@ -32,20 +32,3 @@ public class NotificationProducer {
         rabbitTemplate.convertAndSend(exchange, routingKey, event);
     }
 }
-
-//how to use it
-//@Autowired
-//private NotificationProducer notificationProducer;
-//
-//public void completeBooking(Booking booking) {
-//    // ... save booking to DB ...
-//
-//    NotificationEvent event = NotificationEvent.builder()
-//            .recipientId(booking.getUserId())
-//            .title("New Appointment")
-//            .message("You have a new booking at 5 PM")
-//            .type("APPOINTMENT")
-//            .build();
-//
-//    notificationProducer.send("notify.user", event);
-//}

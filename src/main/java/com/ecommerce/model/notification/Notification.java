@@ -19,7 +19,7 @@ public class Notification {
     @Id
     private String id;  // Matches the UUID from the DTO
 
-    private String recipientId;
+    private Long recipientId;
     private String title;
     private String message;
     private NotificationType type;

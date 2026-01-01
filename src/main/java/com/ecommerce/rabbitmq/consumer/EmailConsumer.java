@@ -1,5 +1,7 @@
 package com.ecommerce.rabbitmq.consumer;
 
+import com.ecommerce.dto.request.email.EmailSenderRequest;
+import com.ecommerce.model.notification.NotificationType;
 import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.ecommerce.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -14,20 +16,27 @@ public class EmailConsumer {
 
     @RabbitListener(queues = "email.notification.queue")
     public void processEmail(NotificationEvent event) {
-        String userEmail = (String) event.getMetadata().get("email"); // Pass email in metadata
+        NotificationType castedType = NotificationType.valueOf(event.getType().toString());
+        String userEmail = (String) event.getMetadata().get("email");
 
-        switch (event.getType()) {
+        switch (castedType) {
             case ORDER_PLACED:
-                emailService.sendHtmlEmail(userEmail, "Order Confirmed!", "<h1>Thanks for your order...</h1>");
+                emailService.sendOrderInfoEmail(userEmail, event.getMetadata());
                 break;
             case ORDER_CANCELLED:
-                emailService.sendHtmlEmail(userEmail, "Order Cancelled", "<p>Your order has been cancelled.</p>");
+                emailService.sendEmail(
+                        new EmailSenderRequest(userEmail, "Order Cancelled", "<p>Your order has been cancelled.</p>")
+                );
                 break;
             case APPOINTMENT_BOOKED:
-                emailService.sendHtmlEmail(userEmail, "Booking Confirmed", "<h2>Your salon appointment is set!</h2>");
+                emailService.sendEmail(
+                        new EmailSenderRequest(userEmail, "Appointment Booked", "<p>Your appointment has been booked.</p>")
+                );
                 break;
             case APPOINTMENT_CANCELLED:
-                emailService.sendHtmlEmail(userEmail, "Booking Cancelled", "<h2>Your salon appointment is cancelled!</h2>");
+                emailService.sendEmail(
+                        new EmailSenderRequest(userEmail, "Appointment Cancelled", "<p>Your appointment has been cancelled.</p>")
+                );
                 break;
         }
     }

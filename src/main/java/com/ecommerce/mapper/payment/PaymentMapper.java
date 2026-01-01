@@ -18,7 +18,6 @@ public interface PaymentMapper {
     @Mapping(source = "amount", target = "totalAmount")
     PaymentResponse mapEntityToPaymentResponse(PaymentModel payment);
 
-
     @Mapping(source = "status", target = "paymentStatus", qualifiedByName = "setPaymentStatus")
     @Mapping(source = "total_amount", target = "amount", qualifiedByName = "setTotalAmount")
     @Mapping(source = "transaction_uuid", target = "transactionId")

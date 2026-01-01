@@ -138,7 +138,7 @@ public class RedisService {
     }
 
 //    Adds the full notification DTO to a Redis List for the user.
-    public void addUnreadNotification(String userId, NotificationEvent event) {
+    public void addUnreadNotification(Long userId, NotificationEvent event) {
         try {
             String key = "unread_list:" + userId;
             String json = objectMapper.writeValueAsString(event);
@@ -156,7 +156,7 @@ public class RedisService {
     }
 
 //    Fetches all unread notification objects for the user icon.
-    public List<NotificationEvent> getUnreadNotifications(String userId) {
+    public List<NotificationEvent> getUnreadNotifications(Long userId) {
         String key = "unread_list:" + userId;
         List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
 

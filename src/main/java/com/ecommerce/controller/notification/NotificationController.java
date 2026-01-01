@@ -24,7 +24,7 @@ public class NotificationController {
 //    GET 1: The "Hot" list for the notification bell dropdown.
 //     Fetches only unread items from Redis.
     @GetMapping("/unread/{userId}")
-    public ResponseEntity<ApiResponse<List<NotificationEvent>>> getUnread(@PathVariable String userId) {
+    public ResponseEntity<ApiResponse<List<NotificationEvent>>> getUnread(@PathVariable Long userId) {
         List<NotificationEvent> unreadNotifications = redisService.getUnreadNotifications(userId);
         return ResponseEntity.ok(ApiResponse.ok(unreadNotifications, "Notifications fetched successfully"));
     }

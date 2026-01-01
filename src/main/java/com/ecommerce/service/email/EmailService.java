@@ -9,12 +9,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
+    private final org.thymeleaf.TemplateEngine templateEngine;
 
     public boolean sendEmail(EmailSenderRequest emailSender) {
         try{
@@ -31,18 +34,25 @@ public class EmailService {
 
     }
 
-    public void sendHtmlEmail(String to, String subject, String htmlBody) {
+    public void sendOrderInfoEmail(String to, Map<String, Object> metadata) {
+        org.thymeleaf.context.Context context = new org.thymeleaf.context.Context();
+        context.setVariables(metadata);
+
         try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            // Process the HTML template
+            String htmlContent = templateEngine.process("order-info", context);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true); // Set to true for HTML content
+            helper.setSubject("Your Order Info - " + metadata.get("transactionId"));
+            helper.setText(htmlContent, true);
 
-            javaMailSender.send(message);
+            javaMailSender.send(mimeMessage);
+            log.info("Order info email sent to: {}", to);
         } catch (Exception e) {
-            log.error("Failed to send email to {}", to, e);
+            log.error("Failed to send order info email: {}", e.getMessage());
         }
     }
 
