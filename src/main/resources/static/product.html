@@ -10,6 +10,9 @@
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/toast.css">
     <link rel="stylesheet" href="/assets/css/product/product.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
         #profileWrapper:hover #profileDropdown {
             opacity: 1;
@@ -73,17 +76,27 @@
 
                     <!-- notification -->
                     <div class="relative">
-                        <div id="notificationBtn"
-                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" class="size-6">
+                        <div id="notificationBtn" class="text-slate-700 p-3 flex items-center justify-center cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                             </svg>
                         </div>
-                        <span id="notificationCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
-                            0
+
+                        <span id="notificationCount" class="absolute -top-1 -right-1 hidden h-5 w-5">
+                            <span id="notifPing" class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="notif-count-text relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-red-500 text-white text-[10px] font-bold shadow-lg ring-2 ring-white">0</span>
                         </span>
+
+                        <div id="notificationDropdown" class="absolute left-1/2 -translate-x-1/2 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                                <span class="font-bold text-slate-800 text-base">Notifications</span>
+                                <button id="markAllReadBtn" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Mark all read</button>
+                            </div>
+                            <div id="notificationItemsList" class="max-h-[400px] overflow-y-auto"></div>
+                            <a href="notification.html" class="block py-4 text-center text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-t border-slate-50">View All Notifications</a>
+                        </div>
                     </div>
+                    
 
                     <!-- Profile Wrapper -->
                     <div id="profileWrapper" class="relative">
@@ -264,12 +277,14 @@
 
 <script src="assets/js/api.js"></script>
 
+<script src="assets/js/notification/notificationService.js"></script>
 <script src="assets/js/auth/authService.js"></script>
 <script src="assets/js/product/productService.js"></script>
 <script src="assets/js/cart/cartService.js"></script>
 
 <script src="assets/js/product/product.js"></script>
 <script src="assets/js/navbar.js"></script>
+<script src="assets/js/notification/notification.js"></script>
 
 </html>
 

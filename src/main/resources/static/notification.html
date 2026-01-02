@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CutLab - Notification</title>
+</head>
+<body>
+    
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h1 class="text-2xl font-extrabold text-gray-800">Your Notifications</h1>
+            <button id="mark-all-read-btn" class="text-sm font-semibold text-blue-600 hover:text-blue-800">
+                Mark all as read
+            </button>
+        </div>
+
+        <div id="full-page-notif-list" class="space-y-2">
+            </div>
+    </div>
+
+    <script>
+        document.getElementById('mark-all-read-btn').addEventListener('click', async () => {
+            const res = await notificationService.markAllRead();
+            if (res.success) location.reload(); // Refresh to show all as read
+        });
+    </script>   
+
+</body>
+</html>
