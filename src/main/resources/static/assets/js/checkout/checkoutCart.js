@@ -1,14 +1,38 @@
 // checkout.js
 let addressConfirmed = false;
+let cartCount = 0;
+let subTotalAmount = 0;
 
-
-document.addEventListener("DOMContentLoaded", () => {
-    const subTotalAmount = getFromUrl("total");
+async function initCheckoutCartPage() {
+    subTotalAmount = getFromUrl("total");
     if(!subTotalAmount){
         showToast("Please go through your cart!", "info");
     }
+
     const subPriceInput = document.getElementById("productPrice");
     subPriceInput.textContent = "Rs. "+subTotalAmount;
+
+    try {
+        // 1) load all brands for sidebar
+        const cartResp = await cartService.getCartCount();
+        if(cartResp.success){
+            cartCount = cartResp.data.totalCartItems || 0;
+        }
+
+        updateCartCount();
+    } catch (err) {
+        console.error('Error initializing brand page:', err);
+        showToast("Failed to load product!", "error");
+    }
+}
+
+function updateCartCount() {
+    const countElement = document.getElementById('cartCount');
+    if (countElement) {
+        countElement.textContent = cartCount || 0;
+    }
+}
+    
 // ===== ELEMENTS =====
     const phoneInput = document.getElementById("phoneNumber");
 
@@ -285,5 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    document.getElementById("cartBtn").addEventListener("click", ()=>{
+        window.location.href = "cart.html";
+    })
 
-});
+document.addEventListener("DOMContentLoaded", initCheckoutCartPage);

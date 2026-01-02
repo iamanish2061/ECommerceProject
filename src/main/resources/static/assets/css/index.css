@@ -1,0 +1,139 @@
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Navbar visibility control - overrides Tailwind responsive classes */
+.nav-hidden {
+    display: none !important;
+}
+
+@keyframes blob {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+.animation-delay-6000 {
+    animation-delay: 6s;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(147, 197, 253, 0.1) 0%, transparent 50%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(59, 130, 246, 0.03) 2px, rgba(59, 130, 246, 0.03) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(99, 102, 241, 0.03) 2px, rgba(99, 102, 241, 0.03) 4px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.product-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card .product-image-extend {
+    position: absolute;
+    right: -100%;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transition: right 0.5s ease-out;
+    z-index: 10;
+}
+
+.product-card:hover .product-image-extend {
+    right: 0;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+}
+
+.review-card:hover {
+    transform: scale(1.05);
+}

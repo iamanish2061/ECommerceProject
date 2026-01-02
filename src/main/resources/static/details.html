@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details - CutLab</title>
+    <title>CutLab - Product Detail</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/toast.css">
@@ -20,6 +20,11 @@
             66% { transform: translate(-20px, 20px) scale(0.9); }
             100% { transform: translate(0px, 0px) scale(1); }
         }
+        #profileWrapper:hover #profileDropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0);
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
@@ -32,24 +37,133 @@
     </div>
 
     <!-- Navbar -->
-    <header class="w-full bg-white/80 backdrop-blur shadow-sm sticky top-0 z-20">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <a href="index.html" class="flex items-center gap-2">
-                <div class="h-9 w-9 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-semibold">
-                    C
-                </div>
-                <h1 class="text-3xl font-bold text-slate-800">
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="index.html"
+                class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
-                </h1>
-            </a>
-
-            <nav class="hidden sm:flex items-center gap-4 text-sm">
-                <a href="product.html" class="text-slate-600 hover:text-blue-600 transition-colors">
-                    All Products
                 </a>
-            </nav>
+
+                <div class="flex justify-center max-w-2xl mx-0 md:mx-8">
+                    <a href="product.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">
+                        Continue Shopping
+                    </a>
+                </div>
+
+                <!-- Auth & Profile -->
+                <div class="flex items-center gap-6">
+                    <!-- Cart with Badge -->
+                    <div class="relative">
+                        <div id="cartBtn"
+                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+
+                        </div>
+                        <span id="cartCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </div>
+
+                    <!-- notification -->
+                    <div class="relative">
+                        <div id="notificationBtn"
+                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                        </div>
+                        <span id="notificationCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </div>
+
+                    <!-- Profile Wrapper -->
+                    <div id="profileWrapper" class="relative">
+                        <!-- Profile Icon -->
+                        <a href="profile.html"
+                            class="flex items-center justify-center text-slate-700
+                                hover:text-indigo-600 transition-transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                        3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                        a7.5 7.5 0 0 1 14.998 0A17.933
+                                        17.933 0 0 1 12 21.75c-2.676
+                                        0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </a>
+
+                        <!-- Dropdown -->
+                        <div
+                            id="profileDropdown"
+                            class="absolute left-1/2 top-full mt-3 -translate-x-1/2
+                                min-w-[180px] bg-white rounded-2xl shadow-xl border
+                                opacity-0 invisible translate-y-1
+                                transition-all duration-200">
+
+                            <a href="profile.html"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
+                                    hover:bg-slate-100 rounded-t-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-4 h-4 text-slate-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                            3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                            a7.5 7.5 0 0 1 14.998 0" />
+                                </svg>
+                                View Profile
+                            </a>
+
+                            <div class="h-px bg-slate-100"></div>
+
+                            <button
+                                id="logoutBtn"
+                                class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
+                                    text-red-600 hover:bg-red-50 rounded-b-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 9V5.25A2.25 2.25 0 0 0
+                                            13.5 3h-6A2.25 2.25 0 0 0
+                                            5.25 5.25v13.5A2.25 2.25 0 0 0
+                                            7.5 21h6a2.25 2.25 0 0 0
+                                            2.25-2.25V15
+                                            M18 12H9
+                                            M14 8l4 4-4 4" />
+                                </svg>
+                                Logout
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button
+                        id="loginBtn"
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600
+                            text-white px-4 py-2 text-sm rounded-full font-medium
+                            hover:shadow-md transition-all hover:scale-105">
+                        Login
+                    </button>
+
+                </div>
+            </div>
         </div>
-    </header>
+    </nav>
 
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-10">
@@ -162,8 +276,15 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/product/productService.js"></script>
-    <script src="assets/js/product/details.js"></script>
 </body>
+
+<script src="assets/js/api.js"></script>
+
+<script src="assets/js/auth/authService.js"></script>
+<script src="assets/js/cart/cartService.js"></script>
+<script src="assets/js/product/productService.js"></script>
+
+<script src="assets/js/product/details.js"></script>
+<script src= "assets/js/navbar.js"></script>
+
 </html>

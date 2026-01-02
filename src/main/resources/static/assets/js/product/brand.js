@@ -1,12 +1,11 @@
-// ---------- STATE ----------
-
 let brandState = {
     brands: [],
     selectedBrandSlug: null,
     selectedBrand: null,
     products: [],
     filteredProducts: [],
-    searchQuery: ''
+    searchQuery: '',
+    cartCount: 0
 };
 
 // helper: convert name to slug, similar to product page
@@ -34,7 +33,7 @@ function showToast(message,type="info", duration = 3000){
         setTimeout(()=>{
             toast.remove();
         },duration);
-    }
+}
 
 // simple helper to get an array from your API response
 function toArray(res) {
@@ -61,8 +60,14 @@ function getBrandSlugFromUrl() {
 async function initBrandPage() {
     try {
         // 1) load all brands for sidebar
-        const brandsRes = await productService.getProductsByBrandDetails();
+        const [brandsRes, cartResp] = await Promise.all([
+            productService.getProductsByBrandDetails(),
+            cartService.getCartCount()
+        ])
         brandState.brands = toArray(brandsRes);
+        if(cartResp.success){
+            brandState.cartCount = cartResp.data.totalCartItems || 0;
+        }
 
         // 2) decide which brand is selected (from URL or first brand)
         let urlSlug = getBrandSlugFromUrl();
@@ -81,6 +86,7 @@ async function initBrandPage() {
         renderBrandHeader();
         renderBrandProducts();
 
+        updateCartCount();
         setupBrandEventListeners();
     } catch (err) {
         console.error('Error initializing brand page:', err);
@@ -92,32 +98,7 @@ async function initBrandPage() {
     }
 }
 
- //sort functionality
-//     const sortSelect = document.getElementById('sortSelect');
-//     if (sortSelect) {
-//         sortSelect.addEventListener('change', handleSort);
-//     }
-
-//     //handling sort 
-// function handleSort(e) {
-//     const sortBy = e.target.value;
-
-//     switch (sortBy) {
-//         case 'price-asc':
-//             state.filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
-//             break;
-//         case 'price-desc':
-//             state.filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
-//             break;
-//         default:
-//             state.filteredProducts = [...state.products];
-//     }
-//     renderProducts();
-// }
-
-
 // ---------- LOAD BRAND DATA ----------
-
 async function loadBrandBySlug(slug) {
     try {
         const res = await productService.getProductsByBrandSlug(slug);
@@ -277,7 +258,6 @@ function renderBrandHeader() {
 
 // ---------- RENDER: PRODUCTS ----------  
 
-
 function createBrandProductCard(product) {
     const productCard = document.createElement('div');
     productCard.className =
@@ -364,9 +344,12 @@ function createBrandProductCard(product) {
             if (stock === 0) return;
 
             try {
+                showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(productId);
-                if(response.success)
+                if(response.success){
+                    await updateCartCountByFetching();
                     showToast(response.message || 'Added to cart!', 'success');
+                }
                 else
                     showToast(response.message || 'Failed to add to cart', 'error');
             } catch (err) {
@@ -470,6 +453,25 @@ function setupBrandEventListeners() {
     }
 }
 
-// ---------- BOOTSTRAP ----------
+function updateCartCount() {
+    const countElement = document.getElementById('cartCount');
+    if (countElement) {
+        countElement.textContent = brandState.cartCount || 0;
+    }
+}
+
+async function updateCartCountByFetching() {
+    const resp = await cartService.getCartCount();
+    if(resp.success){
+        brandState.cartCount = resp.data.totalCartItems || 0;
+        updateCartCount();
+    }else{
+        console.error("Failed to fetch cart count");
+    }
+}
+
+document.getElementById('cartBtn').addEventListener('click', () => {
+    window.location.href = 'cart.html';
+});
 
 document.addEventListener('DOMContentLoaded', initBrandPage);

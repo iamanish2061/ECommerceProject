@@ -1,0 +1,64 @@
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+@keyframes blob {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+.subcategory-enter {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.subcategory-enter.active {
+    max-height: 300px;
+}
+
+.tags-dropdown {
+    position: relative;
+}
+
+.tags-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.tags-menu.active {
+    display: block;
+}

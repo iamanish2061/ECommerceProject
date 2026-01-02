@@ -1,5 +1,6 @@
 // State management for the product page
 let state = {
+    recommendedProducts: [],
     categories: [],
     brands: [],
     tags: [],
@@ -25,9 +26,9 @@ function toSlug(str) {
         .replace(/^-+|-+$/g, '');
 }
 
-function showToast(message,type="info", duration = 3000){
+function showToast(message, type = "info", duration = 3000) {
     const toastContainer = document.getElementById('toast-container');
-    if(!toastContainer) return;
+    if (!toastContainer) return;
 
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -35,9 +36,9 @@ function showToast(message,type="info", duration = 3000){
 
     toastContainer.appendChild(toast);
 
-    setTimeout(()=>{
+    setTimeout(() => {
         toast.remove();
-    },duration);
+    }, duration);
 }
 
 // Helper to extract array from API responses
@@ -50,6 +51,26 @@ function toArray(res) {
     if (data && Array.isArray(data.products)) return data.products;
 
     return [];
+}
+
+// Helper to extract products response with personalized recommendations
+function extractProductsResponse(res) {
+    if (!res || !res.data) return { products: [], personalized: [] };
+    const data = res.data;
+
+    // Handle response with personalized and products arrays
+    if (data.personalized && data.products) {
+        return {
+            products: Array.isArray(data.products) ? data.products : [],
+            personalized: Array.isArray(data.personalized) ? data.personalized : []
+        };
+    }
+
+    // Fallback for other response formats
+    return {
+        products: toArray(res),
+        personalized: []
+    };
 }
 
 // Initialize the page
@@ -66,9 +87,13 @@ async function init() {
         state.categories = toArray(categoriesRes);
         state.brands = toArray(brandsRes);
         state.tags = toArray(tagsRes);
-        state.products = toArray(productsRes);
+
+        // Extract products and personalized recommendations
+        const productsData = extractProductsResponse(productsRes);
+        state.products = productsData.products;
+        state.recommendedProducts = productsData.personalized;
         state.filteredProducts = [...state.products];
-        if(cartRes.success){
+        if (cartRes.success) {
             state.cartCount = cartRes.data.totalCartItems || 0;
         }
 
@@ -82,6 +107,7 @@ async function init() {
         renderCategories();
         renderBrands();
         renderTags();
+        renderRecommendedProducts();
         renderProducts();
 
         updateCartCount();
@@ -470,21 +496,21 @@ function createProductCard(product) {
     const imageUrl = product.imageUrl || null;
 
     // Stock status badge
-    const stockStatus = stock > 10 
+    const stockStatus = stock > 10
         ? `<span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">In Stock</span>`
-        : stock > 0 
+        : stock > 0
             ? `<span class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">Low Stock</span>`
             : `<span class="text-xs text-red-700 bg-red-100 px-2 py-1 rounded-full">Out of Stock</span>`;
 
     productCard.innerHTML = `
         <div class="relative overflow-hidden rounded-xl">  <!-- ADD overflow-hidden here -->
             <div class="bg-gray-50 h-64 flex items-center justify-center group">  <!-- ADD group class -->
-                ${imageUrl 
-                    ? `<img src="${imageUrl}" alt="${productName}" 
+                ${imageUrl
+            ? `<img src="${imageUrl}" alt="${productName}" 
                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'; this.onerror=null;">`
-                    : `<div class="w-full h-full flex items-center justify-center text-6xl text-gray-300">📦</div>`
-                }
+            : `<div class="w-full h-full flex items-center justify-center text-6xl text-gray-300">📦</div>`
+        }
             </div>
             <div class="absolute top-3 right-3">
                 ${stockStatus}
@@ -545,10 +571,10 @@ function createProductCard(product) {
             try {
                 showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(productId);
-                if(response && response.success){
+                if (response && response.success) {
                     await updateCartCountByFetching();
                     showToast(response.message || 'Added to cart!', 'success');
-                }else
+                } else
                     showToast(response.message || 'Failed to add to cart', 'error');
             } catch (err) {
                 console.error('Failed to add to cart:', err);
@@ -569,7 +595,7 @@ function createProductCard(product) {
                 setTimeout(() => {
                     window.location.href = '/checkoutBuy.html?productId=' + encodeURIComponent(productId);
                 }, 500);
-                
+
             } catch (err) {
                 console.error('Buy now failed:', err);
                 showToast('Could not proceed to buy', 'error');
@@ -627,23 +653,45 @@ function renderProducts() {
     });
 }
 
-document.getElementById('cartButton').addEventListener('click', () => {
+// Render recommended/personalized products
+function renderRecommendedProducts() {
+    const container = document.getElementById('recommendedContainer');
+    const section = document.getElementById('recommendedSection');
+
+    if (!container || !section) return;
+
+    // Hide section if no recommended products
+    if (!state.recommendedProducts || state.recommendedProducts.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    // Show section and populate products
+    section.style.display = 'block';
+    container.innerHTML = '';
+
+    state.recommendedProducts.forEach(product => {
+        container.appendChild(createProductCard(product));
+    });
+}
+
+document.getElementById('cartBtn').addEventListener('click', () => {
     window.location.href = 'cart.html';
 });
 
 function updateCartCount() {
     const countElement = document.getElementById('cartCount');
     if (countElement) {
-            countElement.textContent = state.cartCount || 0;
+        countElement.textContent = state.cartCount || 0;
     }
 }
 
 async function updateCartCountByFetching() {
     const resp = await cartService.getCartCount();
-    if(resp.success){
+    if (resp.success) {
         state.cartCount = resp.data.totalCartItems || 0;
         updateCartCount();
-    }else{
+    } else {
         console.error("Failed to fetch cart count");
     }
 }

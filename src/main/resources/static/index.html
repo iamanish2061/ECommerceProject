@@ -9,143 +9,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/toast.css">
-
+    <link rel="stylesheet" href="/assets/css/index.css">
     <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        @keyframes blob {
-
-            0%,
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            33% {
-                transform: translate(30px, -50px) scale(1.1);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) scale(0.9);
-            }
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes gradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
-
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-
-        .animation-delay-6000 {
-            animation-delay: 6s;
-        }
-
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(147, 197, 253, 0.1) 0%, transparent 50%);
-            background-size: 200% 200%;
-            animation: gradientShift 15s ease infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(59, 130, 246, 0.03) 2px, rgba(59, 130, 246, 0.03) 4px),
-                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(99, 102, 241, 0.03) 2px, rgba(99, 102, 241, 0.03) 4px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .product-card {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .product-card .product-image-extend {
-            position: absolute;
-            right: -100%;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            transition: right 0.5s ease-out;
-            z-index: 10;
-        }
-
-        .product-card:hover .product-image-extend {
-            right: 0;
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .review-card:hover {
-            transform: scale(1.05);
+        #profileWrapper:hover #profileDropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0);
         }
     </style>
+
+</style>
+
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
@@ -163,41 +37,110 @@
     <div
         class="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-35 animate-blob animation-delay-6000">
     </div>
-    <!-- Navbar -->
-    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo -->
-                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                <a href="index.html"
+                class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
                 </a>
 
                 <!-- Nav Links -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="index.html"
-                        class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">Home</a>
                     <a href="product.html"
-                        class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">Shop</a>
-                    <a href="about.html"
-                        class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">Services</a>
+                    class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">
+                        Shop
+                    </a>
+                    <a href="service.html"
+                    class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">
+                        Services
+                    </a>
+                    <a href="reviews.html"
+                    class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">
+                        Review
+                    </a>
                 </div>
 
                 <!-- Auth & Profile -->
-                <div class="flex items-center gap-12">
-                    <a href="profile.html" id="profileBtn"
-                        class="hidden text-slate-700 hover:text-indigo-600 transition-all hover:scale-105 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                    </a>
-                    <button id="authBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all hover:scale-105">
+                <div class="flex items-center gap-6">
+                    <!-- Profile Wrapper -->
+                    <div id="profileWrapper" class="hidden relative">
+                        <!-- Profile Icon -->
+                        <a href="profile.html"
+                            class="flex items-center justify-center text-slate-700
+                                hover:text-indigo-600 transition-transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                        3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                        a7.5 7.5 0 0 1 14.998 0A17.933
+                                        17.933 0 0 1 12 21.75c-2.676
+                                        0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </a>
+
+                        <!-- Dropdown -->
+                        <div
+                            id="profileDropdown"
+                            class="absolute left-1/2 top-full mt-3 -translate-x-1/2
+                                min-w-[180px] bg-white rounded-2xl shadow-xl border
+                                opacity-0 invisible translate-y-1
+                                transition-all duration-200">
+
+                            <a href="profile.html"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
+                                    hover:bg-slate-100 rounded-t-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-4 h-4 text-slate-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                            3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                            a7.5 7.5 0 0 1 14.998 0" />
+                                </svg>
+                                View Profile
+                            </a>
+
+                            <div class="h-px bg-slate-100"></div>
+
+                            <button
+                                id="logoutBtn"
+                                class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
+                                    text-red-600 hover:bg-red-50 rounded-b-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 9V5.25A2.25 2.25 0 0 0
+                                            13.5 3h-6A2.25 2.25 0 0 0
+                                            5.25 5.25v13.5A2.25 2.25 0 0 0
+                                            7.5 21h6a2.25 2.25 0 0 0
+                                            2.25-2.25V15
+                                            M18 12H9
+                                            M14 8l4 4-4 4" />
+                                </svg>
+                                Logout
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button
+                        id="loginBtn"
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600
+                            text-white px-4 py-2 text-sm rounded-full font-medium
+                            hover:shadow-md transition-all hover:scale-105">
                         Login
-                    </button>
-                    <button id="notifyBtn" class="font-medium  hover:text-indigo-600 transition-all hover:scale-105">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
                     </button>
                 </div>
             </div>
@@ -216,7 +159,7 @@
                 <p class="text-xl text-slate-600 leading-relaxed">
                     Experience the perfect blend of traditional barbering and modern style. At CutLab, we craft more
                     than haircuts.
-                    <p class="text-3xl font-medium">We Create <span class="text-indigo-600 font-bold">Confidence.</span></p>
+                <p class="text-3xl font-medium">We Create <span class="text-indigo-600 font-bold">Confidence.</span></p>
                 </p>
                 <div class="flex gap-4">
                     <a href="product.html"
@@ -236,9 +179,11 @@
             <div class="relative animate-float">
                 <div class="w-[480px] h-[480px] mx-auto rounded-full overflow-hidden shadow-2xl">
                     <div class="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 p-8">
-                        <div class="w-full h-full rounded-full overflow-hidden bg-white shadow-2xl ring-12 ring-white/70">
-                            <img class="w-full h-full object-contain" src="assets/svg/CutLab.svg" alt="Professional barbers at work in CutLab salon">
-                
+                        <div
+                            class="w-full h-full rounded-full overflow-hidden bg-white shadow-2xl ring-12 ring-white/70">
+                            <img class="w-full h-full object-contain" src="assets/svg/CutLab.svg"
+                                alt="Professional barbers at work in CutLab salon">
+
                         </div>
                     </div>
                 </div>
@@ -330,7 +275,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <!-- Left: Image -->
             <div class="relative">
-                <div class=" bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl p-12 shadow-xl transform hover:scale-105 hover:shadow-2xl transition-transform duration-300">
+                <div
+                    class=" bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl p-12 shadow-xl transform hover:scale-105 hover:shadow-2xl transition-transform duration-300">
                     <div class="text-9xl text-center text-white">
                         <img class="w-full h-60 rounded-full object-contain" src="assets/svg/AboutUs.svg" alt="AboutUs">
                     </div>
@@ -341,7 +287,7 @@
             <div class="space-y-6">
                 <h2 class="text-4xl font-bold text-slate-800">About CutLab</h2>
                 <p class="text-lg text-slate-600 leading-relaxed">
-                    Founded in 2025, CutLab has revolutionized the barbershop experience. We combine traditional
+                    Founded in 2020, CutLab has revolutionized the barbershop experience. We combine traditional
                     craftsmanship with modern techniques to deliver exceptional grooming services.
                 </p>
                 <p class="text-lg text-slate-600 leading-relaxed">
@@ -350,7 +296,7 @@
                 </p>
                 <div class="grid grid-cols-3 gap-4 pt-4">
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600">500+</div>
+                        <div class="text-3xl font-bold text-blue-600">400+</div>
                         <div class="text-slate-600">Happy Clients</div>
                     </div>
                     <div class="text-center">
@@ -358,7 +304,7 @@
                         <div class="text-slate-600">Rated Service</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600">10+</div>
+                        <div class="text-3xl font-bold text-blue-600">5+</div>
                         <div class="text-slate-600">Years Experience</div>
                     </div>
                 </div>
@@ -606,12 +552,12 @@
                         <ul class="space-y-2">
                             <li><a href="index.html"
                                     class="text-slate-400 hover:text-blue-400 transition-colors">Home</a></li>
-                            <li><a href="products.html"
+                            <li><a href="product.html"
                                     class="text-slate-400 hover:text-blue-400 transition-colors">Shop</a></li>
+                            <li><a href="service.html"
+                                    class="text-slate-400 hover:text-blue-400 transition-colors">Services</a></li>
                             <li><a href="about.html"
                                     class="text-slate-400 hover:text-blue-400 transition-colors">About</a></li>
-                            <li><a href="cart.html"
-                                    class="text-slate-400 hover:text-blue-400 transition-colors">Cart</a></li>
                         </ul>
                     </div>
 
@@ -648,9 +594,26 @@
 
     <div id="toast-container"></div>
 
-    <!-- <script src="assets/js/api.js"></script>
-    <script src="assets/js/auth/authService.js"></script>
-    <script src="assets/js/auth/auth.js"></script> -->
 </body>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth/authService.js"></script>
+<script src="assets/js/navbar.js"></script>
+<script>
+    function showToast(message, type = "info", duration = 3000) {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, duration);
+    } 
+</script>
 
 </html>

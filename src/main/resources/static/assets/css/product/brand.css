@@ -1,0 +1,25 @@
+* {
+    font-family: 'Poppins', sans-serif;
+}
+.tags-dropdown {
+    position: relative;
+}
+
+.tags-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.tags-menu.active {
+    display: block;
+}

@@ -1,7 +1,8 @@
 // State
 let detailsState = {
     product: null,
-    currentImageIndex: 0
+    currentImageIndex: 0,
+    cartCount: 0
 };
 
 // Toast
@@ -57,10 +58,17 @@ async function initDetailsPage() {
     }
 
     try {
-        const res = await productService.getProductsById(id);
+        const [res, cartResp] = await Promise.all([
+            productService.getProductsById(id),
+            cartService.getCartCount()
+        ])
+        
         if (!res || res.success === false) {
             showDetailsError(res?.message || "Failed to load product.");
             return;
+        }
+        if(cartResp.success){
+            brandState.cartCount = cartResp.data.totalCartItems || 0;
         }
 
         const product = extractProduct(res);
@@ -68,9 +76,9 @@ async function initDetailsPage() {
             showDetailsError("Product not found.");
             return;
         }
-
         detailsState.product = product;
         renderDetails(product);
+        updateCartCount();
     } catch (err) {
         console.error("Error loading product:", err);
         showDetailsError("Error loading product. Please try again.");
@@ -188,18 +196,26 @@ function renderDetails(product) {
     const buyBtn = document.getElementById('detailsBuyNow');
 
     if (addBtn) {
-        addBtn.onclick = async () => {
-            if (product.stock <= 0) return showToast('Out of stock', 'error');
+        addBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (product.stock <= 0){
+                showToast('Out of stock', 'error');
+                return;
+            }
             try {
+                showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(product.id);
-                if(response.success)
+                if(response.success){
+                    await updateCartCountByFetching();
                     showToast(response.message || 'Added to cart!', 'success');
+                }
                 else
                     showToast(response.message || 'Failed to add to cart', 'error');
             } catch (err) {
-                showToast('Failed to add to cart', 'error');
+                console.error('Failed to add to cart:', err);
+                showToast('Could not add to cart', 'error');
             }
-        };
+        });
     }
 
     if (buyBtn) {
@@ -220,6 +236,27 @@ function renderDetails(product) {
         });
     }
 }
+
+function updateCartCount() {
+    const countElement = document.getElementById('cartCount');
+    if (countElement) {
+        countElement.textContent = brandState.cartCount || 0;
+    }
+}
+
+async function updateCartCountByFetching() {
+    const resp = await cartService.getCartCount();
+    if(resp.success){
+        brandState.cartCount = resp.data.totalCartItems || 0;
+        updateCartCount();
+    }else{
+        console.error("Failed to fetch cart count");
+    }
+}
+
+document.getElementById('cartBtn').addEventListener('click', () => {
+    window.location.href = 'cart.html';
+});
 
 // Start
 document.addEventListener('DOMContentLoaded', initDetailsPage);

@@ -1,28 +1,52 @@
 // checkout.js
 let addressConfirmed = false;
+let productData = {};
+let cartCount = 0;
 
-
-document.addEventListener("DOMContentLoaded", () => {
+async function initCheckoutBuyPage() {
     const productId = getFromUrl("productId");
-    loadProductInfo();
-
-    async function loadProductInfo() {
-        const productInfoResponse = await checkoutService.getProductInfo(productId);
-        const productData = productInfoResponse.data;
-
-        if (!productData) {
-            showToast("Product not found", "error");
-            return;
+    try {
+        // 1) load all brands for sidebar
+        const [productResp, cartResp] = await Promise.all([
+            checkoutService.getProductInfo(productId),
+            cartService.getCartCount()
+        ])
+        productData = productResp.data;
+        if(cartResp.success){
+            cartCount = cartResp.data.totalCartItems || 0;
         }
 
-        const productImageUrl = productData.images.filter(img=>img.thumbnail === true).map(img=>img.url);
-
-        document.getElementById("productImage").src = productImageUrl || 'default-image.png';
-        document.getElementById("productName").textContent = productData.name;
-        document.getElementById("productDescription").textContent = productData.shortDescription;
-        document.getElementById("productPrice").textContent = `Rs. ${productData.price.toFixed(2)}`;
-
+        renderProductInfo();
+        updateCartCount();
+    } catch (err) {
+        console.error('Error initializing brand page:', err);
+        showToast("Failed to load product!", "error");
     }
+}
+
+function renderProductInfo() {
+    
+    if (!productData) {
+        showToast("Product not found", "error");
+        return;
+    }
+
+    const productImageUrl = productData.images.filter(img=>img.thumbnail === true).map(img=>img.url);
+
+    document.getElementById("productImage").src = productImageUrl || 'default-image.png';
+    document.getElementById("productName").textContent = productData.name;
+    document.getElementById("productDescription").textContent = productData.shortDescription;
+    document.getElementById("productPrice").textContent = `Rs. ${productData.price.toFixed(2)}`;
+
+}
+
+function updateCartCount() {
+    const countElement = document.getElementById('cartCount');
+    if (countElement) {
+        countElement.textContent = cartCount || 0;
+    }
+}
+
 // ===== ELEMENTS =====
     const phoneInput = document.getElementById("phoneNumber");
 
@@ -299,5 +323,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    document.getElementById("cartBtn").addEventListener("click", ()=>{
+        window.location.href = "cart.html";
+    })
 
-});
+document.addEventListener('DOMContentLoaded', initCheckoutBuyPage);

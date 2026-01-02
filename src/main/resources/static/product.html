@@ -9,71 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/toast.css">
-
+    <link rel="stylesheet" href="/assets/css/product/product.css">
     <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        @keyframes blob {
-
-            0%,
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            33% {
-                transform: translate(30px, -50px) scale(1.1);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) scale(0.9);
-            }
-        }
-
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
-
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-
-        .subcategory-enter {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .subcategory-enter.active {
-            max-height: 300px;
-        }
-
-        .tags-dropdown {
-            position: relative;
-        }
-
-        .tags-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            min-width: 200px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .tags-menu.active {
-            display: block;
+        #profileWrapper:hover #profileDropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0);
         }
     </style>
 </head>
@@ -91,77 +32,141 @@
         class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
     </div>
 
-    <!-- Header -->
-   <!-- Header -->
-<header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex items-center justify-between">
-            <!-- Logo -->
-            <h1 class="text-3xl font-bold text-slate-800 flex-shrink-0">
-                Cut<span class="text-blue-600">Lab</span>
-            </h1>
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="index.html"
+                class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                    Cut<span class="text-blue-600">Lab</span>
+                </a>
 
-            <!-- Desktop: Search + Cart -->
-            <div class="hidden md:flex items-center flex-1 max-w-xl mx-8 gap-6">
-                <!-- Search Bar -->
-                <div class="relative flex-1">
-                    <input type="text" id="searchInput" placeholder="Search products..."
-                        class="w-full px-6 py-3 rounded-full border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition-all shadow-sm" />
-                    <svg class="absolute right-4 top-3.5 text-slate-400" width="20" height="20" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </div>
-
-                <!-- Cart with Badge -->
-                <div class="relative">
-                    <div id="cartButton"
-                        class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                <!-- Desktop: Search + Cart -->
+                <div class="hidden md:flex items-center flex-1 max-w-xl mx-8 gap-6">
+                    <!-- Search Bar -->
+                    <div class="relative flex-1">
+                        <input type="text" id="searchInput" placeholder="Search products..."
+                            class="w-full px-6 py-3 rounded-full border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition-all shadow-sm" />
+                        <svg class="absolute right-4 top-3.5 text-slate-400" width="20" height="20" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-
                     </div>
-                    <span id="cartCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
-                        0
-                    </span>
                 </div>
-            </div>
 
-            <!-- Right Group: Icons + Login (Desktop)  -->
-            <div class="flex items-center gap-6">
+                <!-- Auth & Profile -->
+                <div class="flex items-center gap-6">
+                    <!-- Cart with Badge -->
+                    <div class="relative">
+                        <div id="cartBtn"
+                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
 
-                <!-- Desktop Icons + Login -->
-                <div class="hidden md:flex items-center gap-8">
+                        </div>
+                        <span id="cartCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </div>
 
-                    <a href="profile.html" id="profileBtn"
-                        class="text-slate-700 hover:text-indigo-600 transition-all hover:scale-105 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                    </a>
+                    <!-- notification -->
+                    <div class="relative">
+                        <div id="notificationBtn"
+                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                        </div>
+                        <span id="notificationCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </div>
 
-                    <button id="authBtn"
-                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all hover:scale-105">
+                    <!-- Profile Wrapper -->
+                    <div id="profileWrapper" class="relative">
+                        <!-- Profile Icon -->
+                        <a href="profile.html"
+                            class="flex items-center justify-center text-slate-700
+                                hover:text-indigo-600 transition-transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                        3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                        a7.5 7.5 0 0 1 14.998 0A17.933
+                                        17.933 0 0 1 12 21.75c-2.676
+                                        0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </a>
+
+                        <!-- Dropdown -->
+                        <div
+                            id="profileDropdown"
+                            class="absolute left-1/2 top-full mt-3 -translate-x-1/2
+                                min-w-[180px] bg-white rounded-2xl shadow-xl border
+                                opacity-0 invisible translate-y-1
+                                transition-all duration-200">
+
+                            <a href="profile.html"
+                            class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
+                                    hover:bg-slate-100 rounded-t-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-4 h-4 text-slate-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                            3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                            a7.5 7.5 0 0 1 14.998 0" />
+                                </svg>
+                                View Profile
+                            </a>
+
+                            <div class="h-px bg-slate-100"></div>
+
+                            <button
+                                id="logoutBtn"
+                                class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
+                                    text-red-600 hover:bg-red-50 rounded-b-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 9V5.25A2.25 2.25 0 0 0
+                                            13.5 3h-6A2.25 2.25 0 0 0
+                                            5.25 5.25v13.5A2.25 2.25 0 0 0
+                                            7.5 21h6a2.25 2.25 0 0 0
+                                            2.25-2.25V15
+                                            M18 12H9
+                                            M14 8l4 4-4 4" />
+                                </svg>
+                                Logout
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button
+                        id="loginBtn"
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600
+                            text-white px-4 py-2 text-sm rounded-full font-medium
+                            hover:shadow-md transition-all hover:scale-105">
                         Login
                     </button>
 
-
-                   <button id="notifyBtn" class="font-medium hover:text-indigo-600 transition-all hover:scale-105">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
-                    </button>
-                   
                 </div>
-
-
             </div>
         </div>
-    </div>
-</header>
+    </nav>
 
     <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-10 py-8 relative z-10">
         <div class="flex flex-col lg:flex-row gap-8">
@@ -188,7 +193,7 @@
             <main class="flex-1">
                 <!-- Recommended for You Section -->
                 <div id="recommendedSection" class="bg-white rounded-3xl shadow-lg p-8 mb-6" style="display: none;">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Recommended for You</h2>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">User like you also prefer:</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-6"
                         id="recommendedContainer"></div>
                 </div>
@@ -201,9 +206,13 @@
                         <!--Sort and tags-->
                         <div class="flex items-center gap-4">
 
-                           <!-- Tags Dropdown -->
+                            <!-- Tags Dropdown -->
                             <div class="tags-dropdown">
-                                <button id="tagsBtn" class="bg-white border-2 border-slate-200 text-slate-700 px-6 py-3 rounded-full flex items-center gap-2 shadow-sm hover:shadow-md transition-all hover:border-blue-400">
+                                <button id="tagsBtn" 
+                                    class="bg-white px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-700
+                                        flex items-center gap-2
+                                        focus:outline-none focus:border-blue-400
+                                        hover:border-blue-400 transition">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
@@ -222,7 +231,11 @@
                                 </div>
                             </div>    
                        
-                            <select id="sortSelect" class="px-4 py-2 rounded-xl border-2 border-slate-200 focus:border-blue-400 focus:outline-none">
+                            <select id="sortSelect" 
+                                class="bg-white px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-700
+                                        flex items-center gap-2
+                                        focus:outline-none focus:border-blue-400
+                                        hover:border-blue-400 transition">
                                 <option value="featured">Sort by: Featured</option>
                                 <option value="price-asc">Price: Low to High</option>
                                 <option value="price-desc">Price: High to Low</option>
@@ -235,7 +248,7 @@
                         id="productsContainer">
                         <div class="col-span-full flex flex-col items-center justify-center min-h-96 py-12">
                             <div
-                                class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent">
+                                claass="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent">
                             </div>
                             <p class="mt-6 text-lg text-slate-600 font-medium">Loading products...</p>
                         </div>
@@ -246,13 +259,18 @@
     </div>
 
     <div id="toast-container"></div>
-    <!-- Include JavaScript files -->
-    <script src="assets/js/api.js"></script>
-    <!-- <script src="assets/js/auth/authService.js"></script>
-    <script src="assets/js/auth/auth.js"></script> -->
-    <script src="assets/js/product/productService.js"></script>
-    <script src="assets/js/cart/cartService.js"></script>
-    <script src="assets/js/product/product.js"></script>
+
 </body>
 
+<script src="assets/js/api.js"></script>
+
+<script src="assets/js/auth/authService.js"></script>
+<script src="assets/js/product/productService.js"></script>
+<script src="assets/js/cart/cartService.js"></script>
+
+<script src="assets/js/product/product.js"></script>
+<script src="assets/js/navbar.js"></script>
+
 </html>
+
+
