@@ -1,30 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CutLab - Notification</title>
+    <title>CutLab - Notifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/toast.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        #profileWrapper:hover #profileDropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0);
+        }
+
+        .notification-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+
+        .notification-card.unread {
+            background: linear-gradient(to right, #eff6ff, white);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .notification-card.read {
+            background: white;
+            border-left: 4px solid #f1f5f9;
+        }
+
+        .mark-read-slide {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
 </head>
-<body>
-    
-    <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h1 class="text-2xl font-extrabold text-gray-800">Your Notifications</h1>
-            <button id="mark-all-read-btn" class="text-sm font-semibold text-blue-600 hover:text-blue-800">
-                Mark all as read
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative w-full overflow-x-hidden">
+
+    <!-- Abstract Background Blobs -->
+    <div
+        class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
+    </div>
+    <div
+        class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
+    </div>
+    <div
+        class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+    </div>
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                    Cut<span class="text-blue-600">Lab</span>
+                </a>
+
+                <!-- Auth & Profile -->
+                <div class="flex items-center gap-6">
+                    <!-- Cart with Badge -->
+                    <div class="relative">
+                        <div id="cartBtn"
+                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+
+                        </div>
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold 
+                            rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </div>
+
+                    <!-- notification -->
+                    <div class="relative">
+                        <div id="notificationBtn"
+                            class="text-slate-700 p-3 flex items-center justify-center cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                        </div>
+
+                        <span id="notificationCount" class="absolute -top-1 -right-1 hidden h-5 w-5">
+                            <span id="notifPing"
+                                class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span
+                                class="notif-count-text relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-red-500 text-white text-xs font-semibold shadow-lg ring-2 ring-white">0</span>
+                        </span>
+
+                        <div id="notificationDropdown"
+                            class="absolute left-1/2 -translate-x-1/2 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
+                            <div
+                                class="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                                <span class="font-bold text-slate-800 text-base">Notifications</span>
+                                <button id="markAllReadBtn"
+                                    class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Mark
+                                    all read</button>
+                            </div>
+                            <div id="notificationItemsList" class="max-h-[400px] overflow-y-auto"></div>
+                            <a href="notification.html"
+                                class="block py-4 text-center text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-t border-slate-50">View
+                                All Notifications</a>
+                        </div>
+                    </div>
+
+                    <!-- Profile Wrapper -->
+                    <div id="profileWrapper" class="relative">
+                        <!-- Profile Icon -->
+                        <a href="profile.html" class="flex items-center justify-center text-slate-700
+                                hover:text-indigo-600 transition-transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                        3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                        a7.5 7.5 0 0 1 14.998 0A17.933
+                                        17.933 0 0 1 12 21.75c-2.676
+                                        0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </a>
+
+                        <!-- Dropdown -->
+                        <div id="profileDropdown" class="absolute left-1/2 top-full mt-3 -translate-x-1/2
+                                min-w-[180px] bg-white rounded-2xl shadow-xl border
+                                opacity-0 invisible translate-y-1
+                                transition-all duration-200">
+
+                            <a href="profile.html" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
+                                    hover:bg-slate-100 rounded-t-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                            3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                            a7.5 7.5 0 0 1 14.998 0" />
+                                </svg>
+                                View Profile
+                            </a>
+
+                            <div class="h-px bg-slate-100"></div>
+
+                            <button id="logoutBtn" class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
+                                    text-red-600 hover:bg-red-50 rounded-b-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0
+                                            13.5 3h-6A2.25 2.25 0 0 0
+                                            5.25 5.25v13.5A2.25 2.25 0 0 0
+                                            7.5 21h6a2.25 2.25 0 0 0
+                                            2.25-2.25V15
+                                            M18 12H9
+                                            M14 8l4 4-4 4" />
+                                </svg>
+                                Logout
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button id="loginBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600
+                            text-white px-4 py-2 text-sm rounded-full font-medium
+                            hover:shadow-md transition-all hover:scale-105">
+                        Login
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-10 py-8 relative z-10">
+        <!-- Header -->
+        <div class="bg-white rounded-3xl shadow-lg p-8 mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-blue-100 rounded-2xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-8 h-8 text-blue-600">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">All Notifications</h1>
+                        <p class="text-slate-500 text-sm" id="notificationSummary">Loading...</p>
+                    </div>
+                </div>
+                <button id="markAllReadBtnPage"
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Mark All as Read
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="bg-white rounded-2xl shadow-lg p-2 mb-6 flex gap-2">
+            <button id="filterAll"
+                class="filter-btn flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all bg-blue-600 text-white">
+                All
+            </button>
+            <button id="filterUnread"
+                class="filter-btn flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-100">
+                Unread
+            </button>
+            <button id="filterRead"
+                class="filter-btn flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-100">
+                Read
             </button>
         </div>
 
-        <div id="full-page-notif-list" class="space-y-2">
+        <!-- Notifications List -->
+        <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div id="allNotificationsList" class="divide-y divide-slate-100">
+                <!-- Loading State -->
+                <div class="flex flex-col items-center justify-center py-16">
+                    <div
+                        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent">
+                    </div>
+                    <p class="mt-4 text-slate-500 font-medium">Loading notifications...</p>
+                </div>
             </div>
+        </div>
+
+        <!-- Back to Products -->
+        <div class="mt-6 text-center">
+            <a href="product.html"
+                class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+                Back to Products
+            </a>
+        </div>
     </div>
 
-    <script>
-        document.getElementById('mark-all-read-btn').addEventListener('click', async () => {
-            const res = await notificationService.markAllRead();
-            if (res.success) location.reload(); // Refresh to show all as read
-        });
-    </script>   
+    <div id="toast-container"></div>
 
 </body>
+
+<script src="assets/js/api.js"></script>
+
+<script src="assets/js/notification/notificationService.js"></script>
+<script src="assets/js/auth/authService.js"></script>
+<script src="assets/js/cart/cartService.js"></script>
+
+<script src="assets/js/navbar.js"></script>
+<script src="assets/js/notification/notification.js"></script>
+
+<!-- Page-specific script for All Notifications -->
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const listContainer = document.getElementById('allNotificationsList');
+        const summaryEl = document.getElementById('notificationSummary');
+        const markAllBtn = document.getElementById('markAllReadBtnPage');
+        const filterAll = document.getElementById('filterAll');
+        const filterUnread = document.getElementById('filterUnread');
+        const filterRead = document.getElementById('filterRead');
+
+        let allNotifications = [];
+        let currentFilter = 'all';
+
+        // --- Fetch all notifications ---
+        async function loadAllNotifications() {
+            const res = await notificationService.getAll();
+            if (res.success) {
+                allNotifications = res.data;
+                updateSummary();
+                renderNotifications();
+            } else {
+                listContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-16 text-red-500">
+                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="font-medium">Failed to load notifications</p>
+                    </div>`;
+            }
+        }
+
+        // --- Update summary text ---
+        function updateSummary() {
+            const unreadCount = allNotifications.filter(n => !n.isRead).length;
+            const total = allNotifications.length;
+            summaryEl.textContent = `${unreadCount} unread of ${total} total notifications`;
+        }
+
+        // --- Render notifications based on filter ---
+        function renderNotifications() {
+            let filtered = allNotifications;
+            if (currentFilter === 'unread') {
+                filtered = allNotifications.filter(n => !n.isRead);
+            } else if (currentFilter === 'read') {
+                filtered = allNotifications.filter(n => n.isRead);
+            }
+
+            if (!filtered.length) {
+                listContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <svg class="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <p class="text-lg font-bold uppercase tracking-wide">No Notifications</p>
+                        <p class="text-sm mt-1">You're all caught up!</p>
+                    </div>`;
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(notif => {
+                const icon = notificationService.getTypeIcon(notif.type, 'w-6 h-6');
+                return `
+                <div class="notification-card group ${notif.isRead ? 'read' : 'unread'} p-6 cursor-pointer hover:bg-blue-50/50 transition-all duration-300 relative overflow-hidden" data-id="${notif.id}">
+                    <div class="flex gap-5 items-start transition-all duration-300 group-hover:pr-20">
+                        <div class="flex-shrink-0 p-3 bg-white rounded-2xl shadow-sm border border-slate-100 group-hover:bg-white transition-colors">
+                            ${icon}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="font-bold text-slate-800 truncate pr-4">${notif.title}</h3>
+                                <span class="text-[11px] font-semibold text-slate-400 whitespace-nowrap">${notificationService.formatDate(notif.createdAt)}</span>
+                            </div>
+                            <p class="text-slate-500 text-sm leading-relaxed">${notif.message}</p>
+                        </div>
+                    </div>
+                    
+                    ${!notif.isRead ? `
+                        <button onclick="markSingleRead('${notif.id}', event)" 
+                            class="absolute right-0 top-0 bottom-0 w-16 bg-blue-600 text-white flex items-center justify-center translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                        </button>
+                    ` : ''}
+                </div>
+            `}).join('');
+        }
+
+        // --- Mark single as read ---
+        window.markSingleRead = async (id, event) => {
+            event.stopPropagation();
+            const res = await notificationService.markAsRead(id);
+            if (res.success) {
+                const notif = allNotifications.find(n => n.id == id);
+                if (notif) notif.isRead = true;
+                updateSummary();
+                renderNotifications();
+                // Update navbar badge too
+                if (typeof updateBadgeUI === 'function') {
+                    const unreadCount = allNotifications.filter(n => !n.isRead).length;
+                    updateBadgeUI(unreadCount);
+                }
+            }
+        };
+
+        // --- Mark all as read ---
+        markAllBtn.addEventListener('click', async () => {
+            const res = await notificationService.markAllRead();
+            if (res.success) {
+                allNotifications.forEach(n => n.isRead = true);
+                updateSummary();
+                renderNotifications();
+                if (typeof updateBadgeUI === 'function') {
+                    updateBadgeUI(0);
+                }
+                showToast('All notifications marked as read', 'success');
+            }
+        });
+
+        // --- Filter buttons ---
+        function setActiveFilter(btn) {
+            [filterAll, filterUnread, filterRead].forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+                b.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            btn.classList.add('bg-blue-600', 'text-white');
+            btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        }
+
+        filterAll.addEventListener('click', () => {
+            currentFilter = 'all';
+            setActiveFilter(filterAll);
+            renderNotifications();
+        });
+
+        filterUnread.addEventListener('click', () => {
+            currentFilter = 'unread';
+            setActiveFilter(filterUnread);
+            renderNotifications();
+        });
+
+        filterRead.addEventListener('click', () => {
+            currentFilter = 'read';
+            setActiveFilter(filterRead);
+            renderNotifications();
+        });
+
+        // --- Initial load ---
+        await loadAllNotifications();
+    });
+</script>
+
 </html>

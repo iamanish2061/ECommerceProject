@@ -15,8 +15,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-
-    // These values are pulled directly from your application.properties
     @Value("${notification.exchange}")
     private String exchange;
 

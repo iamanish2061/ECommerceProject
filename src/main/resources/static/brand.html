@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>CutLab - Brands</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/toast.css">
     <link rel="stylesheet" href="assets/css/product/brand.css">
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
         #profileWrapper:hover #profileDropdown {
             opacity: 1;
@@ -16,34 +20,37 @@
         }
     </style>
 </head>
+
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
 
     <!-- Abstract Background Blobs -->
-    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob -z-10 pointer-events-none"></div>
-    <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-    <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    <div
+        class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob -z-10 pointer-events-none">
+    </div>
+    <div
+        class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
+    </div>
+    <div
+        class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+    </div>
 
 
-    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">        
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo -->
-                <a href="index.html"
-                class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
                 </a>
 
-                <!-- Nav Links -->
                 <div class="flex-1 max-w-2xl mx-0 md:mx-8">
                     <div class="relative">
-                        <input
-                            type="text"
-                            id="brandSearchInput"
-                            placeholder="Search products in this brand..."
-                            class="w-full px-6 py-3 rounded-full border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition-all shadow-sm"
-                        />
-                        <svg class="absolute right-4 top-3.5 text-slate-400" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        <input type="text" id="brandSearchInput" placeholder="Search products in this brand..."
+                            class="w-full px-6 py-3 rounded-full border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition-all shadow-sm" />
+                        <svg class="absolute right-4 top-3.5 text-slate-400" width="20" height="20" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
                 </div>
@@ -54,12 +61,15 @@
                     <div class="relative">
                         <div id="cartBtn"
                             class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                             </svg>
 
                         </div>
-                        <span id="cartCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold 
+                            rounded-full h-5 w-5 flex items-center justify-center shadow-md">
                             0
                         </span>
                     </div>
@@ -67,31 +77,45 @@
                     <!-- notification -->
                     <div class="relative">
                         <div id="notificationBtn"
-                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            class="text-slate-700 p-3 flex items-center justify-center cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                             </svg>
                         </div>
-                        <span id="notificationCount" class="absolute -top-0 -right-0 bg-red-500 text-white text-xs font-semiold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
-                            0
+
+                        <span id="notificationCount" class="absolute -top-1 -right-1 hidden h-5 w-5">
+                            <span id="notifPing"
+                                class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span
+                                class="notif-count-text relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-red-500 text-white text-xs font-semibold shadow-lg ring-2 ring-white">0</span>
                         </span>
+
+                        <div id="notificationDropdown"
+                            class="absolute left-1/2 -translate-x-1/2 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
+                            <div
+                                class="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                                <span class="font-bold text-slate-800 text-base">Notifications</span>
+                                <button id="markAllReadBtn"
+                                    class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Mark
+                                    all read</button>
+                            </div>
+                            <div id="notificationItemsList" class="max-h-[400px] overflow-y-auto"></div>
+                            <a href="notification.html"
+                                class="block py-4 text-center text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-t border-slate-50">View
+                                All Notifications</a>
+                        </div>
                     </div>
 
                     <!-- Profile Wrapper -->
                     <div id="profileWrapper" class="relative">
                         <!-- Profile Icon -->
-                        <a href="profile.html"
-                            class="flex items-center justify-center text-slate-700
+                        <a href="profile.html" class="flex items-center justify-center text-slate-700
                                 hover:text-indigo-600 transition-transform hover:scale-105">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
                                         3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
                                         a7.5 7.5 0 0 1 14.998 0A17.933
                                         17.933 0 0 1 12 21.75c-2.676
@@ -100,24 +124,16 @@
                         </a>
 
                         <!-- Dropdown -->
-                        <div
-                            id="profileDropdown"
-                            class="absolute left-1/2 top-full mt-3 -translate-x-1/2
+                        <div id="profileDropdown" class="absolute left-1/2 top-full mt-3 -translate-x-1/2
                                 min-w-[180px] bg-white rounded-2xl shadow-xl border
                                 opacity-0 invisible translate-y-1
                                 transition-all duration-200">
 
-                            <a href="profile.html"
-                            class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
+                            <a href="profile.html" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
                                     hover:bg-slate-100 rounded-t-2xl">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="w-4 h-4 text-slate-400"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
                                             3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
                                             a7.5 7.5 0 0 1 14.998 0" />
                                 </svg>
@@ -126,14 +142,11 @@
 
                             <div class="h-px bg-slate-100"></div>
 
-                            <button
-                                id="logoutBtn"
-                                class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
+                            <button id="logoutBtn" class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
                                     text-red-600 hover:bg-red-50 rounded-b-2xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 9V5.25A2.25 2.25 0 0 0
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0
                                             13.5 3h-6A2.25 2.25 0 0 0
                                             5.25 5.25v13.5A2.25 2.25 0 0 0
                                             7.5 21h6a2.25 2.25 0 0 0
@@ -148,9 +161,7 @@
                     </div>
 
                     <!-- Login Button -->
-                    <button
-                        id="loginBtn"
-                        class="bg-gradient-to-r from-blue-600 to-indigo-600
+                    <button id="loginBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600
                             text-white px-4 py-2 text-sm rounded-full font-medium
                             hover:shadow-md transition-all hover:scale-105">
                         Login
@@ -168,7 +179,7 @@
         <!-- Aside nav for brands -->
         <aside class="col-span-12 md:col-span-3 space-y-4">
             <div class="bg-white/90 rounded-3xl shadow-md p-4">
-                   <h2 class="text-xl font-bold text-slate-800 mb-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">
                     Brands
                 </h2>
 
@@ -182,25 +193,17 @@
         <section class="col-span-12 md:col-span-9 space-y-6">
             <!-- Brand header (logo + name + description) -->
             <div class="bg-white/90 rounded-3xl shadow-md p-5 flex items-center gap-4">
-                <div
-                    id="brandLogoWrapper"
-                    class="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center overflow-hidden shadow-sm"
-                >
+                <div id="brandLogoWrapper"
+                    class="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center overflow-hidden shadow-sm">
                     <!-- Brand logo injected here -->
                     <!-- Fallback initial is handled in JS -->
                 </div>
 
                 <div class="flex-1">
-                    <h1
-                        id="brandTitle"
-                        class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1"
-                    >
+                    <h1 id="brandTitle" class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1">
                         Brand
                     </h1>
-                    <p
-                        id="brandSubtitle"
-                        class="text-xs sm:text-sm text-slate-500 max-w-xl"
-                    >
+                    <p id="brandSubtitle" class="text-xs sm:text-sm text-slate-500 max-w-xl">
                         Explore professional products from this brand.
                     </p>
                 </div>
@@ -208,20 +211,14 @@
 
             <!-- Toolbar: heading + sort -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h2
-                    id="brandProductsHeading"
-                    class="text-lg font-semibold text-slate-900 tracking-tight"
-                >
+                <h2 id="brandProductsHeading" class="text-lg font-semibold text-slate-900 tracking-tight">
                     Products by Brand
                 </h2>
 
             </div>
 
             <!-- Products grid -->
-            <div
-                id="brandProductsContainer"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-            >
+            <div id="brandProductsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 <!-- Product cards injected by JS -->
             </div>
         </section>
@@ -231,10 +228,13 @@
 </body>
 <script src="assets/js/api.js"></script>
 
+<script src="assets/js/notification/notificationService.js"></script>
 <script src="assets/js/auth/authService.js"></script>
 <script src="assets/js/product/productService.js"></script>
 <script src="assets/js/cart/cartService.js"></script>
 
 <script src="assets/js/product/brand.js"></script>
 <script src="assets/js/navbar.js"></script>
+<script src="assets/js/notification/notification.js"></script>
+
 </html>

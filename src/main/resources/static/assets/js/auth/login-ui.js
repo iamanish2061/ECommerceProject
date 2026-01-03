@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             showToast(result.message || 'Login successful!', 'success');
-            setTimeout(() => window.location.href = "/product.html", 1000);
+            setTimeout(() => window.location.href = result.data.redirectionPage, 1000);
         } catch (error) {
             showToast(error.message, "error");
         } finally {
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 showToast(resultOfSignup.message || "Account created successfully", "success");
-                setTimeout(()=> window.location.href = "/product.html", 500);
+                setTimeout(()=> window.location.href = resultOfSignup.data.redirectionPage, 500);
             }catch(error){
                 console.error("Registration error: ",error);
                 showToast("Network error please try again later", "error");

@@ -1,6 +1,6 @@
 function initNavbar() {
     setupAuthState();
-    setupEventListeners();
+    setupNavbarEventListeners();
 }
 
 function setupAuthState() {
@@ -30,7 +30,7 @@ function updateAuthUI(isLoggedIn) {
     }
 }
 
-function setupEventListeners() {
+function setupNavbarEventListeners() {
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 

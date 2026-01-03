@@ -34,28 +34,28 @@ function toArray(res) {
 //initialze cart page
 async function initCart() {
     try {
-        const[cartItemRes, cartCountRes] = await Promise.all([
+        const [cartItemRes, cartCountRes] = await Promise.all([
             cartService.getAllCartItems(),
             cartService.getCartCount()
         ]);
 
         cartState.items = toArray(cartItemRes);
-        if(cartCountRes && cartCountRes.success){
+        if (cartCountRes && cartCountRes.success) {
             cartState.totalCartItems = cartCountRes.data.totalCartItems || 0;
         }
 
         loadCartItems();
         updateCartCount();
 
-        setupEventListeners();
+        setupCartEventListeners();
     } catch (error) {
         console.error('Erro initializing cart', error);
-        showError('Refresh the cart page');
+        showToast('Refresh the cart page', 'error');
     }
 }
 
 //setting up event listeners
-function setupEventListeners() {
+function setupCartEventListeners() {
     const clearCartBtn = document.getElementById('clearCartBtn');
     const checkoutBtn = document.getElementById('checkoutBtn');
 
@@ -74,7 +74,7 @@ function loadCartItems() {
         if (cartState.items && cartState.items.length > 0) {
             renderCartItems();
             calculateTotal();
-        }else{
+        } else {
             showEmptyCart();
         }
     } catch (error) {
@@ -87,9 +87,9 @@ function loadCartItems() {
 //update cart counter
 function updateCartCount() {
     const countElement = document.getElementById('cartCount');
-    if(countElement) 
+    if (countElement)
         countElement.textContent = cartState.totalCartItems || 0;
-    else{
+    else {
         console.error("Failed to fetch cart count");
     }
 }
@@ -182,13 +182,13 @@ function createCartItemElement(item) {
     </div>
 `;
 
-   
+
     //adding event listeners
     const increaseButton = itemDiv.querySelector('[data-action="increase"]');
     const decreaseButton = itemDiv.querySelector('[data-action="decrease"]');
-    const quantityInput  = itemDiv.querySelector('.quantity-input');
-    const removeBtn      = itemDiv.querySelector('.remove-btn');
-    const saveBtn        = itemDiv.querySelector('.save-btn');
+    const quantityInput = itemDiv.querySelector('.quantity-input');
+    const removeBtn = itemDiv.querySelector('.remove-btn');
+    const saveBtn = itemDiv.querySelector('.save-btn');
 
     // IMPORTANT: null-safety so it doesn't crash
     if (increaseButton && quantityInput) {
@@ -228,23 +228,23 @@ function createCartItemElement(item) {
     return itemDiv;
 }
 
-async function saveCartItem(productId){
-    const item = cartState.items.find(i=> i.product.id === productId);
-    if(!item) return
+async function saveCartItem(productId) {
+    const item = cartState.items.find(i => i.product.id === productId);
+    if (!item) return
 
     //read the input 
     const input = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
     const newQuantity = parseInt(input?.value, 10) || 1;
 
-    if(newQuantity < 1){
-    showToast("Quantity must be at least 1", "error");
-    return;
+    if (newQuantity < 1) {
+        showToast("Quantity must be at least 1", "error");
+        return;
     }
 
-    try{
+    try {
         const response = await cartService.updateCartItem(productId, newQuantity);
-        
-        if(!response.success){
+
+        if (!response.success) {
             showToast("Failed to save quantity", "error");
             return;
         }
@@ -254,7 +254,7 @@ async function saveCartItem(productId){
 
         //update the item total
         const itemElement = document.getElementById(`cart-Item${productId}`);
-        if(itemElement){
+        if (itemElement) {
             itemElement.replaceWith(createCartItemElement(item));
         }
 
@@ -263,23 +263,23 @@ async function saveCartItem(productId){
 
         showToast("Saved quantity successfullly", "success");
 
-    }catch(error){
+    } catch (error) {
         console.error("Network erro failed to save quantity", error);
-        showToast("Network error","error");
+        showToast("Network error", "error");
     }
 
 }
 
 //Handle remove item
-async function handleRemoveItem(productId){
-    if(!confirm("Are you sure you want to remove this item from you cart?")){
+async function handleRemoveItem(productId) {
+    if (!confirm("Are you sure you want to remove this item from you cart?")) {
         return
     }
 
-    try{
+    try {
         const response = await cartService.deleteCartItem(productId);
 
-        if(!response.success){
+        if (!response.success) {
             showToast('Failed to remove item', 'error');
             loadCartItems();
         }
@@ -289,7 +289,7 @@ async function handleRemoveItem(productId){
         calculateTotal();
         updateCartCount();
         showToast('Item removed from cart', 'success');
-    }catch(error){
+    } catch (error) {
         console.error("Network error Please try again later", error);
         alert("Network error failed to remove item");
         loadCartItems();
@@ -297,16 +297,16 @@ async function handleRemoveItem(productId){
 }
 
 //calculate total and update order summary
-function calculateTotal(){
+function calculateTotal() {
     const productPriceList = document.getElementById('productPricesList');
     const totalEl = document.getElementById('total');
 
-    if(!productPriceList) return;
+    if (!productPriceList) return;
 
     productPriceList.innerHTML = '';
     cartState.total = 0;
 
-    cartState.items.forEach(item=> {
+    cartState.items.forEach(item => {
         const product = item.product;
         const price = product.price || 0;
         const quantity = item.quantity || 1;
@@ -325,13 +325,13 @@ function calculateTotal(){
         productPriceList.appendChild(priceRow);
     });
 
-    if(totalEl){
+    if (totalEl) {
         totalEl.textContent = `Rs.${cartState.total.toFixed(2)}`;
     }
 }
 
 //show empty cart state
-function showEmptyCart(){
+function showEmptyCart() {
     const container = document.getElementById('cartItemsContainer');
     const emptyState = document.getElementById('emptyCartState');
     const productPricesList = document.getElementById('productPricesList');
@@ -347,9 +347,10 @@ function showEmptyCart(){
 }
 
 //Handle checkout
-function handleCheckout(){
-    if(cartState.items.length === 0){
+function handleCheckout() {
+    if (cartState.items.length === 0) {
         showToast("Your cart is empty", "error");
+        return;
     }
     showToast("Proceeding to checkout...", "info");
     setTimeout(() => {
@@ -358,27 +359,27 @@ function handleCheckout(){
 }
 
 //handle clear cart
-async function handleClearCart(){
-    if(!confirm("Are you sure you want to clear you entire cart")){
+async function handleClearCart() {
+    if (!confirm("Are you sure you want to clear you entire cart")) {
         return;
     }
-    
+
     cartState.items = [];
     cartState.totalCartItems = 0;
     showEmptyCart();
 
-    try{
+    try {
         const res = await cartService.deleteAllCartItems();
-        if(res.success){
+        if (res.success) {
             showToast("Cart cleared!", "success");
             loadCartItems();
             updateCartCount();
-        }    
-    }catch(err){
+        }
+    } catch (err) {
         console.error("Error clearing cart", err);
         alert("Network error failed to clear cart");
     }
 }
-    
+
 // Start app
 document.addEventListener('DOMContentLoaded', initCart);

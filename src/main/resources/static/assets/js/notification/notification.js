@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function refreshDropdownData() {
         const res = await notificationService.getUnread();
         if (res.success) {
-            renderList(res.data, notifList);
             updateBadgeUI(res.data.length);
+            renderList(res.data, notifList);
         }
     }
 
@@ -50,19 +50,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        container.innerHTML = notifications.map(notif => `
+        container.innerHTML = notifications.map(notif => {
+            const icon = notificationService.getTypeIcon(notif.type, 'w-4 h-4');
+            return `
             <div class="group relative flex items-center px-6 py-5 border-b border-slate-50 hover:bg-blue-50/50 transition-all duration-300 overflow-hidden cursor-pointer" data-id="${notif.id}">
-                <div class="flex-1 pr-6 transition-all duration-300 group-hover:pr-20">
-                    <h4 class="text-sm font-bold text-slate-800 mb-1">${notif.title}</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">${notif.message}</p>
-                    <span class="text-[10px] text-slate-300 mt-2 block font-medium">Just now</span>
+                <div class="flex gap-4 items-start flex-1 transition-all duration-300 group-hover:pr-20">
+                    <div class="flex-shrink-0 p-2 bg-slate-50 rounded-xl group-hover:bg-white transition-colors">
+                        ${icon}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-0.5">
+                            <h4 class="text-sm font-bold text-slate-800 truncate pr-2">${notif.title}</h4>
+                            <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap">${notificationService.formatDate(notif.createdAt)}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">${notif.message}</p>
+                    </div>
                 </div>
                 <button onclick="handleMarkRead('${notif.id}', event)" 
-                    class="absolute right-0 top-0 bottom-0 w-20 bg-emerald-500 text-white text-[11px] font-black translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out flex items-center justify-center tracking-wider">
-                    DONE
+                    class="absolute right-0 top-0 bottom-0 w-20 bg-blue-600 text-white flex items-center justify-center translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
                 </button>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     // --- 3. BADGE & LIVE ANIMATION ---
@@ -81,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pingEffect.classList.add('animate-ping');
         setTimeout(() => {
             pingEffect.classList.remove('animate-ping');
-        }, 3000);
+        }, 1500);
     }
 
     // --- 4. ACTIONS ---
@@ -105,13 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 5. INITIALIZE LIVE WEBSOCKET ---
     const currentUser = localStorage.getItem('accessToken');
     if (currentUser) {
-        // Fetch initial count on load
         refreshDropdownData();
-
         notificationService.initWebSocket(currentUser, (newNotif) => {
             triggerLivePing();
             refreshDropdownData();
-            // Optional: You could call a Toast notification here too
+            showToast(newNotif.message || "New Notification", "info");
         });
     }
 });
+

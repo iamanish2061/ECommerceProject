@@ -68,7 +68,7 @@ async function initDetailsPage() {
             return;
         }
         if(cartResp.success){
-            brandState.cartCount = cartResp.data.totalCartItems || 0;
+            detailsState.cartCount = cartResp.data.totalCartItems || 0;
         }
 
         const product = extractProduct(res);
@@ -240,14 +240,14 @@ function renderDetails(product) {
 function updateCartCount() {
     const countElement = document.getElementById('cartCount');
     if (countElement) {
-        countElement.textContent = brandState.cartCount || 0;
+        countElement.textContent = detailsState.cartCount || 0;
     }
 }
 
 async function updateCartCountByFetching() {
     const resp = await cartService.getCartCount();
     if(resp.success){
-        brandState.cartCount = resp.data.totalCartItems || 0;
+        detailsState.cartCount = resp.data.totalCartItems || 0;
         updateCartCount();
     }else{
         console.error("Failed to fetch cart count");

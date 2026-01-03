@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
             showToast("Please Wait...", "info");
             setTimeout(() => {
-                window.location.href = "/product.html"
+                window.location.href = response.data.redirectionPage || "/product.html";
             }, 500);
         }catch(error){
             console.error("Error continuing without password reset");
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
                 return;
             }
             showToast("Password changed successfully", "success");
-            setTimeout(() => window.location.href = "/product.html", 500);
+            setTimeout(() => window.location.href = response.data.redirectionPage, 500);
         }catch(error){
             console.error("Error changing password: ", error);
             showToast("Something went wrong please try again later","error");
