@@ -7,6 +7,6 @@ public record LoginRequest(
         @ValidUsername
         String username,
 
-        @ValidPassword()
+        @ValidPassword
         String password
 ) {}

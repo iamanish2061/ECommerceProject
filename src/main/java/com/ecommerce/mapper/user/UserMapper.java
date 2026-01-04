@@ -17,8 +17,6 @@ public interface UserMapper {
     @Mapping(source = "id", target = "userId")
     DetailedUser mapEntityToDetailedUser(UserModel userModel);
 
-    DetailedAddress mapEntityToDetailedAddress(AddressModel address);
-
     DriverInfoResponse mapEntityToDriverInfoResponse(Driver driver);
 
     StaffInfoResponse mapEntityToStaffInfoResponse(Staff staff);

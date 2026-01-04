@@ -2,6 +2,7 @@ package com.ecommerce.service.user;
 
 import com.ecommerce.dto.response.user.*;
 import com.ecommerce.exception.ApplicationException;
+import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.user.UserMapper;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.AddressType;
@@ -25,6 +26,7 @@ public class AdminUserService {
     private final DriverRepository driverRepository;
     private final StaffRepository staffRepository;
     private final UserMapper userMapper;
+    private final AddressMapper addressMapper;
 
     public List<AllUsersResponse> getAllUsers() {
         List<UserModel> users = userRepository.findAll();
@@ -44,7 +46,7 @@ public class AdminUserService {
                 .findFirst().orElse(null);
 
         DetailedAddress address = filteredAddress != null
-                ? userMapper.mapEntityToDetailedAddress(filteredAddress)
+                ? addressMapper.mapEntityToDetailedAddress(filteredAddress)
                 : null;
 
         return new DetailedUserResponse(user, address);

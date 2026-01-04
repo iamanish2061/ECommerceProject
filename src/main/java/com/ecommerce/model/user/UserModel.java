@@ -1,7 +1,6 @@
 package com.ecommerce.model.user;
 
 import com.ecommerce.model.address.AddressModel;
-import com.ecommerce.model.order.OrderModel;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

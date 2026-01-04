@@ -3,6 +3,7 @@ package com.ecommerce.mapper.address;
 import com.ecommerce.dto.request.order.PlaceOrderRequest;
 import com.ecommerce.dto.response.address.AddressResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
+import com.ecommerce.dto.response.user.DetailedAddress;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.DeliveryAddress;
 import org.mapstruct.Mapper;
@@ -16,7 +17,6 @@ public interface AddressMapper {
     @Mapping(source = "id", target = "addressId")
     AddressResponse mapEntityToAddressResponse(DeliveryAddress address);
 
-
     @Mapping(source = "address.type", target = "addressType")
     @Mapping(source = "address.province", target = "province")
     @Mapping(source = "address.district", target = "district")
@@ -27,6 +27,8 @@ public interface AddressMapper {
     @Mapping(source = "charge", target = "deliveryCharge")
     AddressWithDeliveryChargeResponse mapEntityToAddressWithDeliveryChargeResponse(AddressModel address, BigDecimal charge);
 
-
     DeliveryAddress mapRequestToDeliveryAddress(PlaceOrderRequest request);
+
+    @Mapping(source = "id", target = "addressId")
+    DetailedAddress mapEntityToDetailedAddress(AddressModel address);
 }
