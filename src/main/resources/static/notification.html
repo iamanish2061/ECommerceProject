@@ -267,6 +267,20 @@
 
 <!-- Page-specific script for All Notifications -->
 <script>
+
+    function showToast(message, type = "info", duration = 3000) {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.remove(), duration);
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         const listContainer = document.getElementById('allNotificationsList');
         const summaryEl = document.getElementById('notificationSummary');
@@ -282,7 +296,11 @@
         async function loadAllNotifications() {
             const res = await notificationService.getAll();
             if (res.success) {
-                allNotifications = res.data;
+                // Normalize isRead/read field from backend
+                allNotifications = res.data.map(n => ({
+                    ...n,
+                    isRead: n.isRead !== undefined ? n.isRead : n.read
+                }));
                 updateSummary();
                 renderNotifications();
             } else {
@@ -326,8 +344,11 @@
 
             listContainer.innerHTML = filtered.map(notif => {
                 const icon = notificationService.getTypeIcon(notif.type, 'w-6 h-6');
+                const isRead = notif.isRead;
+                const cardStateClass = isRead ? 'read' : 'unread hover:bg-blue-50/50';
+
                 return `
-                <div class="notification-card group ${notif.isRead ? 'read' : 'unread'} p-6 cursor-pointer hover:bg-blue-50/50 transition-all duration-300 relative overflow-hidden" data-id="${notif.id}">
+                <div class="notification-card group ${cardStateClass} p-6 cursor-pointer transition-all duration-300 relative overflow-hidden" data-id="${notif.id}">
                     <div class="flex gap-5 items-start transition-all duration-300 group-hover:pr-20">
                         <div class="flex-shrink-0 p-3 bg-white rounded-2xl shadow-sm border border-slate-100 group-hover:bg-white transition-colors">
                             ${icon}
@@ -341,7 +362,7 @@
                         </div>
                     </div>
                     
-                    ${!notif.isRead ? `
+                    ${!isRead ? `
                         <button onclick="markSingleRead('${notif.id}', event)" 
                             class="absolute right-0 top-0 bottom-0 w-16 bg-blue-600 text-white flex items-center justify-center translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
@@ -356,12 +377,14 @@
         // --- Mark single as read ---
         window.markSingleRead = async (id, event) => {
             event.stopPropagation();
+            showToast("Marking notification as read", "info");
             const res = await notificationService.markAsRead(id);
             if (res.success) {
                 const notif = allNotifications.find(n => n.id == id);
                 if (notif) notif.isRead = true;
                 updateSummary();
                 renderNotifications();
+                showToast("Notification marked as read", "success");
                 // Update navbar badge too
                 if (typeof updateBadgeUI === 'function') {
                     const unreadCount = allNotifications.filter(n => !n.isRead).length;
@@ -372,15 +395,16 @@
 
         // --- Mark all as read ---
         markAllBtn.addEventListener('click', async () => {
+            showToast("Marking all notifications as read", "info");
             const res = await notificationService.markAllRead();
             if (res.success) {
                 allNotifications.forEach(n => n.isRead = true);
                 updateSummary();
                 renderNotifications();
+                showToast("All notifications marked as read", "success");
                 if (typeof updateBadgeUI === 'function') {
                     updateBadgeUI(0);
                 }
-                showToast('All notifications marked as read', 'success');
             }
         });
 

@@ -32,7 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,7 +80,7 @@ public class OrderPersistService {
         redisService.incrementUserVector(user.getId(), product.getId(), 10);
         similarUserUpdater.updateSimilarUsersAsync(user.getId());
 
-        NotificationEvent event = createEvent(user, tempOrder, null);
+        NotificationEvent event = createEventForOrder(user, tempOrder, null);
         notificationProducer.send("notify.user", event);
 
         return null;
@@ -120,7 +123,7 @@ public class OrderPersistService {
         cartRepository.deleteAllByUserId(user.getId());
         similarUserUpdater.updateSimilarUsersAsync(user.getId());
 
-        NotificationEvent event = createEvent(user, tempOrder, null);
+        NotificationEvent event = createEventForOrder(user, tempOrder, null);
         notificationProducer.send("notify.user", event);
 
         return null;
@@ -215,7 +218,7 @@ public class OrderPersistService {
         redisService.incrementUserVector(user.getId(), product.getId(), 10);
         similarUserUpdater.updateSimilarUsersAsync(user.getId());
 
-        NotificationEvent event = createEvent(user, tempOrder, payment);
+        NotificationEvent event = createEventForOrder(user, tempOrder, payment);
         notificationProducer.send("notify.user", event);
     }
 
@@ -264,11 +267,11 @@ public class OrderPersistService {
         cartRepository.deleteAllByUserId(user.getId());
         similarUserUpdater.updateSimilarUsersAsync(user.getId());
 
-        NotificationEvent event = createEvent(user, tempOrder, payment);
+        NotificationEvent event = createEventForOrder(user, tempOrder, payment);
         notificationProducer.send("notify.user", event);
     }
 
-    public NotificationEvent createEvent(UserModel user, TempOrderDetails tempOrder, PaymentModel paymentModel){
+    public NotificationEvent createEventForOrder(UserModel user, TempOrderDetails tempOrder, PaymentModel paymentModel){
         Map<String, Object> metaData = new HashMap<>();
         metaData.put("email" , user.getEmail());
 
@@ -286,9 +289,9 @@ public class OrderPersistService {
             metaData.put("transactionId", paymentModel.getTransactionId());
             metaData.put("paymentStatus", paymentModel.getPaymentStatus());
         }
+        metaData.put("adminMessage", "User "+user.getId()+" has placed an order!");
 
         return NotificationEvent.builder()
-                .id("user-"+user.getId()+"-"+ UUID.randomUUID().toString())
                 .recipientId(user.getId())
                 .title("Order placement")
                 .message("Your order has been placed.")

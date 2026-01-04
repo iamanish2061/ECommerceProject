@@ -98,8 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. ACTIONS ---
     window.handleMarkRead = async (id, event) => {
         event.stopPropagation();
+        showToast("Marking notification as read", "info");
         const res = await notificationService.markAsRead(id);
         if (res.success) {
+            showToast("Notification marked as read", "success");
             const el = document.querySelector(`[data-id="${id}"]`);
             el.classList.add('opacity-0', '-translate-x-10');
             setTimeout(() => {
@@ -109,8 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     markAllBtn.addEventListener('click', async () => {
+        showToast("Clearing notifications", "info");
         const res = await notificationService.markAllRead();
         if (res.success) refreshDropdownData();
+        showToast("Notifications cleared", "success");
     });
 
     // --- 5. INITIALIZE LIVE WEBSOCKET ---

@@ -3,7 +3,6 @@ package com.ecommerce.service.notification;
 import com.ecommerce.dto.response.notification.NotificationResponse;
 import com.ecommerce.mapper.notification.NotificationMapper;
 import com.ecommerce.model.notification.Notification;
-import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.notification.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +20,26 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
 
-    public List<NotificationResponse> getUnreadNotifications(Long id) {
-        List<NotificationEvent> notifications = redisService.getUnreadNotifications(id);
+    public List<NotificationResponse> getUnreadNotifications(Long userId) {
+        List<Notification> notifications = redisService.getUnreadNotifications(userId);
         return notifications.stream()
-                        .map(notificationMapper::mapEventToNotificationResponse)
+                        .map(notificationMapper::mapEntityToNotificationResponse)
                 .toList();
     }
 
-    public Integer getUnreadNotificationCount(Long id) {
-        return redisService.getUnreadCount(String.valueOf(id));
+    public Integer getUnreadNotificationCount(Long userId) {
+        return redisService.getUnreadCount(userId);
     }
 
-    public List<NotificationResponse> getAllNotifications(Long id) {
-        List<Notification> notifications = notificationRepository.findAllByRecipientIdOrderByCreatedAtDesc(id);
+    public List<NotificationResponse> getAllNotifications(Long userId) {
+        List<Notification> notifications = notificationRepository.findAllByRecipientIdOrderByCreatedAtDesc(userId);
         if(notifications.isEmpty()){
             return new ArrayList<>();
         }
+
+        notifications.forEach(System.out::println);
         return notifications.stream()
-                .map(notificationMapper::mapEntityToNotificationResponce)
+                .map(notificationMapper::mapEntityToNotificationResponse)
                 .toList();
     }
 

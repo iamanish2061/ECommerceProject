@@ -45,9 +45,10 @@ public class NotificationHandler {
     }
 
     public void saveAndSendToUser(NotificationEvent event){
+        String notificationId= "user-"+event.getId();
         // 1. Permanent Store: Save to SQL DB
         Notification notification = Notification.builder()
-                .id(event.getId())
+                .id(notificationId)
                 .recipientId(event.getRecipientId())
                 .title(event.getTitle())
                 .message(event.getMessage())
@@ -57,7 +58,7 @@ public class NotificationHandler {
                 .build();
         notificationRepository.save(notification);
         // 2. Hot Store: Save only unread to Redis List
-        redisService.addUnreadNotification(event.getRecipientId(), event);
+        redisService.addUnreadNotification(event.getRecipientId(), notification);
         // 3. Real-Time Push: Notify the UI
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(event.getRecipientId()),
@@ -67,18 +68,21 @@ public class NotificationHandler {
     }
 
     public void saveAndSendToAdmin(NotificationEvent event){
+        String notificationId = "admin-"+event.getId();
         Notification notification = Notification.builder()
-                .id(event.getId())
+                .id(notificationId)
                 .recipientId(ADMIN_ID)
                 .title(event.getTitle())
-                .message(event.getMessage())
+                .message(
+                        event.getMetadata().get("adminMessage").toString()
+                )
                 .type(NotificationType.valueOf(event.getType().toString()))
                 .createdAt(event.getCreatedAt() != null ? event.getCreatedAt() : LocalDateTime.now())
                 .isRead(false)
                 .build();
         notificationRepository.save(notification);
 
-        redisService.addUnreadNotification(ADMIN_ID, event);
+        redisService.addUnreadNotification(ADMIN_ID, notification);
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(ADMIN_ID),
                 "/queue/notifications",
@@ -91,17 +95,17 @@ public class NotificationHandler {
         if (staffIdObj != null) {
             Long staffId = Long.valueOf(staffIdObj.toString());
             Notification notification = Notification.builder()
-                    .id(event.getId())
+                    .id("staff-"+event.getId())
                     .recipientId(staffId)
                     .title(event.getTitle())
-                    .message(event.getMessage())
+                    .message(event.getMetadata().get("staffMessage").toString())
                     .type(NotificationType.valueOf(event.getType().toString()))
                     .createdAt(event.getCreatedAt() != null ? event.getCreatedAt() : LocalDateTime.now())
                     .isRead(false)
                     .build();
             notificationRepository.save(notification);
 
-            redisService.addUnreadNotification(staffId, event);
+            redisService.addUnreadNotification(staffId, notification);
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(staffId),
                     "/queue/notifications",
@@ -116,17 +120,17 @@ public class NotificationHandler {
             Long driverId = Long.valueOf(driverIdObj.toString());
 
             Notification notification = Notification.builder()
-                    .id(event.getId())
+                    .id("driver-"+event.getId())
                     .recipientId(driverId)
                     .title(event.getTitle())
-                    .message(event.getMessage())
+                    .message(event.getMetadata().get("driverMessage").toString())
                     .type(NotificationType.valueOf(event.getType().toString()))
                     .createdAt(event.getCreatedAt() != null ? event.getCreatedAt() : LocalDateTime.now())
                     .isRead(false)
                     .build();
             notificationRepository.save(notification);
 
-            redisService.addUnreadNotification(driverId, event);
+            redisService.addUnreadNotification(driverId, notification);
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(driverId),
                     "/queue/notifications",

@@ -38,13 +38,15 @@ public class SimilarUserUpdater {
 
         // 2. Find all other users
         Set<String> allUserKeys = redisTemplate.keys("user_vector:*");
+
         Map<Long, Double> similarityScores = new HashMap<>();
 
         for (String key : allUserKeys) {
             // key format is "user_vector:ID"
             Long otherId = Long.parseLong(key.split(":")[1]);
-            if (otherId.equals(changedUserId)) continue;
-
+            if (otherId.equals(changedUserId)) {
+                continue;
+            }
             // 3. Fetch the other user's vector
             Map<Object, Object> otherVector = redisService.getUserVector(otherId);
 
@@ -54,8 +56,8 @@ public class SimilarUserUpdater {
             if (similarity >= MIN_SIMILARITY) {
                 similarityScores.put(otherId, similarity);
             }
-        }
 
+        }
         // 5. Sort and get top matches
         List<Map.Entry<Long, Double>> top = similarityScores.entrySet().stream()
                 .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())

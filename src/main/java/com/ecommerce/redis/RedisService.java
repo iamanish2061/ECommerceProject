@@ -1,7 +1,7 @@
 package com.ecommerce.redis;
 
 import com.ecommerce.dto.intermediate.TempOrderDetails;
-import com.ecommerce.rabbitmq.dto.NotificationEvent;
+import com.ecommerce.model.notification.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -125,10 +125,9 @@ public class RedisService {
     }
 
 
-
 //    notification
 //    Gets the current unread count.
-    public Integer getUnreadCount(String userId) {
+    public Integer getUnreadCount(Long userId) {
         try {
             Object count = redisTemplate.opsForValue().get("unread_notifications:" + userId);
             return count != null ? Integer.parseInt(count.toString()) : 0;
@@ -138,10 +137,10 @@ public class RedisService {
     }
 
 //    Adds the full notification DTO to a Redis List for the user.
-    public void addUnreadNotification(Long userId, NotificationEvent event) {
+    public void addUnreadNotification(Long userId, Notification notification) {
         try {
             String key = "unread_list:" + userId;
-            String json = objectMapper.writeValueAsString(event);
+            String json = objectMapper.writeValueAsString(notification);
 
             // Push to the front of the list (LPUSH) so newest are first
             redisTemplate.opsForList().leftPush(key, json);
@@ -156,7 +155,7 @@ public class RedisService {
     }
 
 //    Fetches all unread notification objects for the user icon.
-    public List<NotificationEvent> getUnreadNotifications(Long userId) {
+    public List<Notification> getUnreadNotifications(Long userId) {
         String key = "unread_list:" + userId;
         List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
 
@@ -165,7 +164,7 @@ public class RedisService {
         return rawList.stream()
                 .map(obj -> {
                     try {
-                        return objectMapper.readValue(obj.toString(), NotificationEvent.class);
+                        return objectMapper.readValue(obj.toString(), Notification.class);
                     } catch (Exception e) {
                         return null;
                     }

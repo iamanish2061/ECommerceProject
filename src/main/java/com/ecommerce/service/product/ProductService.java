@@ -152,8 +152,6 @@ public class ProductService {
             similarUserUpdater.updateSimilarUsersAsync(userId);
         }
 
-        product.getImages().forEach(productImageModel -> System.out.println(productImageModel.getAltText()));
-
         return new SingleProductResponse(
                 product.getId(),
                 product.getSku(),

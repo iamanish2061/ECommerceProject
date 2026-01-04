@@ -24,7 +24,7 @@ public class Notification {
     private String message;
     private NotificationType type;
 
-    private boolean isRead = false; // Important for your "Unread" tracking
+    private boolean isRead; // Important for your "Unread" tracking
 
     private LocalDateTime createdAt;
 }
