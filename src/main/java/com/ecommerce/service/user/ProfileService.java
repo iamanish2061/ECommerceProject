@@ -8,6 +8,7 @@ import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.UserModel;
 import com.ecommerce.repository.user.UserRepository;
+import com.ecommerce.utils.ProfilePictureUploadHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -63,8 +64,9 @@ public class ProfileService {
         userRepository.save(user);
     }
 
-    public void changeProfilePicture(Long userId, MultipartFile photo) {
-
-
+    public void changeProfilePicture(UserModel user, MultipartFile photo) {
+        String profileUrl = ProfilePictureUploadHelper.uploadImage(photo, user.getUsername());
+        user.setProfileUrl(profileUrl);
+        userRepository.save(user);
     }
 }

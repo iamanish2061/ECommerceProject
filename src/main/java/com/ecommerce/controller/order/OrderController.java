@@ -32,20 +32,37 @@ public class OrderController {
 
     private final RouteService routeService;
     private final OrderService orderService;
-    private final String notLoggedInMessage = "Please login to add items to cart";
+    private final String notLoggedInMessage = "Please login to continue";
     private final String notLoggedInErrorCode = "NOT_LOGGED_IN";
 
 
     @GetMapping("/")
-    @Operation(summary = "get all orders of that user to list them in their profile")
+    @Operation(summary = "get all orders of that user to list them in their order page")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllProducts(
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null){
-            throw new ApplicationException("Please login to continue!", "NOT_LOGGED_IN", HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode)
+            );
         }
         List<OrderResponse> response = orderService.getAllOrdersOf(currentUser.getUser());
         return ResponseEntity.ok(ApiResponse.ok(response, "All orders of user: "+currentUser.getUser().getId()));
+
+    }
+
+    @GetMapping("/for-profile")
+    @Operation(summary = "to list on profile page")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getRecentThreeOrders(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode)
+            );
+        }
+        List<OrderResponse> response = orderService.getRecentOrdersOf(currentUser.getUser());
+        return ResponseEntity.ok(ApiResponse.ok(response, "Recent orders of user: "+currentUser.getUser().getId()));
 
     }
 

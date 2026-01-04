@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -54,18 +55,51 @@ public class ProfileController {
         return ResponseEntity.ok(ApiResponse.ok( "Password changed successfully"));
     }
 
-    @PutMapping("/change-photo")
+
+    @PutMapping(value = "/change-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "to change photo")
     public ResponseEntity<ApiResponse<?>> changePhoto(
-                @AuthenticationPrincipal UserPrincipal user,
-                MultipartFile photo
-    ){
+            @AuthenticationPrincipal UserPrincipal user,
+            @RequestParam("file") MultipartFile file
+    ) {
         if(user == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
         }
-        profileService.changeProfilePicture(user.getUser().getId(), photo);
+        profileService.changeProfilePicture(user.getUser(), file);
         return ResponseEntity.ok(ApiResponse.ok("Profile picture changed successfully"));
     }
 
 }
+//async function handleImageUpload(event) {
+//    const file = event.target.files[0];
+//    if (!file) return;
+//
+//    // 1. Show immediate preview
+//    const reader = new FileReader();
+//    reader.onload = (e) => {
+//            document.getElementById('profilePic').src = e.target.result;
+//    };
+//    reader.readAsDataURL(file);
+//
+//    // 2. Prepare Data for Backend
+//    const formData = new FormData();
+//    formData.append('file', file);
+//
+//    try {
+//        const response = await fetch('/change-photo', {
+//                method: 'PUT',
+//                body: formData,
+//        // Note: Do NOT set Content-Type header manually when using FormData
+//        });
+//
+//        const result = await response.json();
+//        if (response.ok) {
+//            alert("Success: " + result.message);
+//        } else {
+//            alert("Error: " + result.message);
+//        }
+//    } catch (error) {
+//        console.error("Upload failed:", error);
+//    }
+//}

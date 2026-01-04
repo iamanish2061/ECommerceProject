@@ -56,6 +56,15 @@ public class OrderService {
                 .toList();
     }
 
+    public List<OrderResponse> getRecentOrdersOf(UserModel user) {
+        List<OrderModel> orders = orderRepository.findAllByUserId(user.getId());
+        return orders.stream()
+                .sorted(Comparator.comparing(OrderModel::getCreatedAt).reversed())
+                .map(o-> orderMapper.mapEntityToOrderResponse(o, user.getUsername()))
+                .limit(3)
+                .toList();
+    }
+
     public UserOrderResponse getDetailsOfOrder(Long orderId) {
         OrderModel order = orderRepository.findOrderOfUserInDetail(orderId)
                 .orElseThrow(()-> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
@@ -193,6 +202,5 @@ public class OrderService {
         }
         return null;
     }
-
 
 }
