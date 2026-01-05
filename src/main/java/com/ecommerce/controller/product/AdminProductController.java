@@ -75,10 +75,6 @@ public class AdminProductController {
     }
 
 
-
-
-
-
 //    --------specific product detail page maa huney operations haru-----------
 //    for getting detail of specific product
     @GetMapping("/{id}")

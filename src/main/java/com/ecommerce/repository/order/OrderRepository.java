@@ -35,4 +35,7 @@ public interface OrderRepository extends JpaRepository<OrderModel, Long> {
     @EntityGraph(value = "Order.orderItems.product.images.address.payment", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT o FROM OrderModel o where o.id = :orderId")
     Optional<OrderModel> findOrderOfUserInDetail(@Param("orderId") Long orderId);
+
+    @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.FETCH)
+    List<OrderModel> findTop5ByOrderByCreatedAtDesc();
 }
