@@ -1,8 +1,6 @@
 package com.ecommerce.model.notification;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +20,9 @@ public class Notification {
     private Long recipientId;
     private String title;
     private String message;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
     private NotificationType type;
 
     private boolean isRead; // Important for your "Unread" tracking

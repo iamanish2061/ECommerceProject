@@ -18,7 +18,7 @@ public class RecommendationService  {
     private final RedisService redisService;
     private final ProductMapper productMapper;
 
-    private static final int RECOMMENDATION_COUNT =15;
+    private static final int RECOMMENDATION_COUNT =7;
 
     public List<BriefProductsResponse> getPersonalizedRecommendation(Long userId) {
         // 1. Get the current user's vector to know what they've already seen

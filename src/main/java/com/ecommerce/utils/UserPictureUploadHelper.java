@@ -12,11 +12,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Data
-public class ProfilePictureUploadHelper {
+public class UserPictureUploadHelper {
 
     private static final Path PROFILE_UPLOAD_DIR = Paths.get("uploads/profile-picture").toAbsolutePath();
+    private static final Path LICENSE_UPLOAD_DIR = Paths.get("uploads/license-photo").toAbsolutePath();
 
-    public static String uploadImage(MultipartFile file, String name)throws ApplicationException {
+    public static String uploadProfileImage(MultipartFile file, String name)throws ApplicationException {
         ImageUploadHelper.fileValidation(file);
         String extension = ImageUploadHelper.getFileExtension(file);
 
@@ -28,7 +29,22 @@ public class ProfilePictureUploadHelper {
         } catch (IOException e) {
             throw new ApplicationException(e.getMessage(), "IO_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "/uploads/products/" + filename;
+        return "/uploads/profile-picture/" + filename;
+    }
+
+    public static String uploadLicenseImage(MultipartFile file, String name)throws ApplicationException {
+        ImageUploadHelper.fileValidation(file);
+        String extension = ImageUploadHelper.getFileExtension(file);
+
+        String filename=name+"-license."+extension;
+        Path targetPath = LICENSE_UPLOAD_DIR.resolve(filename);
+
+        try {
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new ApplicationException(e.getMessage(), "IO_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return "/uploads/license-photo/" + filename;
     }
 
 }

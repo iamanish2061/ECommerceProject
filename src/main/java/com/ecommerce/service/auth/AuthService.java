@@ -6,7 +6,8 @@ import com.ecommerce.dto.request.email.EmailSenderRequest;
 import com.ecommerce.dto.response.auth.AuthResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.AuthMapper;
-import com.ecommerce.model.user.*;
+import com.ecommerce.model.user.UserModel;
+import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.user.UserRepository;
 import com.ecommerce.service.email.EmailService;
@@ -16,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,10 +42,11 @@ public class AuthService {
     private final EmailService emailService;
     private final UserRepository userRepo;
     private final JwtService jwtService;
+    private final AuthMapper authMapper;
+
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder encoder= new BCryptPasswordEncoder(12);
 
-    private final AuthMapper authMapper;
 
     public boolean doesUserNameExist(String username) {
         return userRepo.existsByUsername(username);

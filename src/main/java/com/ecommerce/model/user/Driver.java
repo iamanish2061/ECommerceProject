@@ -1,10 +1,8 @@
 package com.ecommerce.model.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.annotations.NaturalId;
 
@@ -16,7 +14,7 @@ import java.time.LocalDateTime;
         attributeNodes = @NamedAttributeNode("user")
 )
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-@Entity
+@Entity @Builder
 @Table(name = "drivers")
 public class Driver {
 
@@ -45,7 +43,7 @@ public class Driver {
     @Column(nullable = false)
     private String licenseUrl;
 
-    @CurrentTimestamp
+    @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime submittedAt;
 

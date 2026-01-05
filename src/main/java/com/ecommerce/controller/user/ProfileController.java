@@ -1,6 +1,7 @@
 package com.ecommerce.controller.user;
 
 import com.ecommerce.dto.request.user.ChangePasswordRequest;
+import com.ecommerce.dto.request.user.DriverRegisterRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.user.UserProfileResponse;
 import com.ecommerce.model.user.UserPrincipal;
@@ -70,7 +71,38 @@ public class ProfileController {
         return ResponseEntity.ok(ApiResponse.ok("Profile picture changed successfully"));
     }
 
+    @GetMapping("/check-driver-status")
+    @Operation(summary = "To check if the driver status is pending, verified or not applied to display the text in profile")
+    public ResponseEntity<ApiResponse<?>> checkDriverStatus(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+        }
+        String status = profileService.getDriverStatus(currentUser.getUser());
+        return ResponseEntity.ok(ApiResponse.ok(status, "Status fetched successfully"));
+    }
+
+
+    @PostMapping(value = "/register-driver", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "To handle form of driver registration")
+    public ResponseEntity<ApiResponse<?>> registerDriver(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestPart("license") MultipartFile license,
+            @Valid @RequestPart("driverRegisterRequest") DriverRegisterRequest driverRegisterRequest
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+        }
+        profileService.registerDriver(currentUser.getUser(), license, driverRegisterRequest);
+        return ResponseEntity.ok(ApiResponse.ok("Registered successfully"));
+    }
+
 }
+
+
 //async function handleImageUpload(event) {
 //    const file = event.target.files[0];
 //    if (!file) return;

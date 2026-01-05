@@ -67,7 +67,6 @@ public class UserModel {
 
     @Column(nullable = false)
     @UpdateTimestamp
-    @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToOne(
