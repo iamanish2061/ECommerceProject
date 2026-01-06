@@ -6,7 +6,11 @@ import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.user.UserMapper;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.AddressType;
+import com.ecommerce.model.address.DeliveryAddress;
+import com.ecommerce.model.order.OrderModel;
+import com.ecommerce.model.order.OrderStatus;
 import com.ecommerce.model.user.*;
+import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.user.DriverRepository;
 import com.ecommerce.repository.user.StaffRepository;
 import com.ecommerce.repository.user.UserRepository;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +32,7 @@ public class AdminUserService {
     private final StaffRepository staffRepository;
     private final UserMapper userMapper;
     private final AddressMapper addressMapper;
+    private final OrderRepository orderRepository;
 
     public List<AllUsersResponse> getAllUsers() {
         List<UserModel> users = userRepository.findAll();
@@ -80,4 +86,9 @@ public class AdminUserService {
         return userMapper.mapEntityToStaffInfoResponse(staff);
     }
 
+    public void assignDeliveryToDriver(Long driverId) {
+        List<OrderModel> orders = orderRepository.findByStatusIn(List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED));
+        List<DeliveryAddress> addresses = orders.stream().map(OrderModel::getAddress).toList();
+
+    }
 }

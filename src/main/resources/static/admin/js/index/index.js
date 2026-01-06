@@ -74,7 +74,6 @@ function initSidebar() {
             if (typeof AuthService !== 'undefined' && AuthService.logout) {
                 const response = await AuthService.logout();
                 if (response?.success) {
-                    updateAuthUI(false);
                     showToast('Logged out successfully', 'success');
                     setTimeout(() => {
                         window.location.href = '/auth/login.html';

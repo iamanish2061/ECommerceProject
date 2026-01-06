@@ -84,4 +84,27 @@ public class EventHelper {
                 .build();
     }
 
+    public static NotificationEvent createEventForStartingOrder(UserModel driver, Long userId) {
+        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + "has started the delivery of user: "+userId);
+
+        return NotificationEvent.builder()
+                .recipientId(userId)
+                .title("ORDER STARTED")
+                .message("Your order is on the way")
+                .type(NotificationType.ORDER_STARTED)
+                .metadata(metaData)
+                .build();
+    }
+
+    public static NotificationEvent createEventForOrderCompletion(UserModel driver, Long userId) {
+        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + "has completed the delivery of user: "+userId);
+
+        return NotificationEvent.builder()
+                .recipientId(userId)
+                .title("ORDER COMPLETED")
+                .message("Your order is delivered")
+                .type(NotificationType.ORDER_DELIVERED)
+                .metadata(metaData)
+                .build();
+    }
 }

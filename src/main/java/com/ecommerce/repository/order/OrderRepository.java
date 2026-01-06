@@ -1,6 +1,7 @@
 package com.ecommerce.repository.order;
 
 import com.ecommerce.model.order.OrderModel;
+import com.ecommerce.model.order.OrderStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +39,8 @@ public interface OrderRepository extends JpaRepository<OrderModel, Long> {
 
     @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.FETCH)
     List<OrderModel> findTop5ByOrderByCreatedAtDesc();
+
+    @EntityGraph(value = "Order.user.address", type = EntityGraph.EntityGraphType.FETCH)
+    List<OrderModel> findByStatusIn(List<OrderStatus> statuses);
+
 }

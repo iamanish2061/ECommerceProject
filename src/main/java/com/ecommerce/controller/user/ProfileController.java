@@ -17,6 +17,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -67,8 +69,8 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
         }
-        profileService.changeProfilePicture(user.getUser(), file);
-        return ResponseEntity.ok(ApiResponse.ok("Profile picture changed successfully"));
+        String profileUrl= profileService.changeProfilePicture(user.getUser(), file);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("profileUrl", profileUrl), "Profile picture changed successfully"));
     }
 
     @GetMapping("/check-driver-status")

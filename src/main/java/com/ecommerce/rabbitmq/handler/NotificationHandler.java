@@ -28,7 +28,7 @@ public class NotificationHandler {
     public void handle(NotificationEvent event) {
         NotificationType eventCastedType = NotificationType.valueOf(event.getType().toString());
 
-        if(eventCastedType == NotificationType.ORDER_PLACED || eventCastedType == NotificationType.ORDER_CANCELLED || eventCastedType == NotificationType.ORDER_DELIVERED ||eventCastedType == NotificationType.DRIVER_REGISTRATION){
+        if(eventCastedType == NotificationType.ORDER_PLACED || eventCastedType == NotificationType.ORDER_CANCELLED || eventCastedType == NotificationType.ORDER_STARTED || eventCastedType == NotificationType.ORDER_DELIVERED ||eventCastedType == NotificationType.DRIVER_REGISTRATION){
             saveAndSendToUser(event);
             saveAndSendToAdmin(event);
         } else if (eventCastedType == NotificationType.ORDER_SHIPPED) {

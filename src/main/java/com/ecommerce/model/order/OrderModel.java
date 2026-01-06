@@ -68,6 +68,15 @@ import java.util.Set;
         attributeNodes = @NamedAttributeNode("user")
 )
 
+//fetching order with delivery address and user
+@NamedEntityGraph(
+        name = "Order.user.address",
+        attributeNodes = {
+                @NamedAttributeNode("user"),
+                @NamedAttributeNode("address")
+        }
+)
+
 @Entity
 @Table(name = "orders")
 @Getter

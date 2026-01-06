@@ -78,5 +78,13 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched staff info of: "+id));
     }
 
+    @PostMapping("/assign-driver/{driverId}")
+    public ResponseEntity<ApiResponse<?>> assignDeliveryToDriver(
+            @PathVariable Long driverId
+    ){
+        userService.assignDeliveryToDriver(driverId);
+        return ResponseEntity.ok(ApiResponse.ok("Assigned successfully"));
+    }
+
 
 }

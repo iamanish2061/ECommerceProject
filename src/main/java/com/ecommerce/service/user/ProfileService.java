@@ -79,10 +79,11 @@ public class ProfileService {
         notificationProducer.send("notify.user", event);
     }
 
-    public void changeProfilePicture(UserModel user, MultipartFile photo) {
+    public String changeProfilePicture(UserModel user, MultipartFile photo) {
         String profileUrl = UserPictureUploadHelper.uploadProfileImage(photo, user.getUsername());
         user.setProfileUrl(profileUrl);
         userRepository.save(user);
+        return profileUrl;
     }
 
     public String getDriverStatus(UserModel user) {
