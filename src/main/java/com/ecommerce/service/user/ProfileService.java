@@ -10,6 +10,7 @@ import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.Driver;
 import com.ecommerce.model.user.UserModel;
 import com.ecommerce.model.user.VerificationStatus;
+import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.ecommerce.rabbitmq.producer.NotificationProducer;
 import com.ecommerce.repository.user.DriverRepository;
 import com.ecommerce.repository.user.UserRepository;
@@ -63,14 +64,19 @@ public class ProfileService {
     }
 
     public void changePassword(Long userId, ChangePasswordRequest request) {
-        if(!request.password().equals(request.rePassword())){
+        if(!request.newPassword().equals(request.reNewPassword())){
             throw new ApplicationException("Please enter same password in both fields!", "PASSWORD_MISMATCH", HttpStatus.BAD_REQUEST);
         }
         UserModel user = userRepository.findById(userId).orElseThrow(
                 ()-> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.NOT_FOUND)
         );
-        user.setPassword(encoder.encode(request.password()));
+        if(!encoder.matches(request.oldPassword(), user.getPassword())){
+            throw new ApplicationException("Your current password is incorrect!", "PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST);
+        }
+        user.setPassword(encoder.encode(request.newPassword()));
         userRepository.save(user);
+        NotificationEvent event = EventHelper.createEventForPasswordChange(user);
+        notificationProducer.send("notify.user", event);
     }
 
     public void changeProfilePicture(UserModel user, MultipartFile photo) {

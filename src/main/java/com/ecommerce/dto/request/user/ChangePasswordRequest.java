@@ -3,10 +3,11 @@ package com.ecommerce.dto.request.user;
 import com.ecommerce.validation.ValidPassword;
 
 public record ChangePasswordRequest(
-
         @ValidPassword
-        String password,
+        String oldPassword,
         @ValidPassword
-        String rePassword
+        String newPassword,
+        @ValidPassword
+        String reNewPassword
 ){
 }

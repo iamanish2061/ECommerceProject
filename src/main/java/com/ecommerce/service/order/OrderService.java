@@ -13,13 +13,17 @@ import com.ecommerce.mapper.order.OrderMapper;
 import com.ecommerce.mapper.payment.PaymentMapper;
 import com.ecommerce.model.cart.CartModel;
 import com.ecommerce.model.order.OrderModel;
+import com.ecommerce.model.order.OrderStatus;
 import com.ecommerce.model.payment.PaymentMethod;
 import com.ecommerce.model.product.ProductModel;
 import com.ecommerce.model.user.UserModel;
+import com.ecommerce.rabbitmq.dto.NotificationEvent;
+import com.ecommerce.rabbitmq.producer.NotificationProducer;
 import com.ecommerce.repository.cart.CartRepository;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.service.payment.PaymentService;
+import com.ecommerce.utils.EventHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -47,6 +51,7 @@ public class OrderService {
     private final AddressMapper addressMapper;
     private final PaymentMapper paymentMapper;
 
+    private final NotificationProducer notificationProducer;
 
     public List<OrderResponse> getAllOrdersOf(UserModel user) {
         List<OrderModel> orders = orderRepository.findAllByUserId(user.getId());
@@ -77,7 +82,8 @@ public class OrderService {
                 order.getOrderItems().stream()
                         .map(orderMapper::mapEntityToOrderItemResponse).toList(),
                 addressMapper.mapEntityToAddressResponse(order.getAddress()),
-                paymentMapper.mapEntityToPaymentResponse(order.getPayment())
+                paymentMapper.mapEntityToPaymentResponse(order.getPayment()),
+                order.getPhoneNumber()
         );
     }
 
@@ -203,4 +209,14 @@ public class OrderService {
         return null;
     }
 
+    @Transactional
+    public void cancelOrder(UserModel user, Long orderId) {
+        OrderModel order = orderRepository.findById(orderId).orElseThrow(
+                () -> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND)
+        );
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        NotificationEvent event = EventHelper.createEventForOrderCanncellation(user, order);
+        notificationProducer.send("notify.user", event);
+    }
 }

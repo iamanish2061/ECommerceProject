@@ -35,7 +35,6 @@ public class OrderController {
     private final String notLoggedInMessage = "Please login to continue";
     private final String notLoggedInErrorCode = "NOT_LOGGED_IN";
 
-
     @GetMapping("/")
     @Operation(summary = "get all orders of that user to list them in their order page")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllProducts(
@@ -77,6 +76,20 @@ public class OrderController {
         }
         UserOrderResponse response = orderService.getDetailsOfOrder(orderId);
         return ResponseEntity.ok(ApiResponse.ok(response, "Detail of order: "+orderId));
+    }
+
+    @PutMapping("/cancel/{orderId}")
+    @Operation(summary = "to cancel the order by the user")
+    public ResponseEntity<ApiResponse<?>> cancelOrder(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable Long orderId
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+        }
+        orderService.cancelOrder(currentUser.getUser(), orderId);
+        return ResponseEntity.ok(ApiResponse.ok("Order cancelled successfully!"));
     }
 
     @PostMapping("/calculate-delivery-charge")

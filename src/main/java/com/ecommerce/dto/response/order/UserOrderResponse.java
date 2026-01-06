@@ -15,6 +15,7 @@ public record UserOrderResponse(
         LocalDateTime createdAt,
         List<OrderItemResponse> orderItems,
         AddressResponse address,
-        PaymentResponse payment
+        PaymentResponse payment,
+        String phoneNumber
 ) {
 }

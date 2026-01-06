@@ -136,7 +136,7 @@ function renderStats() {
         { label: 'Total Services', value: state.totalServices, icon: 'scissors', color: 'purple' },
         { label: 'Total Orders', value: state.totalOrders, icon: 'shopping-cart', color: 'green' },
         { label: 'Total Appointments', value: state.totalAppointments, icon: 'calendar', color: 'yellow' },
-        { label: 'Total Payments', value: state.totalPayments, icon: 'dollar-sign', color: 'emerald' },
+        { label: 'Total Payments', value: state.totalPayments, icon: 'banknote', color: 'emerald' },
         { label: 'Total Reviews', value: state.totalReviews, icon: 'star', color: 'orange' },
         { label: 'Total Sales', value: state.totalSales, icon: 'trending-up', color: 'rose' }
     ];
@@ -148,7 +148,9 @@ function renderStats() {
             </div>
             <div>
                 <p class="text-sm text-slate-500 font-medium">${card.label}</p>
-                <h3 class="text-2xl font-bold text-slate-800">${card.value}</h3>
+                <h3 class="text-2xl font-bold text-slate-800">
+                    ${(card.label.includes('Payments') || card.label.includes('Sales')) ? 'Rs. ' : ''}${card.value}
+                </h3>
             </div>
         </div>
     `).join('');
@@ -170,7 +172,7 @@ function renderLatestOrders() {
         <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
             <td class="py-4 font-medium text-slate-800">#${order.orderId}</td>
             <td class="py-4">${order.username}</td>
-            <td class="py-4">${order.totalAmount}</td>
+            <td class="py-4">Rs. ${order.totalAmount}</td>
             <td class="py-4">${order.phoneNumber}</td>
             <td class="py-4">
                 <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(order.status)}">
@@ -236,7 +238,7 @@ function getIcon(name) {
         'scissors': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path><path d="M14.8 9.2 20 4"></path><path d="m8.12 15.88 3.84-3.84"></path></svg>`,
         'shopping-cart': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>`,
         'calendar': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>`,
-        'dollar-sign': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+        'banknote': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>`,
         'star': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
         'trending-up': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`
     };

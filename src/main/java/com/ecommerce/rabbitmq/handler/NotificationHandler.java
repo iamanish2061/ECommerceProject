@@ -40,6 +40,8 @@ public class NotificationHandler {
         } else if (eventCastedType == NotificationType.DRIVER_ASSIGN) {
             saveAndSendToDriver(event);
             saveAndSendToAdmin(event);
+        }else{
+            saveAndSendToUser(event);
         }
 
     }
