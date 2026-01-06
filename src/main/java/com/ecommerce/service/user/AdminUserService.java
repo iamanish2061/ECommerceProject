@@ -1,26 +1,30 @@
 package com.ecommerce.service.user;
 
+import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.dto.response.user.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.user.UserMapper;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.AddressType;
-import com.ecommerce.model.address.DeliveryAddress;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
 import com.ecommerce.model.user.*;
+import com.ecommerce.rabbitmq.producer.NotificationProducer;
+import com.ecommerce.redis.RedisService;
+import com.ecommerce.repository.address.AddressRepository;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.user.DriverRepository;
 import com.ecommerce.repository.user.StaffRepository;
 import com.ecommerce.repository.user.UserRepository;
+import com.ecommerce.service.order.RouteService;
+import com.ecommerce.utils.EventHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +37,12 @@ public class AdminUserService {
     private final UserMapper userMapper;
     private final AddressMapper addressMapper;
     private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
+
+    private final RedisService redisService;
+    private final NotificationProducer notificationProducer;
+
+    private final RouteService routeService;
 
     public List<AllUsersResponse> getAllUsers() {
         List<UserModel> users = userRepository.findAll();
@@ -88,7 +98,37 @@ public class AdminUserService {
 
     public void assignDeliveryToDriver(Long driverId) {
         List<OrderModel> orders = orderRepository.findByStatusIn(List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED));
-        List<DeliveryAddress> addresses = orders.stream().map(OrderModel::getAddress).toList();
+        AddressModel adminAddress = addressRepository.findById(1L).orElseThrow(
+                () -> new ApplicationException("Address not found!", "ADDRESS_NOT FOUND", HttpStatus.NOT_FOUND)
+        );
 
+        List<AssignedDeliveryResponse> addresses = orders.stream()
+                .map(
+                        o->new AssignedDeliveryResponse(
+                                o.getId(),
+                                o.getUser().getUsername(),
+                                o.getPhoneNumber(),
+                                o.getAddress().getDistrict(),
+                                o.getAddress().getPlace(),
+                                o.getAddress().getLandmark(),
+                                o.getAddress().getLatitude(),
+                                o.getAddress().getLongitude()
+                        )
+                ).toList();
+        addresses.addFirst(new AssignedDeliveryResponse(
+                null,
+                "adminCutLab",
+                "9823166482",
+                adminAddress.getDistrict(),
+                adminAddress.getPlace(),
+                adminAddress.getLandmark(),
+                adminAddress.getLatitude(),
+                adminAddress.getId())
+        );
+
+        List<AssignedDeliveryResponse> orderedList = routeService.startRoutingAlgorithm(addresses);
+        redisService.addDeliveryAddressList(driverId, orderedList);
+
+        notificationProducer.send("notify.driver", EventHelper.createEventForDeliveryAssignment(driverId));
     }
 }

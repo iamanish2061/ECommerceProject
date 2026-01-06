@@ -2,6 +2,7 @@ package com.ecommerce.service.order;
 
 import com.ecommerce.dto.intermediate.DistanceAndTimeResponse;
 import com.ecommerce.dto.intermediate.Route;
+import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,66 +39,44 @@ public class RouteService {
     private static final Logger log = LoggerFactory.getLogger(RouteService.class);
     private final RestTemplate restTemplate;
 
-    // starting the process
-//    public RouteResponse startRoutingAlgorithm(OpenCageRequest request){
-//        List<String> places = new ArrayList<>(request.getAddresses());
-//        if(places.size()<2){
-//            throw new RuntimeException("At Least two addresses are required to find route!");
-//        }
-//
-//        log.info("Fetching distance matrix from osrm!");
-//        double[][] distanceMatrix = buildDistanceMatrix(coordinates);
-//
-//        log.info("Applying Nearest Neighbour!");
-//        List<Integer> routeIdx = nearestNeighbor(distanceMatrix, places.size());
-//        log.info("After nearest neighbour");
-//        printRoute(routeIdx, places, distanceMatrix);
-//
-//        routeIdx = twoOpt(routeIdx, distanceMatrix);
-//        log.info("After nearest neighbour");
-//        printRoute(routeIdx, places, distanceMatrix);
-//
-//        return generateRouteWithDistances(places, distanceMatrix, routeIdx);
-//
-//    }
-//
-//    private RouteResponse generateRouteWithDistances(List<String> places, double[][] distanceMatrix, List<Integer> routeIdx) {
-//
-//        List<String> routePlaces = new ArrayList<>();
-//        List<Double> distanceResult = new ArrayList<>();
-//
-//        for(int i=0; i<routeIdx.size()-1; i++){
-//            int from = routeIdx.get(i);
-//            int to = routeIdx.get(i + 1);
-//            routePlaces.add(places.get(from));
-//            distanceResult.add(distanceMatrix[from][to]);
-//        }
-//
-//        routePlaces.add(places.get(routeIdx.get(routeIdx.size()-1)));
-//
-//        double totalDistance = routeCost(routeIdx, distanceMatrix);
-//
-//        return new RouteResponse(routePlaces, distanceResult, totalDistance);
-//    }
+    public List<AssignedDeliveryResponse> startRoutingAlgorithm(List<AssignedDeliveryResponse> deliveryList) {
+        if (deliveryList.size() < 2) {
+            return deliveryList;
+        }
 
-    // distance matrix using OSRM
+        // Extract coordinates directly from your DTOs
+        List<double[]> coordinates = deliveryList.stream()
+                .map(d -> new double[]{d.latitude(), d.longitude()})
+                .toList();
+
+        log.info("Fetching distance matrix from OSRM for {} points", coordinates.size());
+        double[][] distanceMatrix = buildDistanceMatrix(coordinates);
+
+        log.info("Applying Optimization Algorithms (Nearest Neighbor + 2-Opt)");
+        List<Integer> routeIdx = nearestNeighbor(distanceMatrix, deliveryList.size());
+        routeIdx = twoOpt(routeIdx, distanceMatrix);
+
+        // Map the optimized indices back to the original DTOs
+        List<AssignedDeliveryResponse> orderedList = new ArrayList<>();
+        for (int index : routeIdx) {
+            orderedList.add(deliveryList.get(index));
+        }
+
+        return orderedList;
+    }
+
     private double[][] buildDistanceMatrix(List<double[]> coordinates) {
-        coordinates.removeIf(c->c[0]==0.00 && c[1]==0.00);
-
         int n = coordinates.size();
         double[][] matrix = new double[n][n];
-
         try {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < n; i++) {
-                double lat = coordinates.get(i)[0];
-                double lon = coordinates.get(i)[1];
-                sb.append(lon).append(",").append(lat);
+                // OSRM expects longitude,latitude
+                sb.append(coordinates.get(i)[1]).append(",").append(coordinates.get(i)[0]);
                 if (i < n - 1) sb.append(";");
             }
 
-            String url = "http://router.project-osrm.org/table/v1/driving/" + sb.toString() +"?annotations=distance";
-
+            String url = "http://router.project-osrm.org/table/v1/driving/" + sb.toString() + "?annotations=distance";
             JsonNode response = restTemplate.getForObject(url, JsonNode.class);
 
             if (response != null && response.has("distances")) {
@@ -108,16 +86,12 @@ public class RouteService {
                         matrix[i][j] = distances.get(i).get(j).asDouble() / 1000.0;
                     }
                 }
-                System.out.println("Distances: "+ Arrays.deepToString(matrix));
-            }else{
-                System.out.println("Failed");
             }
         } catch (Exception e) {
-            log.error("OSRM distance matrix request failed or returned empty response.");
+            log.error("OSRM matrix failed: {}", e.getMessage());
         }
         return matrix;
     }
-
 
     //    algorithm
     //applying nearest neighbour
@@ -145,7 +119,6 @@ public class RouteService {
         return route;
     }
 
-
     // improving the result of nearest neighbour using 2-opt
     private List<Integer> twoOpt(List<Integer> routeIdx, double[][] distances) {
         boolean improved = true;
@@ -167,25 +140,6 @@ public class RouteService {
         return routeIdx;
     }
 
-
-    // Print route with names and total cost
-    void printRoute(List<Integer> routeIdx, List<String> places, double[][] distances) {
-        StringBuilder sb = new StringBuilder();
-        for (int idx : routeIdx)
-            sb.append(places.get(idx)).append(" -> ");
-        sb.append("END");
-        log.info("Route: {}", sb);
-        log.info("Total distance: {} km", routeCost(routeIdx, distances));
-    }
-
-
-    //    finding total cost
-    private double routeCost(List<Integer> route, double[][] distances) {
-        double cost = 0;
-        for (int i = 0; i < route.size() - 1; i++)
-            cost += distances[route.get(i)][route.get(i + 1)];
-        return cost;
-    }
 
 
     //getting distance and time between two points

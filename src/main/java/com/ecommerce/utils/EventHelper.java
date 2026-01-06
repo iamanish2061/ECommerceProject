@@ -107,4 +107,22 @@ public class EventHelper {
                 .metadata(metaData)
                 .build();
     }
+
+    public static NotificationEvent createEventForDeliveryAssignment(Long driverId) {
+
+        Map<String, Object> metaData = Map.of(
+                "adminMessage", "Driver: "+ driverId + "has been assigned for delivering orders",
+                "driverId", driverId,
+                "driverMessage", "You have been assigned for the delivery of orders"
+        );
+
+        return NotificationEvent.builder()
+                .recipientId(null)
+                .title("DRIVER ASSIGN")
+                .message(null)
+                .type(NotificationType.DRIVER_ASSIGN)
+                .metadata(metaData)
+                .build();
+
+    }
 }

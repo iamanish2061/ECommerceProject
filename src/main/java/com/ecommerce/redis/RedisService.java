@@ -1,6 +1,7 @@
 package com.ecommerce.redis;
 
 import com.ecommerce.dto.intermediate.TempOrderDetails;
+import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.model.notification.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -195,6 +196,33 @@ public class RedisService {
         redisTemplate.delete(key);
     }
 
+//   for adding delivery list to redis
+    public void addDeliveryAddressList(Long driverId, List<AssignedDeliveryResponse> orderedList) {
+        try {
+            String key = "driver_route:" + driverId;
+            String json = objectMapper.writeValueAsString(orderedList);
+            // Store for 24 hours or until the delivery is completed
+            redisTemplate.opsForValue().set(key, json, 24, TimeUnit.HOURS);
+            log.info("Stored optimized route in Redis for driver: {}", driverId);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize delivery list for driver: {}", driverId, e);
+        }
+    }
+
+//    get delivery address list
+    public List<AssignedDeliveryResponse> getDeliveryAddressList(Long driverId) {
+        try {
+            String key = "driver_route:" + driverId;
+            Object value = redisTemplate.opsForValue().get(key);
+            if (value == null) return List.of();
+
+            return objectMapper.readValue(value.toString(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, AssignedDeliveryResponse.class));
+        } catch (Exception e) {
+            log.error("Failed to retrieve delivery list from Redis", e);
+            return List.of();
+        }
+    }
 
 }
 
