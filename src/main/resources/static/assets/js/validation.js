@@ -10,7 +10,7 @@ const patterns = {
 const showError = (input, message = null) => {
     const field = input.closest('.field');
     const errorSpan = field?.querySelector('.error-msg');
-    if(errorSpan){
+    if (errorSpan) {
         // Using the passed 'message' or fallback
         errorSpan.textContent = message || errorSpan.dataset.default || "Invalid input";
         errorSpan.classList.add('active');
@@ -20,7 +20,7 @@ const showError = (input, message = null) => {
 
 const hideError = (input) => {
     const errorSpan = input.closest('.field')?.querySelector('.error-msg');
-    if(errorSpan){
+    if (errorSpan) {
         errorSpan.classList.remove('active');
     }
 };
@@ -29,9 +29,9 @@ const hideError = (input) => {
 
 function validateFullName(input) {
     const val = input.value.trim();
-    if(!val){
+    if (!val) {
         return showError(input, "Fullname is required");
-    }if(!patterns.fullName.test(val)){
+    } if (!patterns.fullName.test(val)) {
         return showError(input, "Fullname must be 4-50 characters (letters and spaces only)");
     }
     hideError(input);
@@ -39,13 +39,13 @@ function validateFullName(input) {
 }
 
 // FIX: Corrected to use input element and username pattern
-function validateUsername(input){
+function validateUsername(input) {
     const val = input.value.trim();
-    if(!val){
+    if (!val) {
         return showError(input, "Username is required");
     }
     // FIX: Using the correct 'patterns.username' regex
-    if(!patterns.username.test(val)){
+    if (!patterns.username.test(val)) {
         return showError(input, "Username must be 4-20 characters (a-z, 0-9, and _)");
     }
     hideError(input);
@@ -53,34 +53,34 @@ function validateUsername(input){
 }
 
 // FIX: Standardized to return true/false
-function validateEmail(input){
+function validateEmail(input) {
     const val = input.value.trim();
-    if(!val){
+    if (!val) {
         return showError(input, "Email is required");
-    }if(!patterns.email.test(val)){
+    } if (!patterns.email.test(val)) {
         return showError(input, "Invalid email format");
     }
     hideError(input);
     return true;
 }
 
-function validatePassword(input){
+function validatePassword(input) {
     const val = input.value.trim();
-    if(!val){
+    if (!val) {
         return showError(input, "Password is required");
-    }if(!patterns.password.test(val)){
-
+    } if (!patterns.password.test(val)) {
+        showToast("Password must be 8+ characters and include a number, letter, and symbol (@#$%^&+=!_*)", "info");
         return showError(input, "Password must be 8+ characters and include a number, letter, and symbol (@#$%^&+=!_*)");
     }
     hideError(input);
     return true;
 }
 
-function validateConfirmPassword(passwordInput, confirmInput){
+function validateConfirmPassword(passwordInput, confirmInput) {
     const passwordVal = passwordInput.value.trim();
     const confirmVal = confirmInput.value.trim();
 
-    if(passwordVal !== confirmVal){
+    if (passwordVal !== confirmVal) {
         return showError(confirmInput, "Passwords do not match");
     }
     hideError(confirmInput);
