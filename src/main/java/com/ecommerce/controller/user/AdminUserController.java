@@ -86,5 +86,4 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.ok("Assigned successfully"));
     }
 
-
 }

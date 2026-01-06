@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -102,9 +103,9 @@ public class AdminUserService {
                 () -> new ApplicationException("Address not found!", "ADDRESS_NOT FOUND", HttpStatus.NOT_FOUND)
         );
 
-        List<AssignedDeliveryResponse> addresses = orders.stream()
+        List<AssignedDeliveryResponse> addresses = new ArrayList<>(orders.stream()
                 .map(
-                        o->new AssignedDeliveryResponse(
+                        o -> new AssignedDeliveryResponse(
                                 o.getId(),
                                 o.getUser().getUsername(),
                                 o.getPhoneNumber(),
@@ -114,8 +115,9 @@ public class AdminUserService {
                                 o.getAddress().getLatitude(),
                                 o.getAddress().getLongitude()
                         )
-                ).toList();
-        addresses.addFirst(new AssignedDeliveryResponse(
+                ).toList());
+
+        addresses.add(0, new AssignedDeliveryResponse(
                 null,
                 "adminCutLab",
                 "9823166482",
