@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         prevBtn.style.display = n == 1? 'none' : 'flex';
 
         if(n === 3){
-            nextBtn.textContent = `<span>Create Account</span>` ;
+            nextBtn.innerHTML = `<span>Create Account</span>` ;
         }else if(n === 2){
             nextBtn.innerHTML = `<span>Verify</span><i class ='bx bx-right-arrow-alt'></i>` ;
         }else{

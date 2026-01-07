@@ -66,7 +66,7 @@ public class DriverController {
     @Operation(summary = "when driver click start button to start delivery")
     public ResponseEntity<ApiResponse<?>> completeDelivery(
             @AuthenticationPrincipal UserPrincipal currentUser,
-            @Valid OrderCompletionRequest request
+            @Valid @RequestBody OrderCompletionRequest request
     ){
         if(currentUser == null || currentUser.getUser().getRole() != Role.ROLE_DRIVER){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized user!", "USER_UNAUTHORIZED"));

@@ -42,6 +42,28 @@ function togglePasswordVisibility(inputId, button) {
     }
 }
 
+// Update Navbar UI
+function updateAuthUI(isLoggedIn) {
+    const authBtn = document.getElementById('loginBtn');
+    const profileWrapper = document.getElementById('profileWrapper');
+
+    if (!authBtn || !profileWrapper) return;
+
+    if (isLoggedIn) {
+        // Hide login button
+        authBtn.classList.add('hidden');
+
+        // Show profile icon
+        profileWrapper.classList.remove('hidden');
+    } else {
+        // Show login button
+        authBtn.classList.remove('hidden');
+
+        // Hide profile icon
+        profileWrapper.classList.add('hidden');
+    }
+}
+
 
 //state update functions
 function updateProfileUI() {
@@ -55,7 +77,7 @@ function updateProfileUI() {
 
     if (fullNameEl) fullNameEl.textContent = state.profile.fullName || 'User';
     if (userEmailEl) userEmailEl.textContent = state.profile.email || '';
-    if (userNameEl) userNameEl.textContent = state.profile.username || 'Username';
+    if (userNameEl) userNameEl.textContent = state.profile.username ? `Username: ${state.profile.username}` : 'Username';
 
     if (profilePicEl && state.profile.profilePhoto) {
         profilePicEl.src = state.profile.profilePhoto;
@@ -390,7 +412,7 @@ async function uploadProfilePhoto(formData) {
         const response = await profileService.changePhoto(formData);
 
         if (response?.success) {
-            state.profile.profilePhoto = response.data.photoUrl;
+            state.profile.profilePhoto = response.data.profileUrl || response.data;
             updateProfileUI();
             showToast('Profile photo updated successfully', 'success');
         } else {
@@ -718,10 +740,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const licenseFileInput = document.getElementById('licenseFile');
     if (licenseFileInput) {
         licenseFileInput.addEventListener('change', function (e) {
-            const file = e.target.file[0];
+            const file = e.target.files[0];
             if (!file) return;
 
-            const preview = document.getElementById('licensePriview');
+            const preview = document.getElementById('licensePreview');
             const imagePreview = document.getElementById('licenseImagePreview');
             const fileName = document.getElementById('licenseFileName');
 
