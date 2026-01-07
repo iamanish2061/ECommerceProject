@@ -198,8 +198,8 @@ public class OrderPersistService {
                 .status(payment.getPaymentStatus() == PaymentStatus.COMPLETE ? OrderStatus.CONFIRMED: OrderStatus.PENDING)
                 .phoneNumber(tempOrder.contactNumber())
                 .address(tempOrder.address())
-                .payment(payment)
                 .build();
+        orderToBePersisted.addPayment(payment);
         OrderItem orderItem = OrderItem.builder()
                 .quantity(tempOrder.items().get(0).quantity())
                 .priceAtPurchase(tempOrder.items().get(0).priceAtPurchase())
@@ -236,8 +236,9 @@ public class OrderPersistService {
                 .status(payment.getPaymentStatus() == PaymentStatus.COMPLETE ? OrderStatus.CONFIRMED : OrderStatus.PENDING)
                 .phoneNumber(tempOrder.contactNumber())
                 .address(tempOrder.address())
-                .payment(payment)
                 .build();
+
+        orderToBePersisted.addPayment(payment);
 
         for (ProductModel product : products) {
             OrderItemDTO dto = itemDtoMap.get(product.getId());
