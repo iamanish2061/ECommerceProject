@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record DriverInfoResponse(
+        Long id,
         VerificationStatus verified,
         String licenseNumber,
         LocalDate licenseExpiry,
