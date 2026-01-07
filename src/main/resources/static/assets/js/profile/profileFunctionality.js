@@ -344,9 +344,20 @@ function openAddressModal(type = 'home') {
         document.getElementById('place').value = addr.place || '';
         document.getElementById('landmark').value = addr.landmark || '';
 
+        // Update coordinates and map
+        if (addr.latitude && addr.longitude) {
+            updateLatLng(addr.latitude, addr.longitude);
+            if (typeof updateMapFromLatAndLng === 'function') {
+                updateMapFromLatAndLng(addr.latitude, addr.longitude);
+            }
+        }
+
         // Switch button to Update mode
         saveBtn.onclick = updateAddress;
         saveBtn.textContent = 'Update Address';
+
+        // Leaflet fix: invalidate size when modal opens
+        setTimeout(() => { if (window.map) window.map.invalidateSize(); }, 100);
     } else {
         // Clear form fields
         ['province', 'district', 'place', 'landmark'].forEach(id => {
@@ -482,6 +493,10 @@ async function saveAddress() {
         showToast("Pleae fill all the fields", "info");
         return;
     }
+
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+
     const addressData = {
         type,
         province,
@@ -520,6 +535,10 @@ async function updateAddress() {
         showToast("Pleae fill all the fields");
         return;
     }
+
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+
     const addressData = {
         province,
         district,
@@ -549,6 +568,44 @@ function editAddress(type) {
     openAddressModal(type);
 }
 
+
+//locate on map function
+// ===== LOCATE BUTTON =====
+const locateBtn = document.getElementById("locateMapBtn");
+const provinceInput = document.getElementById("province");
+const districtInput = document.getElementById("district");
+const placeInput = document.getElementById("place");
+const landmarkInput = document.getElementById("landmark");
+
+if (locateBtn) {
+    locateBtn.addEventListener("click", async () => {
+        const province = provinceInput.value?.trim();
+        const district = districtInput.value?.trim();
+        const place = placeInput.value?.trim();
+        const landmark = landmarkInput.value?.trim();
+
+        if (!province && !district && !place && !landmark) {
+            showToast("Please fill the address field");
+            return;
+        }
+
+        const address = [landmark, place, district, province, COUNTRY]
+            .filter(Boolean)
+            .join(", ");
+
+        const location = await geocodeAddress(address);
+        if (!location) {
+            showToast("Location not found", "error");
+            return;
+        }
+
+        map.setView([location.lat, location.lng], 16);
+        marker.setLatLng([location.lat, location.lng]);
+
+        updateLatLng(location.lat, location.lng);
+        updateAddressFields(location.components, location.roadInfo);
+    });
+}
 
 
 
