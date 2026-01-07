@@ -482,6 +482,7 @@ function renderBrands() {
 
 function createProductCard(product) {
     const productCard = document.createElement('div');
+
     productCard.className = `
         bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 
         overflow-hidden flex flex-col h-full border border-gray-100
@@ -490,61 +491,70 @@ function createProductCard(product) {
 
     const productId = product.id;
     const productName = product.title || 'Untitled Product';
-    const shortDesc = product.shortDescription || '';
+    const shortDesc = product.shortDescription || product.description || '';
     const price = product.price ? `Rs. ${product.price}` : 'Price on request';
     const stock = product.stock;
     const imageUrl = product.imageUrl || null;
 
     // Stock status badge
-    const stockStatus = stock > 10
+    let stockStatus;
+    stockStatus = stock > 10
         ? `<span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">In Stock</span>`
         : stock > 0
             ? `<span class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">Low Stock</span>`
             : `<span class="text-xs text-red-700 bg-red-100 px-2 py-1 rounded-full">Out of Stock</span>`;
 
+
+
     productCard.innerHTML = `
-        <div class="relative overflow-hidden rounded-xl">  <!-- ADD overflow-hidden here -->
-            <div class="bg-gray-50 h-64 flex items-center justify-center group">  <!-- ADD group class -->
+        <div class="relative overflow-hidden rounded-t-xl">
+            <div class="bg-gray-50 h-52 flex items-center justify-center group p-4">
                 ${imageUrl
             ? `<img src="${imageUrl}" alt="${productName}" 
-                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'; this.onerror=null;">`
-            : `<div class="w-full h-full flex items-center justify-center text-6xl text-gray-300">📦</div>`
+            : `<div class="w-full h-full flex items-center justify-center text-5xl text-gray-300">📦</div>`
         }
             </div>
-            <div class="absolute top-3 right-3">
+            <div class="absolute top-2 right-2">
                 ${stockStatus}
             </div>
         </div>
 
-        <div class="p-6 flex flex-col flex-1">
-            <h3 class="font-bold text-xl text-gray-800 mb-2 line-clamp-2 leading-tight">
+        <div class="p-4 flex flex-col flex-1">
+            <h3 class="font-bold text-base text-gray-800 mb-1 line-clamp-1 leading-tight" title="${productName}">
                 ${productName}
             </h3>
             
             ${shortDesc ? `
-                <p class="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
+                <p class="text-xs text-gray-600 mb-3 line-clamp-2 flex-1">
                     ${shortDesc}
                 </p>
             ` : '<div class="flex-1"></div>'}
 
             <div class="mt-auto">
-                <div class="flex items-center justify-between mb-5">
-                    <span class="text-3xl font-bold text-blue-600">${price}</span>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xl font-bold text-blue-600">${price}</span>
                 </div>
 
-                <div class="mt-auto space-y-3">
-                    <button class="add-to-cart-btn w-full py-3 px-4 bg-white border-2 border-blue-600 text-blue-600 rounded-xl 
-                                    hover:bg-blue-50 font-semibold text-sm transition-all"
+                <div class="flex gap-2">
+                    <button class="add-to-cart-btn flex-1 py-2 px-2 bg-white border border-blue-600 text-blue-600 rounded-lg 
+                                    hover:bg-blue-50 font-semibold text-xs transition-all flex items-center justify-center gap-1"
                             data-product-id="${productId}"
                             ${stock === 0 ? 'disabled' : ''}>
-                        Add to Cart
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
+                        Cart
                     </button>
-                    <button class="buy-now-btn w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl 
-                                    hover:from-blue-700 hover:to-indigo-700 font-semibold text-sm transition-all shadow-md"
+                    <button class="buy-now-btn flex-1 py-2 px-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg 
+                                    hover:from-blue-700 hover:to-indigo-700 font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-1"
                             data-product-id="${productId}"
                             ${stock === 0 ? 'disabled' : ''}>
-                        Buy Now
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                        Buy
                     </button>
                 </div>
             </div>

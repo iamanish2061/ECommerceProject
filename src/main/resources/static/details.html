@@ -70,11 +70,11 @@
     </div>
 
     <!-- Navbar -->
-    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+            <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
-                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                <a href="index.html" class="text-2xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
                 </a>
 
@@ -202,26 +202,33 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-10">
-        <section class="bg-white rounded-[32px] shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-0">
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        <section
+            class="bg-white rounded-[24px] shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-0 border border-slate-100">
 
             <!-- LEFT: Image Gallery -->
-            <div class="bg-gradient-to-b from-slate-50 to-blue-50 p-10 flex flex-col items-center relative">
+            <div class="bg-gradient-to-b from-slate-50 to-blue-50 p-6 flex flex-col items-center relative">
                 <!-- Main Image -->
-                <div class="relative rounded-3xl bg-white shadow-md overflow-hidden h-[480px] w-full max-w-md">
+                <div class="relative rounded-2xl bg-white shadow-sm overflow-hidden h-[420px] w-full max-w-sm">
                     <img id="productImageMain" src="" alt="Product main image" class="w-full h-full object-cover">
                     <div id="noImageFallback" class="w-full h-full flex items-center justify-center bg-gray-100">
-                        <span class="text-8xl">📦</span>
+                        <span class="text-6xl">📦</span>
                     </div>
 
                     <!-- Prev/Next Arrows -->
                     <button id="prevImage"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg z-10 hidden">
-                        ←
+                        class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg z-10 hidden transition-all hover:scale-110 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
                     </button>
                     <button id="nextImage"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg z-10 hidden">
-                        →
+                        class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg z-10 hidden transition-all hover:scale-110 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
                     </button>
                 </div>
 
@@ -229,35 +236,35 @@
                 <div id="imageThumbnails" class="grid grid-cols-4 gap-3 mt-6 w-full max-w-md"></div>
 
                 <!-- Short Description -->
-                <p id="productShortDescription" class="text-sm text-slate-600 text-center mt-6 max-w-lg">
+                <p id="productShortDescription" class="text-xs text-slate-500 text-center mt-4 max-w-md">
                     <!-- injected -->
                 </p>
             </div>
 
             <!-- RIGHT: Product Info -->
-            <div class="p-10 flex flex-col gap-6">
+            <div class="p-6 flex flex-col gap-4">
                 <!-- Title -->
-                <h1 id="productTitle" class="text-4xl font-bold text-slate-900 leading-tight">
+                <h1 id="productTitle" class="text-3xl font-bold text-slate-900 leading-tight">
                     Product Name
                 </h1>
 
                 <!-- Price -->
                 <div>
-                    <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</h2>
-                    <p id="productPrice" class="text-4xl font-bold text-blue-600 mt-2">Rs. 0</p>
+                    <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em]">Price</h2>
+                    <p id="productPrice" class="text-3xl font-bold text-blue-600 mt-1">Rs. 0</p>
                 </div>
 
                 <!-- Brand & Category -->
-                <div class="grid grid-cols-2 gap-6 text-sm">
+                <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Brand</p>
-                        <div id="detailsBrand" class="flex items-center gap-3">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Brand</p>
+                        <div id="detailsBrand" class="flex items-center gap-2">
                             <!-- logo + name injected -->
                         </div>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Category</p>
-                        <p id="detailsCategory" class="text-slate-700">-</p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Category</p>
+                        <p id="detailsCategory" class="text-slate-700 font-medium">-</p>
                     </div>
                 </div>
 
@@ -279,7 +286,8 @@
 
                 <!-- Description -->
                 <div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-[0.16em] mb-3">Description</h3>
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] mb-1">Description
+                    </h3>
                     <p id="productDescription" class="text-sm text-slate-600 leading-relaxed">
                         No description available.
                     </p>
@@ -287,20 +295,30 @@
 
                 <!-- Tags -->
                 <div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-[0.16em] mb-3">Tags</h3>
-                    <div id="detailsTagsContainer" class="flex flex-wrap gap-2">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] mb-1">Tags</h3>
+                    <div id="detailsTagsContainer" class="flex flex-wrap gap-1">
                         <!-- chips injected -->
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="mt-8 grid grid-cols-2 gap-4">
+                <div class="mt-2 grid grid-cols-2 gap-3">
                     <button id="detailsAddToCart"
-                        class="py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transition-all">
+                        class="py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
                         Add to Cart
                     </button>
                     <button id="detailsBuyNow"
-                        class="py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-2xl text-lg font-semibold hover:bg-blue-50 transition-all">
+                        class="py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg text-base font-semibold hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
                         Buy Now
                     </button>
                 </div>

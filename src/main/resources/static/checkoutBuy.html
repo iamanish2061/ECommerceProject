@@ -203,16 +203,16 @@
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto p-4">
+    <main class="max-w-6xl mx-auto px-4 py-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Left: Forms -->
-            <div class="lg:col-span-2 space-y-8">
+            <div class="lg:col-span-2 space-y-6">
 
-                <section class="bg-white rounded-3xl shadow-lg p-8">
-                    <h2 class="text-2xl font-bold mb-5 text-slate-800">1. Contact Information</h2>
+                <section class="bg-white rounded-3xl shadow-lg p-6 border border-slate-100">
+                    <h2 class="text-xl font-bold mb-4 text-slate-800">1. Contact Information</h2>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="relative">
-                            <input type="tel" placeholder="9841****" class="border rounded-lg px-4 py-3 w-full mt-2"
+                            <input type="tel" placeholder="9841****" class="border rounded-lg px-4 py-2.5 w-full mt-1"
                                 value="" id="phoneNumber" required>
                         </div>
                     </div>
@@ -220,12 +220,12 @@
 
 
                 <!-- Address Information -->
-                <section class="bg-white rounded-3xl shadow-lg p-8">
+                <section class="bg-white rounded-3xl shadow-lg p-6 border border-slate-100">
 
                     <!--  Address Type Selection -->
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 mb-4">
                         <!-- Title -->
-                        <h2 class="text-xl font-bold text-slate-800 whitespace-nowrap">
+                        <h2 class="text-lg font-bold text-slate-800 whitespace-nowrap">
                             Select Saved Address
                         </h2>
 
@@ -251,7 +251,7 @@
                     </div>
 
 
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6 mt-6">2. Address Information</h2>
+                    <h2 class="text-xl font-bold text-slate-800 mb-6 mt-6">2. Address Information</h2>
 
                     <div>
                         <input type="hidden" id="addressType">
@@ -263,29 +263,41 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-2">Province</label>
+                            <label
+                                class="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Province</label>
                             <input required type="text" id="province" placeholder="Enter province"
-                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all">
+                                class="border-2 border-slate-50 rounded-2xl px-4 py-2.5 w-full focus:border-blue-400 focus:outline-none transition-all text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-2">District</label>
+                            <label
+                                class="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">District</label>
                             <input required type="text" id="district" placeholder="Enter district"
-                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all">
+                                class="border-2 border-slate-50 rounded-2xl px-4 py-2.5 w-full focus:border-blue-400 focus:outline-none transition-all text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-2">Place</label>
+                            <label
+                                class="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Place</label>
                             <input required type="text" id="place" placeholder="Enter place"
-                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all">
+                                class="border-2 border-slate-50 rounded-2xl px-4 py-2.5 w-full focus:border-blue-400 focus:outline-none transition-all text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-2">Landmark</label>
+                            <label
+                                class="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Landmark</label>
                             <input required type="text" id="landmark" placeholder="Enter nearby landmark"
-                                class="border-2 border-slate-200 rounded-2xl px-6 py-3 w-full focus:border-blue-400 focus:outline-none transition-all">
+                                class="border-2 border-slate-50 rounded-2xl px-4 py-2.5 w-full focus:border-blue-400 focus:outline-none transition-all text-sm">
                         </div>
                         <div class="md:col-span-2">
                             <button id="locateOnMapBtn"
-                                class="mt-4 w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">Locate
-                                on Map</button>
+                                class="mt-2 w-full py-3 px-6 bg-slate-800 text-white rounded-xl font-bold shadow-md hover:bg-slate-900 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                </svg>
+                                Locate on Map
+                            </button>
                         </div>
                     </div>
 
@@ -308,8 +320,8 @@
                 </section>
 
                 <!--  Payment Method -->
-                <section class="bg-white rounded-3xl shadow-lg p-8">
-                    <h2 class="text-2xl font-bold mb-5 text-gray-800">3. Payment Method</h2>
+                <section class="bg-white rounded-3xl shadow-lg p-6 border border-slate-100">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">3. Payment Method</h2>
                     <div class="grid grid-cols-3 gap-6">
                         <label class="cursor-pointer">
                             <input type="radio" name="payment_method" value="ESEWA" checked class="hidden peer">
@@ -354,14 +366,14 @@
 
             <!-- Right: Order Summary -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-3xl shadow-lg p-8 sticky top-24">
-                    <h2 class="text-lg font-semibold mb-4">Order</h2>
-                    <div class="space-y-4 mb-6">
-                        <!-- Product Placeholder (no image) -->
-                        <div class="flex items-center gap-4 border-b border-slate-200 pb-4">
+                <div class="bg-white rounded-3xl shadow-lg p-6 sticky top-24 border border-slate-100">
+                    <h2 class="text-lg font-bold mb-4 text-slate-800">Order Summary</h2>
+                    <div class="space-y-4 mb-5">
+                        <!-- Product Item -->
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div
-                                class="w-24 h-24 bg-gradient-to-br from slate-100 to-blue-50 rounded-2xl flex items-center justify-center shadow-sm text-4xl">
-                                <img id="productImage" alt="Product Image" src="">
+                                class="w-20 h-20 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center shadow-sm overflow-hidden p-1.5">
+                                <img id="productImage" alt="Product Image" src="" class="w-full h-full object-contain">
                             </div>
                             <div class="flex-1">
                                 <p class="font-medium" id="productName">Product</p>
@@ -376,7 +388,8 @@
                                     id="deliveryCharge">-</span></div>
                             <div
                                 class="flex justify-between font-bold text-slate-800 border-slate-200 text-2xl border-t pt-4">
-                                <span>Total</span><span id="totalPrice">Price</span></div>
+                                <span>Total</span><span id="totalPrice">Price</span>
+                            </div>
                         </div>
                         <button
                             class="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2"

@@ -113,7 +113,7 @@ function renderCartItems() {
 //creating a cart element for displaying
 function createCartItemElement(item) {
     const itemDiv = document.createElement('div');
-    itemDiv.className = 'flex flex-col sm:flex-row gap-6 p-6 border-b border-slate-200 last:border-b-0';
+    itemDiv.className = 'flex flex-row gap-4 py-4 border-b border-slate-100 last:border-b-0 group';
     itemDiv.id = `cart-Item${item.product_id || item.product.id}`;
 
     const product = item.product;
@@ -125,25 +125,25 @@ function createCartItemElement(item) {
 
     itemDiv.innerHTML = `
     <!-- Product Image -->
-    <div class="w-full sm:w-32 h-32 bg-white rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
+    <div class="w-24 h-24 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 p-2">
         ${isEmoji
-            ? `<div class="w-full h-full flex items-center justify-center text-5xl">${productImage}</div>`
-            : `<img src="${productImage}" alt="${product.name}" class="w-full h-full object-cover">`
+            ? `<div class="w-full h-full flex items-center justify-center text-4xl">${productImage}</div>`
+            : `<img src="${productImage}" alt="${product.name}" class="w-full h-full object-contain">`
         }
     </div>
 
     <!-- Product Details -->
-    <div class="flex-1 flex flex-col justify-between">
+    <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">${product.title || product.name}</h3>
-            <p class="text-slate-600 text-sm mb-4 line-clamp-2">${product.shortDescription || product.description || ''}</p>
-            <p class="text-2xl font-bold text-blue-600">Rs: ${itemPrice.toFixed(2)}</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-1 truncate" title="${product.title || product.name}">${product.title || product.name}</h3>
+            <p class="text-slate-500 text-sm mb-3 line-clamp-1">${product.shortDescription || product.description || ''}</p>
+            <p class="text-xl font-bold text-blue-600">Rs. ${itemPrice.toLocaleString()}</p>
         </div>
 
         <!-- Quantity Controls & Remove -->
-        <div class="flex justify-around gap-6 mt-6">
-            <div class="flex items-center gap-3 bg-slate-100 rounded-full px-4 py-2">
-                <button class="quantity-btn text-slate-600 hover:text-blue-600 font-bold text-xl" data-action="decrease" data-product-id="${productId}">
+        <div class="flex items-center gap-4 mt-3">
+            <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-1.5 border border-slate-100">
+                <button class="quantity-btn text-slate-400 hover:text-blue-600 font-bold text-lg px-1" data-action="decrease" data-product-id="${productId}">
                     −
                 </button>
                 <input 
@@ -151,34 +151,32 @@ function createCartItemElement(item) {
                     value="${itemQuantity}" 
                     min="1" 
                     max="99"
-                    class="quantity-input w-16 text-center bg-transparent border-none outline-none font-medium text-slate-800"
+                    class="quantity-input w-10 text-center bg-transparent border-none outline-none font-bold text-sm text-slate-700"
                     data-product-id="${productId}"
                 />
-                <button class="quantity-btn text-slate-600 hover:text-blue-600 font-bold text-xl" data-action="increase" data-product-id="${productId}">
+                <button class="quantity-btn text-slate-400 hover:text-blue-600 font-bold text-lg px-1" data-action="increase" data-product-id="${productId}">
                     +
                 </button>
             </div>
 
-            <button class="remove-btn text-red-500 hover:text-red-700 font-medium flex items-center gap-2 transition-colors" data-product-id="${productId}">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                Remove
-            </button>
+            <div class="flex items-center gap-4">
+                <button class="save-btn text-emerald-500 hover:text-emerald-700 font-bold text-sm flex items-center gap-1 transition-colors" data-product-id="${productId}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Save
+                </button>
 
-            <button class="save-btn text-green-500 hover:text-green-700 font-medium flex items-center gap-2 transition-colors" data-product-id="${productId}">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Save
-            </button>
+                <button class="remove-btn text-red-500 hover:text-red-700 font-bold text-sm flex items-center gap-1 transition-colors" data-product-id="${productId}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Remove
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Item Total -->
-    <div class="text-right">
-        <p class="text-sm text-slate-500 mb-1">Item Total</p>
-        <p class="text-2xl font-bold text-slate-800">Rs.${(itemPrice * itemQuantity).toFixed(2)}</p>
+    <div class="text-right flex flex-col justify-center min-w-[120px]">
+        <p class="text-xs text-slate-400 mb-0.5">Item Total</p>
+        <p class="text-xl font-bold text-slate-800">Rs. ${(itemPrice * itemQuantity).toLocaleString()}</p>
     </div>
 `;
 
@@ -316,10 +314,10 @@ function calculateTotal() {
 
         //create product price row
         const priceRow = document.createElement('div');
-        priceRow.className = 'flex justify-between text-slate-700 py-1';
+        priceRow.className = 'flex justify-between items-start gap-4 text-sm text-slate-600';
         priceRow.innerHTML = `
-            <span class="flex-1 truncate pr-2">${product.title || product.name} (x${quantity})</span>
-            <span class="font-medium">Rs.${itemTotal.toFixed(2)}</span>
+            <span class="flex-1 truncate">${product.title || product.name} <span class="text-slate-400 font-normal">× ${quantity}</span></span>
+            <span class="font-bold text-slate-800 whitespace-nowrap">Rs. ${itemTotal.toLocaleString()}</span>
         `;
 
         productPriceList.appendChild(priceRow);

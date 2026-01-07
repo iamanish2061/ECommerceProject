@@ -4,16 +4,18 @@ let cartCount = 0;
 let subTotalAmount = 0;
 
 async function initCheckoutCartPage() {
-    subTotalAmount = getFromUrl("total");
+    subTotalAmount = parseFloat(getFromUrl("total")) || 0;
     if (!subTotalAmount) {
         showToast("Please go through your cart!", "info");
     }
 
     const subPriceInput = document.getElementById("productPrice");
-    subPriceInput.textContent = "Rs. " + subTotalAmount;
+    subPriceInput.textContent = `Rs. ${subTotalAmount.toLocaleString()}`;
 
     try {
-        // 1) load all brands for sidebar
+        // Load cart items for summary
+        await renderCartItems();
+
         const cartResp = await cartService.getCartCount();
         if (cartResp.success) {
             cartCount = cartResp.data.totalCartItems || 0;
@@ -21,8 +23,42 @@ async function initCheckoutCartPage() {
 
         updateCartCount();
     } catch (err) {
-        console.error('Error initializing brand page:', err);
-        showToast("Failed to load product!", "error");
+        console.error('Error initializing checkout cart page:', err);
+    }
+}
+
+async function renderCartItems() {
+    try {
+        const response = await cartService.getCartItems();
+        if (response.success && response.data) {
+            const listContainer = document.getElementById("cartItemsList");
+            listContainer.innerHTML = "";
+
+            response.data.forEach(item => {
+                const product = item.product;
+                const thumbnailImg = product.images.find(img => img.thumbnail === true) || product.images[0];
+                const productImageUrl = thumbnailImg ? thumbnailImg.url : 'default-image.png';
+
+                const itemHtml = `
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                        <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center shadow-sm overflow-hidden p-1.5 flex-shrink-0">
+                            <img src="${productImageUrl}" alt="${product.name}" class="w-full h-full object-contain">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start gap-2">
+                                <p class="font-bold text-slate-800 text-sm truncate">${product.name}</p>
+                                <p class="text-xs font-bold text-blue-600 whitespace-nowrap">x${item.quantity}</p>
+                            </div>
+                            <p class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">${product.shortDescription || product.description || ''}</p>
+                            <p class="text-xs font-semibold text-slate-500 mt-1">Rs. ${product.price.toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', itemHtml);
+            });
+        }
+    } catch (err) {
+        console.error('Error rendering cart items:', err);
     }
 }
 
@@ -98,8 +134,9 @@ document.querySelectorAll("input[name='address_type']").forEach(radio => {
 
             confirmSection.classList.add("hidden");
 
-            deliveryChargeEl.textContent = `Rs. ${data.deliveryCharge || "0.00"}`;
-            totalPriceEl.textContent = "Rs. " + (parseFloat(deliveryChargeEl.textContent.replace("Rs. ", "")) + parseFloat(subTotalAmount)).toFixed(2);
+            deliveryChargeEl.textContent = `Rs. ${(data.deliveryCharge || 0).toLocaleString()}`;
+            const total = (data.deliveryCharge || 0) + subTotalAmount;
+            totalPriceEl.textContent = `Rs. ${total.toLocaleString()}`;
             addressConfirmed = true;
 
         } catch (e) {
@@ -160,8 +197,10 @@ confirmCheckbox.addEventListener("change",
             disableInputFields();
             marker.dragging.disable();
             const response = await checkoutService.calculateDeliveryCharge(address);
-            deliveryChargeEl.textContent = `Rs. ${response.data?.deliveryCharge.toFixed(2)}`;
-            totalPriceEl.textContent = "Rs. " + (parseFloat(deliveryChargeEl.textContent.replace("Rs. ", "")) + parseFloat(subTotalAmount)).toFixed(2);
+            const deliveryCharge = response.data?.deliveryCharge || 0;
+            deliveryChargeEl.textContent = `Rs. ${deliveryCharge.toLocaleString()}`;
+            const total = deliveryCharge + subTotalAmount;
+            totalPriceEl.textContent = `Rs. ${total.toLocaleString()}`;
             addressConfirmed = true;
             showToast("Address confirmed", "success");
         }

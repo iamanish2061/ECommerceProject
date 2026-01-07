@@ -25,19 +25,26 @@ async function initCheckoutBuyPage() {
 }
 
 function renderProductInfo() {
-
     if (!productData) {
         showToast("Product not found", "error");
         return;
     }
 
-    const productImageUrl = productData.images.filter(img => img.thumbnail === true).map(img => img.url);
+    // Correctly extract the thumbnail URL
+    const thumbnailImg = productData.images.find(img => img.thumbnail === true) || productData.images[0];
+    const productImageUrl = thumbnailImg ? thumbnailImg.url : 'default-image.png';
 
-    document.getElementById("productImage").src = productImageUrl || 'default-image.png';
+    document.getElementById("productImage").src = productImageUrl;
     document.getElementById("productName").textContent = productData.name;
-    document.getElementById("productDescription").textContent = productData.shortDescription;
-    document.getElementById("productPrice").textContent = `Rs. ${productData.price.toFixed(2)}`;
+    document.getElementById("productDescription").textContent = productData.shortDescription || productData.description || '';
+    document.getElementById("productPrice").textContent = `Rs. ${productData.price.toLocaleString()}`;
 
+    // Ensure total is updated initially
+    const deliveryChargeElement = document.getElementById("deliveryCharge");
+    const deliveryChargeText = deliveryChargeElement ? deliveryChargeElement.textContent : "0";
+    const deliveryCharge = parseFloat(deliveryChargeText.replace("Rs. ", "").replace(",", "")) || 0;
+
+    document.getElementById("totalPrice").textContent = `Rs. ${(productData.price + deliveryCharge).toLocaleString()}`;
 }
 
 function updateCartCount() {

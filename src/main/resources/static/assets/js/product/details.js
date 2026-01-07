@@ -62,12 +62,12 @@ async function initDetailsPage() {
             productService.getProductsById(id),
             cartService.getCartCount()
         ])
-        
+
         if (!res || res.success === false) {
             showDetailsError(res?.message || "Failed to load product.");
             return;
         }
-        if(cartResp.success){
+        if (cartResp.success) {
             detailsState.cartCount = cartResp.data.totalCartItems || 0;
         }
 
@@ -119,14 +119,14 @@ function renderDetails(product) {
     const brand = product.brand;
     if (brandContainer && brand) {
         brandContainer.innerHTML = `
-            <div class="flex items-center gap-3">
-                ${brand.logoUrl 
-                    ? `<img src="${brand.logoUrl}" alt="${brand.name}" class="w-12 h-12 object-contain rounded-lg border">`
-                    : `<div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center border">
-                         <span class="text-xl font-bold text-gray-600">${brand.name.charAt(0)}</span>
+            <div class="flex items-center gap-1.5">
+                ${brand.logoUrl
+                ? `<img src="${brand.logoUrl}" alt="${brand.name}" class="w-8 h-8 object-contain rounded border">`
+                : `<div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center border">
+                         <span class="text-sm font-bold text-gray-600">${brand.name.charAt(0)}</span>
                        </div>`
-                }
-                <span class="font-semibold text-lg">${brand.name}</span>
+            }
+                <span class="font-semibold text-base text-slate-800">${brand.name}</span>
             </div>
         `;
     }
@@ -140,7 +140,7 @@ function renderDetails(product) {
     if (product.tags?.length > 0) {
         product.tags.forEach(tag => {
             const chip = document.createElement('span');
-            chip.className = 'px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-sm font-medium';
+            chip.className = 'px-2 py-1 rounded bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider';
             chip.textContent = tag.name || tag.slug;
             tagsContainer.appendChild(chip);
         });
@@ -154,7 +154,7 @@ function renderDetails(product) {
     if (images.length > 1) {
         images.forEach((img, i) => {
             const thumb = document.createElement('div');
-            thumb.className = `cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${i === detailsState.currentImageIndex ? 'border-blue-600 shadow-md' : 'border-transparent'}`;
+            thumb.className = `cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${i === detailsState.currentImageIndex ? 'border-blue-600 shadow-sm' : 'border-transparent'}`;
             thumb.innerHTML = `<img src="${img.url}" alt="${img.altText || product.title}" class="w-full h-20 object-cover">`;
             thumb.onclick = () => {
                 mainImg.src = img.url;
@@ -168,9 +168,10 @@ function renderDetails(product) {
     function updateThumbnails() {
         const thumbs = thumbnails.querySelectorAll('div');
         thumbs.forEach((t, i) => {
-            t.classList.toggle('border-blue-600', i === detailsState.currentImageIndex);
-            t.classList.toggle('shadow-md', i === detailsState.currentImageIndex);
-            t.classList.toggle('border-transparent', i !== detailsState.currentImageIndex);
+            const active = i === detailsState.currentImageIndex;
+            t.classList.toggle('border-blue-600', active);
+            t.classList.toggle('shadow-md', active);
+            t.classList.toggle('border-transparent', !active);
         });
     }
 
@@ -198,14 +199,14 @@ function renderDetails(product) {
     if (addBtn) {
         addBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            if (product.stock <= 0){
+            if (product.stock <= 0) {
                 showToast('Out of stock', 'error');
                 return;
             }
             try {
                 showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(product.id);
-                if(response.success){
+                if (response.success) {
                     await updateCartCountByFetching();
                     showToast(response.message || 'Added to cart!', 'success');
                 }
@@ -228,7 +229,7 @@ function renderDetails(product) {
                 setTimeout(() => {
                     window.location.href = '/checkoutBuy.html?productId=' + encodeURIComponent(product.id);
                 }, 500);
-                
+
             } catch (err) {
                 console.error('Buy now failed:', err);
                 showToast('Could not proceed to buy', 'error');
@@ -246,10 +247,10 @@ function updateCartCount() {
 
 async function updateCartCountByFetching() {
     const resp = await cartService.getCartCount();
-    if(resp.success){
+    if (resp.success) {
         detailsState.cartCount = resp.data.totalCartItems || 0;
         updateCartCount();
-    }else{
+    } else {
         console.error("Failed to fetch cart count");
     }
 }
