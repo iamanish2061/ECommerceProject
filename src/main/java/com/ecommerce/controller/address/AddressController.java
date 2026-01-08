@@ -3,7 +3,7 @@ package com.ecommerce.controller.address;
 import com.ecommerce.dto.request.address.AddAddressRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
-import com.ecommerce.dto.response.user.DetailedAddress;
+import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.address.AddressService;
@@ -38,6 +38,22 @@ public class AddressController {
                     .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
         }
         AddressWithDeliveryChargeResponse address = addressService.getAddressOfType(currentUser.getUser(), addressType);
+        if(address!= null)
+            return ResponseEntity.ok(ApiResponse.ok(address, "Fetched address successfully"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.ok("Address not found"));
+    }
+
+    @GetMapping("/fetch-type/{addressType}")
+    @Operation(summary = "to get address of user (home and work) to display in user profile")
+    public ResponseEntity<ApiResponse<DetailedAddress>> getAddressOfUserForProfile(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable AddressType addressType
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+        }
+        DetailedAddress address = addressService.getAddressForProfileOfType(currentUser.getUser(), addressType);
         if(address!= null)
             return ResponseEntity.ok(ApiResponse.ok(address, "Fetched address successfully"));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.ok("Address not found"));

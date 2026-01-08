@@ -1,4 +1,4 @@
-package com.ecommerce.dto.response.user;
+package com.ecommerce.dto.response.address;
 
 public record DetailedAddress(
         Long addressId,

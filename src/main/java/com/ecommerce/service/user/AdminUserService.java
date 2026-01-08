@@ -1,5 +1,6 @@
 package com.ecommerce.service.user;
 
+import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.dto.response.user.*;
 import com.ecommerce.exception.ApplicationException;

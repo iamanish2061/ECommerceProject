@@ -3,7 +3,7 @@ package com.ecommerce.mapper.address;
 import com.ecommerce.dto.request.order.PlaceOrderRequest;
 import com.ecommerce.dto.response.address.AddressResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
-import com.ecommerce.dto.response.user.DetailedAddress;
+import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.DeliveryAddress;
 import org.mapstruct.Mapper;

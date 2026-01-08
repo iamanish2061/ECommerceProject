@@ -2,7 +2,7 @@ package com.ecommerce.service.user;
 
 import com.ecommerce.dto.request.user.ChangePasswordRequest;
 import com.ecommerce.dto.request.user.DriverRegisterRequest;
-import com.ecommerce.dto.response.user.DetailedAddress;
+import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.dto.response.user.UserProfileResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;

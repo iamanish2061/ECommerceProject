@@ -1,5 +1,7 @@
 package com.ecommerce.dto.response.user;
 
+import com.ecommerce.dto.response.address.DetailedAddress;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 

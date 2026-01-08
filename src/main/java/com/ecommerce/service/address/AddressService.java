@@ -2,7 +2,7 @@ package com.ecommerce.service.address;
 
 import com.ecommerce.dto.request.address.AddAddressRequest;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
-import com.ecommerce.dto.response.user.DetailedAddress;
+import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.model.address.AddressModel;
@@ -34,6 +34,16 @@ public class AddressService {
         if(address != null){
             BigDecimal charge = routeService.calculateDeliveryCharge(address.getLatitude(), address.getLongitude());
             return addressMapper.mapEntityToAddressWithDeliveryChargeResponse(address, charge);
+        }
+        return null;
+    }
+
+
+    public DetailedAddress getAddressForProfileOfType(UserModel user, AddressType addressType) {
+        AddressModel address = addressRepository.findByUserIdAndType(user.getId(), addressType)
+                .orElse(null);
+        if(address != null){
+            return addressMapper.mapEntityToDetailedAddress(address);
         }
         return null;
     }
@@ -81,4 +91,5 @@ public class AddressService {
         AddressModel savedAddress = addressRepository.save(existingAddress);
         return addressMapper.mapEntityToDetailedAddress(savedAddress);
     }
+
 }

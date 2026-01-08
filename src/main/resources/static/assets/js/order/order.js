@@ -59,7 +59,7 @@ function createOrderCard(order) {
     });
 
     return `
-        <div class="group bg-white rounded-[1.5rem] p-5 shadow-sm hover:shadow-lg transition-all duration-500 border border-slate-100/80 flex flex-col md:flex-row items-center justify-between gap-5">
+        <div class="group w-full bg-white rounded-[1.5rem] p-5 shadow-sm hover:shadow-lg transition-all duration-500 border border-slate-100/80 flex flex-col md:flex-row items-center justify-between gap-5">
             <div class="flex items-center gap-5 w-full md:w-auto">
                 <div class="w-14 h-14 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-inner">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -74,10 +74,6 @@ function createOrderCard(order) {
                 <span class="px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusInfo.bgClass} ${statusInfo.textClass} shadow-sm">
                     ${order.status}
                 </span>
-                <div class="flex items-center gap-2.5 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
-                    <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-                    <p class="text-[11px] font-bold text-slate-600 uppercase tracking-tight">${order.payment ? 'Online Payment' : 'Cash On Delivery'}</p>
-                </div>
             </div>
 
             <div class="flex items-center justify-between md:justify-end gap-8 w-full md:w-auto">
@@ -165,7 +161,6 @@ function populateOrderDetailModal(order) {
         }
     } else {
         paymentMethodEl.textContent = 'Cash on Delivery';
-        paymentStatusEl.textContent = 'Pay when you receive items';
     }
 
     document.getElementById('popupTotal').textContent = `Rs. ${order.totalAmount.toFixed(2).toLocaleString()}`;

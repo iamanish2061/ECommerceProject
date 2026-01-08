@@ -103,37 +103,3 @@ public class ProfileController {
     }
 
 }
-
-
-//async function handleImageUpload(event) {
-//    const file = event.target.files[0];
-//    if (!file) return;
-//
-//    // 1. Show immediate preview
-//    const reader = new FileReader();
-//    reader.onload = (e) => {
-//            document.getElementById('profilePic').src = e.target.result;
-//    };
-//    reader.readAsDataURL(file);
-//
-//    // 2. Prepare Data for Backend
-//    const formData = new FormData();
-//    formData.append('file', file);
-//
-//    try {
-//        const response = await fetch('/change-photo', {
-//                method: 'PUT',
-//                body: formData,
-//        // Note: Do NOT set Content-Type header manually when using FormData
-//        });
-//
-//        const result = await response.json();
-//        if (response.ok) {
-//            alert("Success: " + result.message);
-//        } else {
-//            alert("Error: " + result.message);
-//        }
-//    } catch (error) {
-//        console.error("Upload failed:", error);
-//    }
-//}

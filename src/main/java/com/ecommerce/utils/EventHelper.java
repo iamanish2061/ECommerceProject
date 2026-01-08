@@ -85,7 +85,7 @@ public class EventHelper {
     }
 
     public static NotificationEvent createEventForStartingOrder(UserModel driver, Long userId) {
-        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + "has started the delivery of user: "+userId);
+        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + " has started the delivery of user: "+userId);
 
         return NotificationEvent.builder()
                 .recipientId(userId)
@@ -97,7 +97,7 @@ public class EventHelper {
     }
 
     public static NotificationEvent createEventForOrderCompletion(UserModel driver, Long userId) {
-        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + "has completed the delivery of user: "+userId);
+        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + " has completed the delivery of user: "+userId);
 
         return NotificationEvent.builder()
                 .recipientId(userId)
