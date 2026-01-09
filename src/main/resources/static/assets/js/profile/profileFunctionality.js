@@ -696,68 +696,82 @@ function closeOrderDetailModal() {
     }
 }
 // Populate Modal Data
+
 function populateOrderDetailModal(order) {
-    // 1. Header Info
-    document.getElementById('popupOrderId').textContent = order.orderId;
-    document.getElementById('popupDate').textContent = new Date(order.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    const statusInfo = getStatusStyle(order.status);
+    const date = new Date(order.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
-    // Status Styles
-    const statusEl = document.getElementById('popupStatus');
+
+    // Update Status UI
+    const statusText = document.getElementById('popupStatus');
     const statusBg = document.getElementById('popupStatusBg');
-    statusEl.textContent = order.status;
-    // Reset classes
-    statusBg.className = 'p-3 rounded-full bg-blue-50 text-blue-600'; // default
-    // Apply specific color based on status
-    const s = order.status.toLowerCase();
-    if (s === 'delivered') statusBg.className = 'p-3 rounded-full bg-green-100 text-green-600';
-    else if (s === 'cancelled') statusBg.className = 'p-3 rounded-full bg-red-100 text-red-600';
-    else if (s === 'shipped') statusBg.className = 'p-3 rounded-full bg-indigo-100 text-indigo-600';
-    // 2. Order Items
-    const itemsContainer = document.getElementById('popupItemsContainer');
-    itemsContainer.innerHTML = order.orderItems.map(item => `
-        <div class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-xl px-2 transition-colors">
-            <div class="h-16 w-16 bg-white rounded-lg border border-slate-100 flex-shrink-0 overflow-hidden">
-                <img src="${item.product.imageUrl || '/assets/images/placeholder.png'}" 
-                     alt="${item.product.title}" 
-                     class="h-full w-full object-cover">
-            </div>
-            <div class="flex-1 min-w-0">
-                <h5 class="font-semibold text-slate-800 truncate">${item.product.title}</h5>
-                <p class="text-xs text-slate-500 line-clamp-1">${item.product.shortDescription || ''}</p>
-            </div>
-            <div class="text-right">
-                <p class="font-medium text-slate-800">Rs. ${item.price.toFixed(2)}</p>
-                <p class="text-xs text-slate-500">Qty: ${item.quantity}</p>
-            </div>
-        </div>
-    `).join('');
-    // 3. Shipping Address
-    const addr = order.address;
-    const addressEl = document.getElementById('popupAddress');
-    if (addr) {
-        addressEl.innerHTML = `
-            <p class="font-medium text-slate-800">${state.profile.fullName || 'User'}</p>
-            <p>${addr.place}, ${addr.landmark || ''}</p>
-            <p>${addr.district}, ${addr.province}</p>
-            <p class="mt-2 flex items-center gap-2 text-slate-500">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                ${order.phoneNumber || addr.phone || 'N/A'}
-            </p>
-        `;
+
+    statusText.textContent = order.status;
+    statusText.className = `text-base font-bold ${statusInfo.textClass} capitalize leading-none`;
+    statusBg.className = `p-2.5 rounded-xl ${statusInfo.bgClass} ${statusInfo.textClass}`;
+
+    document.getElementById('popupDate').textContent = date;
+
+    const paymentMethodEl = document.getElementById('popupPaymentMethod');
+    const paymentStatusEl = document.getElementById('popupPaymentStatus');
+
+    if (order.payment) {
+        paymentMethodEl.textContent = order.payment.paymentMethod.replace(/_/g, ' ');
+        paymentStatusEl.textContent = `Status: ${order.payment.paymentStatus || 'N/A'}`;
     } else {
-        addressEl.innerHTML = '<p class="text-slate-400">Address info not available</p>';
+        paymentMethodEl.textContent = 'Cash on Delivery';
+        paymentStatusEl.textContent = 'Pending';
     }
-    // 4. Payment & Total
-    document.getElementById('popupTotal').textContent = 'Rs. ' + order.totalAmount.toFixed(2);
-    // Handle payment details
-    const pay = order.payment;
-    if (pay) {
-        document.getElementById('popupPaymentMethod').textContent = pay.paymentMethod || 'Online Payment';
-        document.getElementById('popupPaymentStatus').textContent = pay.paymentStatus || 'Paid';
-    } else {
-        document.getElementById('popupPaymentMethod').textContent = 'Pay on Delivery'; // Fallback
-        document.getElementById('popupPaymentStatus').textContent = 'Pending';
+
+    document.getElementById('popupTotal').textContent = `Rs. ${order.totalAmount.toFixed(2)}`;
+
+    // Address Info
+    const addr = order.address;
+    document.getElementById('popupAddress').innerHTML = `
+        <p class="font-bold text-slate-800">${addr.place}</p>
+        <p>${addr.landmark || ''}</p>
+        <p>${addr.district}, ${addr.province}</p>
+        <p class="mt-2 flex items-center gap-2 text-indigo-600 font-medium font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            ${order.phoneNumber || addr.phone || 'N/A'}
+        </p>
+    `;
+
+    // Render Items
+    const itemsContainer = document.getElementById('popupItemsContainer');
+    itemsContainer.innerHTML = order.orderItems.map(item => {
+        const product = item.product;
+        return `
+            <div class="flex items-center gap-4 p-3 bg-slate-50/80 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all duration-300">
+                <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-slate-100/50 flex-shrink-0">
+                    <img src="${product.imageUrl || '/assets/images/placeholder.png'}" 
+                         alt="${product.title}" 
+                         class="w-full h-full object-contain">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[13px] font-bold text-slate-800 truncate">${product.title}</p>
+                    <div class="flex justify-between items-center mt-1">
+                        <p class="text-[11px] font-medium text-slate-500">Qty: ${item.quantity} × Rs. ${item.price.toFixed(2)}</p>
+                        <p class="text-[13px] font-bold text-blue-600">Rs. ${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Add this utility function to handle the colors
+function getStatusStyle(status) {
+    switch (status.toUpperCase()) {
+        case 'DELIVERED': return { bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' };
+        case 'CANCELLED': return { bgClass: 'bg-red-50', textClass: 'text-red-600' };
+        case 'SHIPPED':   return { bgClass: 'bg-indigo-50', textClass: 'text-indigo-600' };
+        default:          return { bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
     }
 }
 
