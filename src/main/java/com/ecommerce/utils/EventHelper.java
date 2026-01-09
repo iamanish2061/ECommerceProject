@@ -111,7 +111,7 @@ public class EventHelper {
     public static NotificationEvent createEventForDeliveryAssignment(Long driverId) {
 
         Map<String, Object> metaData = Map.of(
-                "adminMessage", "Driver: "+ driverId + "has been assigned for delivering orders",
+                "adminMessage", "Driver: "+ driverId + " has been assigned for delivering orders",
                 "driverId", driverId,
                 "driverMessage", "You have been assigned for the delivery of orders"
         );
@@ -124,5 +124,19 @@ public class EventHelper {
                 .metadata(metaData)
                 .build();
 
+    }
+
+    public static NotificationEvent createEventForInstorePurchase(UserModel admin) {
+        Map<String, Object> metaData = Map.of(
+                "adminMessage", "Admin: "+  admin.getId()+ " has done instore sales"
+        );
+
+        return NotificationEvent.builder()
+                .recipientId(null)
+                .title("INSTORE PURCHASE")
+                .message(null)
+                .type(NotificationType.INSTORE_PURCHASE)
+                .metadata(metaData)
+                .build();
     }
 }

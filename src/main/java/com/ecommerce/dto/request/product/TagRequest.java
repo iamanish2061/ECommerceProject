@@ -1,10 +1,8 @@
 package com.ecommerce.dto.request.product;
 
-import jakarta.validation.constraints.NotEmpty;
-
-import java.util.List;
+import jakarta.validation.constraints.NotBlank;
 
 public record TagRequest(
-        @NotEmpty(message = "Tag names list cannot be empty.")
-        List<String> names
+        @NotBlank(message = "Tag name cannot be empty.")
+        String name
 ){}

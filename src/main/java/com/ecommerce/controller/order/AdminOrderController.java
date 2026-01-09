@@ -31,7 +31,8 @@ public class AdminOrderController {
     @PostMapping("/sell-products")
     @Operation(summary = "end point for selling product when customer buys from store itself")
     public ResponseEntity<ApiResponse<?>> sellProducts(
-            @Valid @RequestBody List<SellProductRequests> requests, @AuthenticationPrincipal UserPrincipal currentUser
+            @Valid @RequestBody List<SellProductRequests> requests,
+            @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

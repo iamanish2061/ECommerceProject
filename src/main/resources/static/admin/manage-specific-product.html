@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage ID: <span id="titleId"></span></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/toast.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .sidebar-transition {
+            transition: width 0.3s ease-in-out;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background-color: #4F46E5;
+            color: white;
+        }
+
+        .nav-label {
+            white-space: nowrap;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Modal Transitions */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+
+        body.modal-active {
+            overflow-x: hidden;
+            overflow-y: hidden !important;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 flex overflow-hidden">
+    <aside id="sidebar"
+        class="bg-indigo-950 text-slate-300 w-64 h-screen flex flex-col sidebar-transition relative z-50 shrink-0">
+        <!-- Logo -->
+        <div class="h-20 flex items-center px-6 border-b border-indigo-900/50">
+            <a href="index.html" class="flex items-center gap-6 font-bold text-white text-2xl">
+                <span class="text-indigo-400 text-3xl">C</span>
+                <span class="nav-label">Cut <span class="text-blue-600">Lab</span></span>
+            </a>
+        </div>
+
+        <!-- Toggle Button -->
+        <button id="sidebarToggle"
+            class="absolute -right-3 top-24 bg-indigo-600 text-white p-1 rounded-full border-2 border-slate-50 hover:bg-indigo-700 transition-colors shadow-sm">
+            <svg id="sidebarCloseIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 19l-7-7 7-7M17 19l-7-7 7-7" />
+            </svg>
+            <svg id="sidebarOpenIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 hidden" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M7 5l7 7-7 7" />
+            </svg>
+        </button>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-6 overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <ul class="space-y-1 px-3">
+                <li>
+                    <a href="index.html" class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-user.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Users</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-product.html"
+                        class="nav-item active flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Products</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-order.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Orders</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-service.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-6 h-6 shrink-0">
+                            <circle cx="6" cy="6" r="3"></circle>
+                            <path d="M8.12 8.12 12 12"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <path d="M14.8 14.8 20 20"></path>
+                            <path d="M14.8 9.2 20 4"></path>
+                            <path d="m8.12 15.88 3.84-3.84"></path>
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Services</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-appointment.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Appointments</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-payment.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Payments</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-review.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Reviews</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-report.html"
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span class="nav-label text-sm font-medium">Sales and Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Profile/Logout -->
+        <div class="p-4 border-t border-indigo-900/50">
+            <button id="logoutBtn"
+                class="flex items-center gap-4 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-all text-red-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span class="nav-label text-sm font-medium">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Header -->
+        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+            <div class="flex items-center gap-4">
+                <a href="manage-product.html" class="text-slate-500 hover:text-indigo-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800">Product Details</h1>
+                    <p class="text-xs text-slate-500">Manage specific product attributes</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- notification -->
+                <div class="relative">
+                    <div id="notificationBtn"
+                        class="text-slate-700 p-3 flex items-center justify-center cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                    </div>
+
+                    <span id="notificationCount" class="absolute -top-1 -right-1 hidden h-5 w-5">
+                        <span id="notifPing"
+                            class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span
+                            class="notif-count-text relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-red-500 text-white text-xs font-semibold shadow-lg ring-2 ring-white">0</span>
+                    </span>
+
+                    <div id="notificationDropdown"
+                        class="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
+                        <div
+                            class="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                            <span class="font-bold text-slate-800 text-base">Notifications</span>
+                            <button id="markAllReadBtn"
+                                class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Mark
+                                all read</button>
+                        </div>
+                        <div id="notificationItemsList" class="max-h-[400px] overflow-y-auto"></div>
+                        <a href="../notification.html"
+                            class="block py-4 text-center text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-t border-slate-50">View
+                            All Notifications</a>
+                    </div>
+                </div>
+
+
+                <a href="../profile.html"
+                    class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border-2 border-indigo-200">
+                    A
+                </a>
+            </div>
+
+        </header>
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+            <div id="loadingState" class="text-center py-20 text-slate-400">Loading Product Details...</div>
+
+            <div id="productContent" class="hidden grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <!-- Left: Product Info -->
+                <div class="xl:col-span-2 space-y-8">
+                    <!-- Main Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <div class="flex flex-col md:flex-row gap-8">
+                            <!-- Image -->
+                            <div class="w-full md:w-1/3">
+                                <img id="productImage" src="" alt="Product"
+                                    class="w-full h-64 object-cover rounded-xl bg-slate-100 mb-4">
+                                <div id="imageGallery" class="grid grid-cols-4 gap-2">
+                                    <!-- Additional images -->
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <div class="flex-1 space-y-4">
+                                <div>
+                                    <div class="flex justify-between items-start">
+                                        <h2 id="pTitle" class="text-2xl font-bold text-slate-800"></h2>
+                                        <span id="pActive"
+                                            class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-bold">Active</span>
+                                    </div>
+                                    <p id="pBrand" class="text-sm text-indigo-600 font-semibold mt-1">Brand Name</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="text-slate-400 text-xs">SKU</div>
+                                        <div id="pSKU" class="font-mono font-semibold text-slate-700"></div>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="text-slate-400 text-xs">Category</div>
+                                        <div id="pCategory" class="font-semibold text-slate-700"></div>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="text-slate-400 text-xs">Cost Price</div>
+                                        <div id="pCost" class="font-bold text-slate-700"></div>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-lg border border-indigo-100 bg-indigo-50/30">
+                                        <div class="text-slate-400 text-xs text-indigo-400">Selling Price</div>
+                                        <div id="pPrice" class="font-bold text-indigo-700 text-lg"></div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="p-4 bg-yellow-50 rounded-xl border border-yellow-100 flex items-center justify-between">
+                                    <span class="text-yellow-800 font-medium text-sm">Stock Available</span>
+                                    <span id="pStock" class="text-2xl font-bold text-yellow-900">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descriptions -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-700 text-lg">Descriptions</h3>
+                        </div>
+
+                        <div class="mb-6 group relative">
+                            <div class="flex justify-between mb-2">
+                                <h4 class="text-sm font-semibold text-slate-600">Short Description</h4>
+                                <button onclick="SpecificProductUI.openModal('updateShortDescModal')"
+                                    class="text-xs text-indigo-600 hover:underline">Edit</button>
+                            </div>
+                            <p id="pShortDesc"
+                                class="text-slate-600 text-sm leading-relaxed p-4 bg-slate-50 rounded-xl"></p>
+                        </div>
+
+                        <div class="group relative">
+                            <div class="flex justify-between mb-2">
+                                <h4 class="text-sm font-semibold text-slate-600">Full Description</h4>
+                                <button onclick="SpecificProductUI.openModal('updateLongDescModal')"
+                                    class="text-xs text-indigo-600 hover:underline">Edit</button>
+                            </div>
+                            <p id="pLongDesc"
+                                class="text-slate-600 text-sm leading-relaxed p-4 bg-slate-50 rounded-xl whitespace-pre-wrap">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="space-y-6">
+                    <!-- Actions Panel -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button onclick="SpecificProductUI.openModal('updatePriceModal')"
+                                class="w-full py-3 px-4 bg-white border border-slate-200 text-slate-700 hover:border-indigo-500 hover:text-indigo-600 rounded-xl transition-all shadow-sm font-medium flex items-center gap-3">
+                                <span>💲</span> Update Price
+                            </button>
+                            <button onclick="SpecificProductUI.openModal('updateStockModal')"
+                                class="w-full py-3 px-4 bg-white border border-slate-200 text-slate-700 hover:border-indigo-500 hover:text-indigo-600 rounded-xl transition-all shadow-sm font-medium flex items-center gap-3">
+                                <span>📦</span> Update Stock
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tags Panel -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800">Tags</h3>
+                            <div class="flex gap-2">
+                                <button onclick="SpecificProductUI.openModal('addTagModal')"
+                                    class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 font-bold">+</button>
+                                <button onclick="SpecificProductUI.openModal('removeTagModal')"
+                                    class="text-xs bg-red-50 text-red-600 px-2 py-1 rounded hover:bg-red-100 font-bold">-</button>
+                            </div>
+                        </div>
+                        <div id="pTags" class="flex flex-wrap gap-2">
+                            <!-- Tags injected -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Update Price Modal -->
+    <div id="updatePriceModal"
+        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        onclick="if(event.target === this) SpecificProductUI.closeModal('updatePriceModal')">
+        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 class="text-lg font-bold mb-4">Update Price</h3>
+            <form id="updatePriceForm">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-500 mb-1">Current Selling Price: Rs. <span
+                            id="modalCurrentPrice"></span></p>
+                    <label class="block text-sm font-medium">New Price</label>
+                    <input type="number" name="price" step="0.01" required class="w-full border p-2 rounded mt-1">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Stock Modal -->
+    <div id="updateStockModal"
+        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        onclick="if(event.target === this) SpecificProductUI.closeModal('updateStockModal')">
+        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 class="text-lg font-bold mb-4">Update Stock</h3>
+            <form id="updateStockForm">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-500 mb-1">Current Stock: <span id="modalCurrentStock"></span></p>
+                    <label class="block text-sm font-medium">Enter the stock to be added</label>
+                    <input type="number" name="quantity" required class="w-full border p-2 rounded mt-1">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Short Desc Modal -->
+    <div id="updateShortDescModal"
+        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        onclick="if(event.target === this) SpecificProductUI.closeModal('updateShortDescModal')">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl shadow-xl">
+            <h3 class="text-lg font-bold mb-4">Update Short Description</h3>
+            <form id="updateShortDescForm">
+                <textarea name="shortDescription" rows="5" class="w-full border p-2 rounded"
+                    id="modalShortDescVal"></textarea>
+                <button type="submit" class="mt-4 w-full bg-indigo-600 text-white py-2 rounded">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Long Desc Modal -->
+    <div id="updateLongDescModal"
+        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        onclick="if(event.target === this) SpecificProductUI.closeModal('updateLongDescModal')">
+        <div class="bg-white rounded-lg p-6 w-full max-w-4xl shadow-xl">
+            <h3 class="text-lg font-bold mb-4">Update Full Description</h3>
+            <form id="updateLongDescForm">
+                <textarea name="longDescription" rows="10" class="w-full border p-2 rounded"
+                    id="modalLongDescVal"></textarea>
+                <button type="submit" class="mt-4 w-full bg-indigo-600 text-white py-2 rounded">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Tag Modal -->
+    <div id="addTagModal" class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        onclick="if(event.target === this) SpecificProductUI.closeModal('addTagModal')">
+        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 class="text-lg font-bold mb-4">Add Tags</h3>
+            <form id="addTagToProductForm">
+                <div id="availableTagsList"
+                    class="max-h-60 overflow-y-auto space-y-2 mb-4 border p-2 rounded bg-slate-50">
+                    <!-- Checkboxes injected here -->
+                    <p class="text-sm text-gray-500">Loading tags...</p>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded">Add Selected</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Remove Tag Modal -->
+    <div id="removeTagModal"
+        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        onclick="if(event.target === this) SpecificProductUI.closeModal('removeTagModal')">
+        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 class="text-lg font-bold mb-4 text-red-600">Remove Tags</h3>
+            <form id="removeTagFromProductForm">
+                <div id="currentTagsList" class="max-h-60 overflow-y-auto space-y-2 mb-4 border p-2 rounded bg-red-50">
+                    <!-- Checkboxes injected here -->
+                    <p class="text-sm text-gray-500">Loading current tags...</p>
+                </div>
+                <button type="submit" class="w-full bg-red-600 text-white py-2 rounded">Remove Selected</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="../assets/js/api.js"></script>
+
+    <script src="../assets/js/auth/authService.js"></script>
+    <script src="../assets/js/notification/notificationService.js"></script>
+    <script src="js/product/manageProductService.js"></script>
+
+    <script src="js/product/manageSpecificProduct.js"></script>
+    <script src="../assets/js/notification/notification.js"></script>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const closeIcon = document.getElementById('sidebarCloseIcon');
+        const openIcon = document.getElementById('sidebarOpenIcon');
+        const navLabels = document.querySelectorAll('.nav-label');
+
+        let isSidebarOpen = true;
+
+        toggleBtn.addEventListener('click', () => {
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+                closeIcon.classList.remove('hidden');
+                openIcon.classList.add('hidden');
+                navLabels.forEach(label => label.classList.remove('hidden'));
+            } else {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+                closeIcon.classList.add('hidden');
+                openIcon.classList.remove('hidden');
+                navLabels.forEach(label => label.classList.add('hidden'));
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            SpecificProductManager.init();
+        });
+    </script>
+</body>
+
+</html>

@@ -18,7 +18,9 @@ import java.util.Set;
 @Data
 public class ImageUploadHelper {
 
-    private static final Path UPLOAD_DIR = Paths.get("uploads/products").toAbsolutePath();
+    private static final Path PRODUCT_UPLOAD_DIR = Paths.get("uploads/products").toAbsolutePath();
+    private static final Path BRAND_UPLOAD_DIR = Paths.get("uploads/brands").toAbsolutePath();
+    private static final Path CATEGORY_UPLOAD_DIR = Paths.get("uploads/categories").toAbsolutePath();
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/webp"
     );
@@ -65,7 +67,7 @@ public class ImageUploadHelper {
 
     public static ProductImageModel uploadImage(MultipartFile file, AddProductImageRequest request) throws ApplicationException {
         fileValidation(file);
-        String fileUrl = uploadImage(file, request.name().trim());
+        String fileUrl = uploadImage(file, request.name().trim(), "PRODUCT");
         ProductImageModel imgModel = new ProductImageModel();
         imgModel.setUrl(fileUrl);
         imgModel.setAltText(request.altText().trim());
@@ -73,24 +75,36 @@ public class ImageUploadHelper {
         return imgModel;
     }
 
-    public static String uploadImage(MultipartFile file, String name)throws ApplicationException{
+    public static String uploadImage(MultipartFile file, String name, String type)throws ApplicationException{
+        Path uploadDir = PRODUCT_UPLOAD_DIR;
+        String returnPreSegment = "";
+        if(type.equalsIgnoreCase("PRODUCT")){
+            returnPreSegment = "/uploads/products/";
+        } else if (type.equalsIgnoreCase("BRAND")) {
+            uploadDir =BRAND_UPLOAD_DIR;
+            returnPreSegment = "/uploads/brands/";
+        } else if (type.equalsIgnoreCase("CATEGORY")) {
+            uploadDir =CATEGORY_UPLOAD_DIR;
+            returnPreSegment = "/uploads/categories/";
+        }
+
         String basename = HelperClass.generateSlug(name);
         String extension = getFileExtension(file);
 
         String filename=basename+"."+extension;
-        Path targetPath = UPLOAD_DIR.resolve(filename);
+        Path targetPath = uploadDir.resolve(filename);
         int counter = 1;
         while(Files.exists(targetPath)){
             filename = basename+"-"+counter+"."+extension;
             counter++;
-            targetPath = UPLOAD_DIR.resolve(filename);
+            targetPath = uploadDir.resolve(filename);
         }
         try {
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new ApplicationException(e.getMessage(), "IO_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "/uploads/products/" + filename;
+        return returnPreSegment + filename;
     }
 
 }

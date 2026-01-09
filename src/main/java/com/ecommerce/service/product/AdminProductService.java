@@ -10,7 +10,6 @@ import com.ecommerce.mapper.product.CategoryMapper;
 import com.ecommerce.mapper.product.ProductImageMapper;
 import com.ecommerce.mapper.product.TagMapper;
 import com.ecommerce.model.product.*;
-import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.product.BrandRepository;
 import com.ecommerce.repository.product.CategoryRepository;
 import com.ecommerce.repository.product.ProductRepository;
@@ -49,7 +48,7 @@ public class AdminProductService {
         BrandModel brandModel = new BrandModel();
         brandModel.setName(brandRequest.name().trim());
         brandModel.setSlug(HelperClass.generateSlug(brandRequest.name().trim()));
-        String url = ImageUploadHelper.uploadImage(logo, brandRequest.name().trim());
+        String url = ImageUploadHelper.uploadImage(logo, brandRequest.name().trim(), "BRAND");
         brandModel.setLogoUrl(url);
 
         brandRepository.save(brandModel);
@@ -63,36 +62,20 @@ public class AdminProductService {
         categoryModel.setName(categoryRequest.name());
         categoryModel.setSlug(HelperClass.generateSlug(categoryRequest.name().trim()));
         categoryModel.setParent(categoryParent);
-        String url = ImageUploadHelper.uploadImage(image, categoryRequest.name().trim());
+        String url = ImageUploadHelper.uploadImage(image, categoryRequest.name().trim(), "CATEGORY");
         categoryModel.setImageUrl(url);
         categoryRepository.save(categoryModel);
     }
 
     @Transactional
-    public void addTags(TagRequest request){
-        List<String> incomingNames = request.names().stream()
-                .map(String::trim)
-                .toList();
-//        generating slugs of all tags
-        List<String> incomingSlugs = incomingNames.stream()
-                .map(HelperClass::generateSlug)
-                .toList();
-
-        Set<String> existingSlugs = tagRepository.findSlugsBySlugIn(incomingSlugs);
-
-        List<TagModel> newTagModels = new ArrayList<>();
-
-        for (String name : incomingNames) {
-            String slug = HelperClass.generateSlug(name);
-
-            if (!existingSlugs.contains(slug)) {
-                newTagModels.add(new TagModel(name, slug));
-            }
+    public void addTag(TagRequest request){
+        String incomingSlug = HelperClass.generateSlug(request.name());
+        TagModel existing = tagRepository.findBySlug(incomingSlug).orElse(null);
+        if(existing != null){
+            throw new ApplicationException("Tag already exists!", "ALREADY_EXISTS", HttpStatus.CONFLICT);
         }
-
-        if (!newTagModels.isEmpty()) {
-            tagRepository.saveAll(newTagModels);
-        }
+        TagModel newTagModel = new TagModel(request.name(), incomingSlug);
+        tagRepository.save(newTagModel);
     }
 
     @Transactional
@@ -233,6 +216,7 @@ public class AdminProductService {
         ProductModel product = productRepository.findById(productId)
                 .orElseThrow(()->new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND));
         product.setShortDescription(shortDescription);
+        System.out.println("shortDESC: " +shortDescription);
         productRepository.save(product);
     }
 

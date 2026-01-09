@@ -164,6 +164,7 @@ function renderBrandSidebar() {
     brandState.brands.forEach(brand => {
         const name = brand.name;
         const slug = brand.slug.toLowerCase();
+        const brandLogo = brand.logo || brand.logoUrl || null;
         const isActive = slug === brandState.selectedBrandSlug;
 
         const btn = document.createElement('button');
@@ -173,8 +174,15 @@ function renderBrandSidebar() {
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
                 : 'hover:bg-blue-50 text-slate-700');
 
-        btn.innerHTML = `<span class="truncate">${name}</span>`;
-
+        btn.innerHTML = `
+            ${brandLogo
+                ? `<img src="${brandLogo}" alt="${name}" class="w-10 h-10 object-contain rounded-full border border-gray-200">`
+                : `<div class="w-10 h-10 bg-gray-200 rounded-full border border-gray-300 flex items-center justify-center">
+                     <span class="text-gray-500 font-bold text-lg">${name.charAt(0).toUpperCase()}</span>
+                   </div>`
+            }
+            <span class="font-medium">${name}</span>
+        `;
         btn.addEventListener('click', async () => {
             if (brandState.selectedBrandSlug === slug) return;
 

@@ -1,10 +1,7 @@
 package com.ecommerce.controller.product;
 
 
-import com.ecommerce.dto.request.product.BrandRequest;
-import com.ecommerce.dto.request.product.CategoryRequest;
-import com.ecommerce.dto.request.product.ProductRequest;
-import com.ecommerce.dto.request.product.TagRequest;
+import com.ecommerce.dto.request.product.*;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.product.NameAndIdResponse;
 import com.ecommerce.dto.response.product.SingleProductWithCostPriceResponse;
@@ -55,10 +52,10 @@ public class AdminProductController {
 
 //    for adding tags
     @PostMapping("/tags")
-    public ResponseEntity<ApiResponse<String>> addTags(
-            @Valid @RequestBody TagRequest tagRequests
+    public ResponseEntity<ApiResponse<String>> addTag(
+            @Valid @RequestBody TagRequest tagRequest
     ){
-        adminProductService.addTags(tagRequests);
+        adminProductService.addTag(tagRequest);
         return ResponseEntity.ok(
                 ApiResponse.ok("Tags added successfully"));
     }
@@ -110,11 +107,11 @@ public class AdminProductController {
 //    checkbox bata tag select garney and list banayera pathaune (checking if the product already has that tag frintend mai )
     @PutMapping("/add-tag-to-product/{productId}")
     public ResponseEntity<ApiResponse<?>> addTagToProduct(
-            @RequestBody List<String> tagSlugs,
+            @RequestBody TagOperationRequest request,
             @ValidId
             @PathVariable Long productId
     ){
-        adminProductService.addTagToProduct(tagSlugs, productId);
+        adminProductService.addTagToProduct(request.tagSlugs(), productId);
         return ResponseEntity.ok(
                 ApiResponse.ok("Tag added to product.")
         );
@@ -125,11 +122,11 @@ public class AdminProductController {
 //    checkbox bata tag select garney and list banayera pathaune (checking if the product already has that tag frintend mai )
     @PutMapping("/remove-tag-from-product/{productId}")
     public ResponseEntity<ApiResponse<?>> removeTagFromProduct(
-            @RequestBody List<String> tagSlugs,
+            @RequestBody TagOperationRequest request,
             @ValidId
             @PathVariable Long productId
     ){
-        adminProductService.removeTagFromProduct(tagSlugs, productId);
+        adminProductService.removeTagFromProduct(request.tagSlugs(), productId);
         return ResponseEntity.ok(
                 ApiResponse.ok("Tag removed from product.")
         );
@@ -138,11 +135,11 @@ public class AdminProductController {
 //    update short description
     @PutMapping("/update-short-description/{productId}")
     public ResponseEntity<ApiResponse<?>> updateShortDescription(
-            @RequestBody String shortDescription,
+            @RequestBody ShortDescriptionRequest request,
             @ValidId
             @PathVariable Long productId
     ){
-        adminProductService.updateShortDescription(productId, shortDescription);
+        adminProductService.updateShortDescription(productId, request.shortDescription());
         return ResponseEntity.ok(
                 ApiResponse.ok("Short description updated successfully.")
         );
@@ -151,11 +148,11 @@ public class AdminProductController {
 //    update long description
     @PutMapping("/update-long-description/{productId}")
     public ResponseEntity<ApiResponse<?>> updateLongDescription(
-            @RequestBody String longDescription,
+            @RequestBody LongDescriptionRequest request,
             @ValidId
             @PathVariable Long productId
     ){
-        adminProductService.updateLongDescription(productId, longDescription);
+        adminProductService.updateLongDescription(productId, request.longDescription());
         return ResponseEntity.ok(
                 ApiResponse.ok("Long description updated successfully.")
         );

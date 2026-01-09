@@ -17,8 +17,10 @@ import com.ecommerce.model.payment.PaymentModel;
 import com.ecommerce.model.payment.PaymentStatus;
 import com.ecommerce.model.product.ProductModel;
 import com.ecommerce.model.user.UserModel;
+import com.ecommerce.rabbitmq.producer.NotificationProducer;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.product.ProductRepository;
+import com.ecommerce.utils.EventHelper;
 import com.ecommerce.utils.HelperClass;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,8 @@ public class AdminOrderService {
     private final UserMapper userMapper;
     private final PaymentMapper paymentMapper;
     private final AddressMapper addressMapper;
+
+    private final NotificationProducer notificationProducer;
 
     @Transactional
     public String sellProducts(List<SellProductRequests> requests, UserModel admin) {
@@ -70,6 +74,7 @@ public class AdminOrderService {
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.INSTORE_COMPLETED);
         order.setAddress(null);
+        order.setPhoneNumber("9823166492");
         order.addPayment(PaymentModel.builder()
                 .user(admin)
                 .amount(totalAmount)
@@ -80,7 +85,7 @@ public class AdminOrderService {
         order.setUser(admin);
 
         orderRepository.save(order);
-
+        notificationProducer.send("notify.user", EventHelper.createEventForInstorePurchase(admin));
         return "Transaction successful";
     }
 
