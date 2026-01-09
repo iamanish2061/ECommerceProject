@@ -1,4 +1,7 @@
-//state iniitialization
+// State Initialization
+// Prevent map updates from overwriting user input fields on this page
+window.updateAddressFields = function () { console.log("Automatic address field update disabled on this page."); };
+
 let state = {
     profile: null,
     addresses: {
@@ -79,8 +82,8 @@ function updateProfileUI() {
     if (userEmailEl) userEmailEl.textContent = state.profile.email || '';
     if (userNameEl) userNameEl.textContent = state.profile.username ? `Username: ${state.profile.username}` : 'Username';
 
-    if (profilePicEl && state.profile.profilePhoto) {
-        profilePicEl.src = state.profile.profilePhoto;
+    if (profilePicEl && state.profile.profileUrl) {
+        profilePicEl.src = state.profile.profileUrl;
     }
 }
 
@@ -328,8 +331,7 @@ function openAddressModal(type = 'home') {
     document.getElementById('addressModal').classList.add('flex');
 
     // Try to find the save button
-    const saveBtn = document.getElementById('saveAddressBtn') ||
-        document.querySelector('#addressModal button.bg-blue-600');
+    const saveBtn = document.getElementById('saveButton');
 
     if (!saveBtn) {
         console.error("Save/Update button not found in address modal");
@@ -337,8 +339,8 @@ function openAddressModal(type = 'home') {
     }
 
     // Pre-fill if editing existing address
-    if (state.addresses[type]) {
-        const addr = state.addresses[type];
+    const addr = state.addresses[type.toLowerCase()];
+    if (addr) {
         document.getElementById('province').value = addr.province || '';
         document.getElementById('district').value = addr.district || '';
         document.getElementById('place').value = addr.place || '';
@@ -360,7 +362,7 @@ function openAddressModal(type = 'home') {
         setTimeout(() => { if (window.map) window.map.invalidateSize(); }, 100);
     } else {
         // Clear form fields
-        ['province', 'district', 'place', 'landmark'].forEach(id => {
+        ['province', 'district', 'place', 'landmark', 'latitude', 'longitude'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
@@ -423,7 +425,7 @@ async function uploadProfilePhoto(formData) {
         const response = await profileService.changePhoto(formData);
 
         if (response?.success) {
-            state.profile.profilePhoto = response.data.profileUrl || response.data;
+            state.profile.profileUrl = response.data.profileUrl || response.data;
             updateProfileUI();
             showToast('Profile photo updated successfully', 'success');
         } else {
@@ -508,15 +510,15 @@ async function saveAddress() {
     };
 
     try {
-
         const response = await profileService.addAddress(addressData);
         if (response?.success) {
-            state.addresses[type] = response.data;
+            state.addresses[type.toLowerCase()] = response.data;
             updateAddressUI();
             closeAddressModal();
             showToast("Address saved successfully", "success");
         } else {
-            showToast("Failed to save address", "error");
+            const msg = response?.message || "Failed to save address";
+            showToast(msg, "error");
         }
     } catch (error) {
         console.error("Error saving address", error);
@@ -548,14 +550,20 @@ async function updateAddress() {
         longitude
     };
     try {
-        const response = await profileService.updateAddress(state.addresses[type].id, addressData);
+        const currentAddr = state.addresses[type.toLowerCase()];
+        if (!currentAddr) {
+            showToast("Original address not found", "error");
+            return;
+        }
+        const response = await profileService.updateAddress(currentAddr.id, addressData);
         if (response?.success) {
-            state.addresses[type] = response.data;
+            state.addresses[type.toLowerCase()] = response.data;
             updateAddressUI();
             closeAddressModal();
             showToast("Address updated successfully", "success");
         } else {
-            showToast("Failed to update address", "error");
+            const msg = response?.message || "Failed to update address";
+            showToast(msg, "error");
         }
     } catch (error) {
         console.error("Error updating address", error);
@@ -603,7 +611,7 @@ if (locateBtn) {
         marker.setLatLng([location.lat, location.lng]);
 
         updateLatLng(location.lat, location.lng);
-        updateAddressFields(location.components, location.roadInfo);
+        // updateAddressFields(location.components, location.roadInfo); // Disabled to prevent overwriting user input
     });
 }
 

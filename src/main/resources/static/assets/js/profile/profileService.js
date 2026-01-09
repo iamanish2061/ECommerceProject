@@ -26,7 +26,7 @@ const profileService = {
 
     // ==================== ADDRESS METHODS ====================
     async getAddressType(addressType) {
-        return await request(`/address/type/${addressType}`, 'GET');
+        return await request(`/address/fetch-type/${addressType}`, 'GET');
     },
 
     async addAddress(data) {
