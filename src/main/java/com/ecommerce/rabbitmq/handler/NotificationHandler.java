@@ -5,6 +5,7 @@ import com.ecommerce.model.notification.NotificationType;
 import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.notification.NotificationRepository;
+import com.ecommerce.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 public class NotificationHandler {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
     private final RedisService redisService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -65,9 +68,9 @@ public class NotificationHandler {
         redisService.addUnreadNotification(event.getRecipientId(), notification);
         // 3. Real-Time Push: Notify the UI
         messagingTemplate.convertAndSendToUser(
-                String.valueOf(event.getRecipientId()),
+                event.getUsername(),
                 "/queue/notifications",
-                event
+                Map.of("message", event.getMessage())
         );
     }
 
@@ -88,9 +91,10 @@ public class NotificationHandler {
 
         redisService.addUnreadNotification(ADMIN_ID, notification);
         messagingTemplate.convertAndSendToUser(
-                String.valueOf(ADMIN_ID),
+                "adminCutLab",
                 "/queue/notifications",
-                event
+                Map.of("message", event.getMetadata().get("adminMessage"))
+
         );
     }
 
@@ -111,9 +115,10 @@ public class NotificationHandler {
 
             redisService.addUnreadNotification(staffId, notification);
             messagingTemplate.convertAndSendToUser(
-                    String.valueOf(staffId),
+                    String.valueOf(event.getMetadata().get("staffUsername")),
                     "/queue/notifications",
-                    event
+                    Map.of("message", event.getMetadata().get("staffMessage"))
+
             );
         }
     }
@@ -136,9 +141,10 @@ public class NotificationHandler {
 
             redisService.addUnreadNotification(driverId, notification);
             messagingTemplate.convertAndSendToUser(
-                    String.valueOf(driverId),
+                    String.valueOf(event.getMetadata().get("driverUsername")),
                     "/queue/notifications",
-                    event
+                    Map.of("message", event.getMetadata().get("driverMessage"))
+
             );
         }
     }

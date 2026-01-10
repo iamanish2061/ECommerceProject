@@ -47,7 +47,7 @@ public class DriverService {
                 () -> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.NOT_FOUND)
         );
 
-        NotificationEvent event =EventHelper.createEventForStartingOrder(driver, clientUser.getId());
+        NotificationEvent event =EventHelper.createEventForStartingOrder(driver, clientUser);
         notificationProducer.send("notify.user", event);
     }
 
@@ -67,7 +67,7 @@ public class DriverService {
         order.setStatus(OrderStatus.DELIVERED);
         orderRepository.save(order);
 
-        NotificationEvent event =EventHelper.createEventForStartingOrder(driver, clientUser.getId());
+        NotificationEvent event =EventHelper.createEventForOrderCompletion(driver, clientUser);
         notificationProducer.send("notify.user", event);
     }
 

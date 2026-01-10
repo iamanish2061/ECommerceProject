@@ -244,7 +244,7 @@ public class ProductService {
         if(!activityList.isEmpty()){
 //            purchase again
             Set<Long> purchasedIds = activityList.stream()
-                    .filter(a -> a.getActivityType() == ActivityType.PURCHASE)
+                    .filter(a -> a.getActivityType() == ActivityType.PURCHASE && a.getScore()>=0)
                     .map(UserActivity::getProductId)
                     .collect(Collectors.toSet());
             if(!purchasedIds.isEmpty()){
@@ -256,7 +256,7 @@ public class ProductService {
 
 //            continue with following products
             Set<Long> cartAndViewedIds = activityList.stream()
-                    .filter(a-> a.getActivityType() == ActivityType.CART_ADD  || a.getActivityType() == ActivityType.VIEW)
+                    .filter(a-> (a.getActivityType() == ActivityType.CART_ADD  || a.getActivityType() == ActivityType.VIEW) && a.getScore()>=0)
                     .map(UserActivity::getProductId)
                     .filter(productId -> !purchasedIds.contains(productId))
                     .collect(Collectors.toSet());

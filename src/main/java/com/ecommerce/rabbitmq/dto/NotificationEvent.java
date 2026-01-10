@@ -19,6 +19,7 @@ import java.util.Map;
 public class NotificationEvent implements Serializable {
     private String id;           // Unique ID for tracking
     private Long recipientId;  // UserID, DriverID, or StaffID
+    private String username;
     private String title;        // e.g., "Order Confirmed!"
     private String message;      // e.g., "Your hair appointment is set for 2 PM."
     private NotificationType type;         // e.g., "ORDER", "APPOINTMENT", "PROMO"

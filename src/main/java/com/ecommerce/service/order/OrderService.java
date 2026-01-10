@@ -218,11 +218,8 @@ public class OrderService {
                 () -> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND)
         );
         order.setStatus(OrderStatus.CANCELLED);
+        NotificationEvent event = EventHelper.createEventForOrderCancellation(user, order);
         orderRepository.save(order);
-        NotificationEvent event = EventHelper.createEventForOrderCanncellation(user, order);
-        order.getOrderItems().forEach(
-                orderItem -> userActivityService.recordActivity(user.getId(), orderItem.getProduct().getId(), ActivityType.PURCHASE, -10)
-        );
         notificationProducer.send("notify.user", event);
     }
 

@@ -5,6 +5,7 @@ import com.ecommerce.model.activity.UserActivity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,9 +20,14 @@ public interface UserActivityRepository extends JpaRepository<UserActivity, Long
 
     @Modifying
     @Query(value = "INSERT INTO user_activity (user_id, product_id, activity_type, score) " +
-            "VALUES (:userId, :productId, :activityType, :score) " +
+            "VALUES (:userId, :productId, CAST(:activityType AS text), :score) " + // Explicit cast
             "ON CONFLICT (user_id, product_id, activity_type) " +
             "DO UPDATE SET score = user_activity.score + EXCLUDED.score", nativeQuery = true)
-    void upsertActivity(Long userId, Long productId, ActivityType activityType, int score);
+    void upsertActivity(
+            @Param("userId") Long userId,
+            @Param("productId") Long productId,
+            @Param("activityType") String activityType, // Pass as String
+            @Param("score") int score
+    );
 
 }

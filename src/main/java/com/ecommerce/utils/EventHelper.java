@@ -39,6 +39,7 @@ public class EventHelper {
 
         return NotificationEvent.builder()
                 .recipientId(user.getId())
+                .username(user.getUsername())
                 .title("Order placement")
                 .message("Your order has been placed.")
                 .type(NotificationType.ORDER_PLACED)
@@ -54,6 +55,7 @@ public class EventHelper {
 
         return NotificationEvent.builder()
                 .recipientId(user.getId())
+                .username(user.getUsername())
                 .title("Driver Registration")
                 .message("Your form has been submitted. Admin will review it soon...")
                 .type(NotificationType.DRIVER_REGISTRATION)
@@ -61,12 +63,14 @@ public class EventHelper {
                 .build();
     }
 
-    public static NotificationEvent createEventForOrderCanncellation(UserModel user, OrderModel order){
+    public static NotificationEvent createEventForOrderCancellation(UserModel user, OrderModel order){
         Map<String, Object> metaData = new HashMap<>();
         metaData.put("adminMessage", "User "+user.getId()+" has cancelled the order: "+order.getId());
+        metaData.put("email", user.getEmail());
 
         return NotificationEvent.builder()
                 .recipientId(user.getId())
+                .username(user.getUsername())
                 .title("Order Cancellation")
                 .message("Your order has been cancelled!")
                 .type(NotificationType.ORDER_CANCELLED)
@@ -77,6 +81,7 @@ public class EventHelper {
     public static NotificationEvent createEventForPasswordChange(UserModel user){
         return NotificationEvent.builder()
                 .recipientId(user.getId())
+                .username(user.getUsername())
                 .title("Password Changed")
                 .message("Your password has been changed")
                 .type(NotificationType.PASSWORD_CHANGE)
@@ -84,11 +89,12 @@ public class EventHelper {
                 .build();
     }
 
-    public static NotificationEvent createEventForStartingOrder(UserModel driver, Long userId) {
-        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + " has started the delivery of user: "+userId);
+    public static NotificationEvent createEventForStartingOrder(UserModel driver, UserModel user) {
+        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + " has started the delivery of user: "+user.getId());
 
         return NotificationEvent.builder()
-                .recipientId(userId)
+                .recipientId(user.getId())
+                .username(user.getUsername())
                 .title("ORDER STARTED")
                 .message("Your order is on the way")
                 .type(NotificationType.ORDER_STARTED)
@@ -96,11 +102,12 @@ public class EventHelper {
                 .build();
     }
 
-    public static NotificationEvent createEventForOrderCompletion(UserModel driver, Long userId) {
-        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + " has completed the delivery of user: "+userId);
+    public static NotificationEvent createEventForOrderCompletion(UserModel driver, UserModel user) {
+        Map<String, Object> metaData = Map.of("adminMessage", "Driver: "+ driver.getUsername() + " has completed the delivery of user: "+user.getId());
 
         return NotificationEvent.builder()
-                .recipientId(userId)
+                .recipientId(user.getId())
+                .username(user.getUsername())
                 .title("ORDER COMPLETED")
                 .message("Your order is delivered")
                 .type(NotificationType.ORDER_DELIVERED)
@@ -108,11 +115,12 @@ public class EventHelper {
                 .build();
     }
 
-    public static NotificationEvent createEventForDeliveryAssignment(Long driverId) {
+    public static NotificationEvent createEventForDeliveryAssignment(UserModel driver) {
 
         Map<String, Object> metaData = Map.of(
-                "adminMessage", "Driver: "+ driverId + " has been assigned for delivering orders",
-                "driverId", driverId,
+                "adminMessage", "Driver: "+ driver.getUsername() + " has been assigned for delivering orders",
+                "driverId", driver.getId(),
+                "driverUsername", driver.getUsername(),
                 "driverMessage", "You have been assigned for the delivery of orders"
         );
 

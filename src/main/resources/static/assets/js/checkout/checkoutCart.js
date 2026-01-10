@@ -295,7 +295,7 @@ checkoutBtn.addEventListener("click", async function () {
             if (paymentData.method === "CASH_ON_DELIVERY") {
                 showToast("Order placed successfully! Pay on delivery.", "success");
                 setTimeout(() => {
-                    window.location.href = "/orders";
+                    window.location.href = "orders.html";
                 }, 1500);
             } else if (paymentData.method === "ESEWA") {
                 populateEsewaFormAndSubmit(paymentData.esewa);

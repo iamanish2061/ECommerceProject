@@ -99,6 +99,9 @@ public class AdminUserService {
     }
 
     public void assignDeliveryToDriver(Long driverId) {
+        UserModel driver = userRepository.findById(driverId).orElseThrow(
+                ()-> new ApplicationException("Driver not found!", "DRIVER_NOT_FOUND", HttpStatus.NOT_FOUND)
+        );
         List<OrderModel> orders = orderRepository.findByStatusIn(List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED));
         AddressModel adminAddress = addressRepository.findById(1L).orElseThrow(
                 () -> new ApplicationException("Address not found!", "ADDRESS_NOT FOUND", HttpStatus.NOT_FOUND)
@@ -132,6 +135,6 @@ public class AdminUserService {
         List<AssignedDeliveryResponse> orderedList = routeService.startRoutingAlgorithm(addresses);
         redisService.addDeliveryAddressList(driverId, orderedList);
 
-        notificationProducer.send("notify.driver", EventHelper.createEventForDeliveryAssignment(driverId));
+        notificationProducer.send("notify.driver", EventHelper.createEventForDeliveryAssignment(driver));
     }
 }

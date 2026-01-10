@@ -17,7 +17,10 @@ public class EmailConsumer {
     @RabbitListener(queues = "email.notification.queue")
     public void processEmail(NotificationEvent event) {
         NotificationType castedType = NotificationType.valueOf(event.getType().toString());
-        String userEmail = (String) event.getMetadata().get("email");
+        if(event.getMetadata() == null){
+            return;
+        }
+        String userEmail = String.valueOf(event.getMetadata().get("email"));
 
         switch (castedType) {
             case ORDER_PLACED:

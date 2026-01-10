@@ -440,6 +440,7 @@ async function uploadProfilePhoto(formData) {
 
 //change password function
 async function changePassword() {
+    const passwordPattern = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!_*])(?=\S+$).{8,50}$/;
     const oldPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const reNewPassword = document.getElementById('confirmPassword').value;
@@ -449,15 +450,19 @@ async function changePassword() {
         return;
     }
 
-    if (!validatePassword(newPassword)) {
+    if (!oldPassword.match(passwordPattern)) {
+        showToast("Password must contain at least one number, one uppercase letter, one lowercase letter, one special character, and be at least 8 characters long", "error");
         return;
     }
-
+    if (!newPassword.match(passwordPattern)) {
+        showToast("Password must contain at least one number, one uppercase letter, one lowercase letter, one special character, and be at least 8 characters long", "error");
+        return;
+    }
     if (newPassword !== reNewPassword) {
         showToast("Passwords do not match", "error");
         return;
     }
-    if (newPass.length < 8) {
+    if (newPassword.length < 8) {
         showToast('Password must be at least 8 characters', 'error');
         return;
     }
@@ -770,8 +775,8 @@ function getStatusStyle(status) {
     switch (status.toUpperCase()) {
         case 'DELIVERED': return { bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' };
         case 'CANCELLED': return { bgClass: 'bg-red-50', textClass: 'text-red-600' };
-        case 'SHIPPED':   return { bgClass: 'bg-indigo-50', textClass: 'text-indigo-600' };
-        default:          return { bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
+        case 'SHIPPED': return { bgClass: 'bg-indigo-50', textClass: 'text-indigo-600' };
+        default: return { bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
     }
 }
 

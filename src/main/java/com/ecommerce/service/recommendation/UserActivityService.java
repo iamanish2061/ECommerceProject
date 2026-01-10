@@ -15,7 +15,7 @@ public class UserActivityService {
     @Transactional
     public void recordActivity(Long userId, Long productId, ActivityType activityType, int score){
 
-        userActivityRepository.upsertActivity(userId, productId, activityType, score);
+        userActivityRepository.upsertActivity(userId, productId, String.valueOf(activityType), score);
 
     }
 
