@@ -1,4 +1,4 @@
-package com.ecommerce.controller.product;
+package com.ecommerce.dto.request.product;
 
 import jakarta.validation.constraints.NotEmpty;
 

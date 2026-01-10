@@ -1,10 +1,12 @@
 // State management for the product page
 let state = {
     recommendedProducts: [],
+    purchasedProducts: [],
+    cartAndViewedProducts: [],
+    products: [],
     categories: [],
     brands: [],
     tags: [],
-    products: [],
     filteredProducts: [],
     selectedCategory: null,
     selectedSubCategory: null, // { name, slug }
@@ -55,21 +57,25 @@ function toArray(res) {
 
 // Helper to extract products response with personalized recommendations
 function extractProductsResponse(res) {
-    if (!res || !res.data) return { products: [], personalized: [] };
+    if (!res || !res.data) return { products: [], recommendedProducts: [], purchasedProducts: [], cartAndViewedProducts: [] };
     const data = res.data;
 
     // Handle response with personalized and products arrays
-    if (data.personalized && data.products) {
+    if (data.recommendedProducts && data.products && data.purchasedProducts && data.cartAndViewed) {
         return {
             products: Array.isArray(data.products) ? data.products : [],
-            personalized: Array.isArray(data.personalized) ? data.personalized : []
+            recommendedProducts: Array.isArray(data.recommendedProducts) ? data.recommendedProducts : [],
+            purchasedProducts: Array.isArray(data.purchasedProducts) ? data.purchasedProducts : [],
+            cartAndViewedProducts: Array.isArray(data.cartAndViewed) ? data.cartAndViewed : []
         };
     }
 
     // Fallback for other response formats
     return {
         products: toArray(res),
-        personalized: []
+        recommendedProducts: [],
+        purchasedProducts: [],
+        cartAndViewedProducts: []
     };
 }
 
@@ -91,8 +97,11 @@ async function init() {
         // Extract products and personalized recommendations
         const productsData = extractProductsResponse(productsRes);
         state.products = productsData.products;
-        state.recommendedProducts = productsData.personalized;
+        state.recommendedProducts = productsData.recommendedProducts;
+        state.purchasedProducts = productsData.purchasedProducts;
+        state.cartAndViewedProducts = productsData.cartAndViewedProducts;
         state.filteredProducts = [...state.products];
+
         if (cartRes.success) {
             state.cartCount = cartRes.data.totalCartItems || 0;
         }
@@ -102,12 +111,17 @@ async function init() {
             brands: state.brands.length,
             tags: state.tags.length,
             products: state.products.length,
+            recommendedProducts: state.recommendedProducts.length,
+            purchasedProducts: state.purchasedProducts.length,
+            cartAndViewedProducts: state.cartAndViewedProducts.length,
         });
 
         renderCategories();
         renderBrands();
         renderTags();
         renderRecommendedProducts();
+        renderPurchasedProducts();
+        renderContinueProducts();
         renderProducts();
 
         updateCartCount();
@@ -622,6 +636,53 @@ function createProductCard(product) {
     return productCard;
 }
 
+// Helper for Expand/Collapse logic
+function handleExpandableSection(products, wrapperId, buttonId) {
+    const wrapper = document.getElementById(wrapperId);
+    const button = document.getElementById(buttonId);
+    const COLLAPSED_HEIGHT = '400px';
+
+    if (!wrapper || !button) return;
+
+    // Reset to collapsed state initially
+    wrapper.classList.add(`max-h-[${COLLAPSED_HEIGHT}]`);
+    // Ensure we start with the class-based or inline restriction
+    wrapper.style.maxHeight = COLLAPSED_HEIGHT;
+
+
+    // We clone the button to remove previous event listeners to avoid duplicates on re-render
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+
+    if (products && products.length > 4) {
+        newButton.classList.remove('hidden');
+        newButton.textContent = 'View All';
+
+        newButton.addEventListener('click', () => {
+            // Check current numeric height or style to determine toggle state
+            // If current style.maxHeight is the collapsed value, we expand.
+            if (wrapper.style.maxHeight === COLLAPSED_HEIGHT) {
+                // Expand
+                wrapper.style.maxHeight = wrapper.scrollHeight + "px";
+                newButton.textContent = 'Show Less';
+            } else {
+                // Collapse
+                // First set to current scrollHeight to ensure transition starts from there if it was 'none' (though here we track it)
+                // actually if we just set it back to collapsed height, valid CSS transition triggers
+                wrapper.style.maxHeight = COLLAPSED_HEIGHT;
+                newButton.textContent = 'View All';
+
+                // Scroll slightly if user is deep down to keep context
+                // wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    } else {
+        newButton.classList.add('hidden');
+        wrapper.classList.remove(`max-h-[${COLLAPSED_HEIGHT}]`);
+        wrapper.style.maxHeight = '';
+    }
+}
+
 
 // Update heading
 function updateProductsHeading() {
@@ -683,7 +744,58 @@ function renderRecommendedProducts() {
     state.recommendedProducts.forEach(product => {
         container.appendChild(createProductCard(product));
     });
+
+    handleExpandableSection(state.recommendedProducts, 'recommendedWrapper', 'recommendedViewAll');
 }
+
+// Render purchased products
+function renderPurchasedProducts() {
+    const container = document.getElementById('purchaseContainer');
+    const section = document.getElementById('purchaseSection');
+
+    if (!container || !section) return;
+
+    // Hide section if no recommended products
+    if (!state.purchasedProducts || state.purchasedProducts.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    // Show section and populate products
+    section.style.display = 'block';
+    container.innerHTML = '';
+
+    state.purchasedProducts.forEach(product => {
+        container.appendChild(createProductCard(product));
+    });
+
+    handleExpandableSection(state.purchasedProducts, 'purchaseWrapper', 'purchaseViewAll');
+}
+
+// Render continue shopping products
+function renderContinueProducts() {
+    const container = document.getElementById('continueContainer');
+    const section = document.getElementById('continueSection');
+
+    if (!container || !section) return;
+
+    // Hide section if no recommended products
+    if (!state.cartAndViewedProducts || state.cartAndViewedProducts.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    // Show section and populate products
+    section.style.display = 'block';
+    container.innerHTML = '';
+
+    state.cartAndViewedProducts.forEach(product => {
+        container.appendChild(createProductCard(product));
+    });
+
+    handleExpandableSection(state.cartAndViewedProducts, 'continueWrapper', 'continueViewAll');
+}
+
 
 document.getElementById('cartBtn').addEventListener('click', () => {
     window.location.href = 'cart.html';

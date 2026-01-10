@@ -4,16 +4,19 @@ import com.ecommerce.dto.response.product.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.product.*;
 import com.ecommerce.model.activity.ActivityType;
+import com.ecommerce.model.activity.UserActivity;
 import com.ecommerce.model.product.BrandModel;
 import com.ecommerce.model.product.CategoryModel;
 import com.ecommerce.model.product.ProductModel;
 import com.ecommerce.model.product.TagModel;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.redis.RedisService;
+import com.ecommerce.repository.activity.UserActivityRepository;
 import com.ecommerce.repository.product.BrandRepository;
 import com.ecommerce.repository.product.CategoryRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.repository.product.TagRepository;
+import com.ecommerce.service.recommendation.RecommendationService;
 import com.ecommerce.service.recommendation.SimilarUserUpdater;
 import com.ecommerce.service.recommendation.UserActivityService;
 import jakarta.persistence.EntityManager;
@@ -24,9 +27,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -44,6 +46,8 @@ public class ProductService {
     private final CategoryMapper categoryMapper;
     private final ProductImageMapper productImageMapper;
     private final SimilarUserUpdater similarUserUpdater;
+    private final RecommendationService recommendationService;
+    private final UserActivityRepository userActivityRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -223,6 +227,58 @@ public class ProductService {
         return em.createQuery(cq)
                 .setMaxResults(15)
                 .getResultList();
+    }
+
+    public Map<String, List<BriefProductsResponse>> getAllProductsWithPersonalization(Long userId) {
+        Map<String, List<BriefProductsResponse>> response = new HashMap<>();
+        Set<Long> excludedIds = new HashSet<>();
+
+//        Recommendation
+        List<BriefProductsResponse> recommendedProducts = recommendationService.getPersonalizedRecommendation(userId);
+        if(!recommendedProducts.isEmpty()){
+            response.put("recommendedProducts", recommendedProducts);
+            recommendedProducts.stream().map(BriefProductsResponse::id).forEach(excludedIds::add);
+        }
+
+        List<UserActivity> activityList = userActivityRepository.findByUserId(userId);
+        if(!activityList.isEmpty()){
+//            purchase again
+            Set<Long> purchasedIds = activityList.stream()
+                    .filter(a -> a.getActivityType() == ActivityType.PURCHASE)
+                    .map(UserActivity::getProductId)
+                    .collect(Collectors.toSet());
+            if(!purchasedIds.isEmpty()){
+                List<BriefProductsResponse> purchasedProducts = productRepository.findAllByIdIn(new ArrayList<>(purchasedIds))
+                        .stream().map(productMapper::mapEntityToBriefProductsResponse).toList();
+                response.put("purchasedProducts", purchasedProducts);
+                excludedIds.addAll(purchasedIds);
+            }
+
+//            continue with following products
+            Set<Long> cartAndViewedIds = activityList.stream()
+                    .filter(a-> a.getActivityType() == ActivityType.CART_ADD  || a.getActivityType() == ActivityType.VIEW)
+                    .map(UserActivity::getProductId)
+                    .filter(productId -> !purchasedIds.contains(productId))
+                    .collect(Collectors.toSet());
+
+            if(!cartAndViewedIds.isEmpty()){
+                List<BriefProductsResponse> cartAndViewedProducts = productRepository.findAllByIdIn(new ArrayList<>(cartAndViewedIds))
+                        .stream().map(productMapper::mapEntityToBriefProductsResponse).toList();
+                response.put("cartAndViewed", cartAndViewedProducts);
+                excludedIds.addAll(cartAndViewedIds);
+            }
+
+        }
+
+//        all products
+        List<BriefProductsResponse> products = productRepository.findAllByIdNotIn(new ArrayList<>(excludedIds))
+                .stream()
+                .map(productMapper::mapEntityToBriefProductsResponse)
+                .toList();
+
+        response.put("products", products);
+
+        return response;
     }
 
 }

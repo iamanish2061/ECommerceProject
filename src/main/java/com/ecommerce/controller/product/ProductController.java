@@ -105,17 +105,7 @@ public class ProductController {
             return ResponseEntity.ok(ApiResponse.ok(res, "Fetched successfully"));
         }
 
-        List<BriefProductsResponse> personalizedProducts = recommendationService.getPersonalizedRecommendation(currentUser.getUser().getId());
-        List<Long> personalizedIds = personalizedProducts.stream()
-                .map(BriefProductsResponse::id)
-                .toList();
-        List<BriefProductsResponse> otherProducts = productService.getAllProductsExcept(personalizedIds);
-        Map<String, List<BriefProductsResponse>> response = new HashMap<>();
-        if(!personalizedProducts.isEmpty()){
-            response.put("personalized", personalizedProducts);
-        }
-        response.put("products", otherProducts);
-
+        Map<String, List<BriefProductsResponse>> response = productService.getAllProductsWithPersonalization(currentUser.getUser().getId());
         return ResponseEntity.ok(ApiResponse.ok(response, "Fetched successfully"));
     }
 

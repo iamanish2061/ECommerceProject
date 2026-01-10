@@ -198,17 +198,57 @@
 
             <!-- Main Content - Products Grid -->
             <main class="flex-1">
-                <!-- Recommended for You Section -->
                 <div id="recommendedSection" class="bg-white rounded-3xl shadow-lg p-8 mb-6" style="display: none;">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Recommended For You:</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-6"
-                        id="recommendedContainer"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">Recommended For You:</h2>
+                        <button id="recommendedViewAll"
+                            class="hidden text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                            View All
+                        </button>
+                    </div>
+                    <div class="relative transition-all duration-700 ease-in-out overflow-hidden max-h-[400px]"
+                        id="recommendedWrapper">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-6"
+                            id="recommendedContainer"></div>
+                    </div>
+                </div>
+
+                <div id="continueSection" class="bg-white rounded-3xl shadow-lg p-8 mb-6" style="display: none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">Continue Shopping:</h2>
+                        <button id="continueViewAll"
+                            class="hidden text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                            View All
+                        </button>
+                    </div>
+                    <div class="relative transition-all duration-700 ease-in-out overflow-hidden max-h-[400px]"
+                        id="continueWrapper">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-6"
+                            id="continueContainer"></div>
+                    </div>
+                </div>
+
+                <div id="purchaseSection" class="bg-white rounded-3xl shadow-lg p-8 mb-6" style="display: none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">Purchase Again:</h2>
+                        <button id="purchaseViewAll"
+                            class="hidden text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                            View All
+                        </button>
+                    </div>
+                    <div class="relative transition-all duration-700 ease-in-out overflow-hidden max-h-[400px]"
+                        id="purchaseWrapper">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-6"
+                            id="purchaseContainer"></div>
+                    </div>
                 </div>
 
                 <!-- All Products Section -->
                 <div class="bg-white rounded-3xl shadow-lg p-8">
                     <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
-                        <h2 class="text-2xl font-bold text-slate-800" id="productsHeading">All Products</h2>
+                        <div class="flex items-center gap-4">
+                            <h2 class="text-2xl font-bold text-slate-800" id="productsHeading">All Products</h2>
+                        </div>
 
                         <!--Sort and tags-->
                         <div class="flex items-center gap-4">
@@ -249,13 +289,15 @@
                     </div>
 
                     <!-- Products Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-5"
-                        id="productsContainer">
-                        <div class="col-span-full flex flex-col items-center justify-center min-h-96 py-12">
-                            <div
-                                claass="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent">
+                    <div class="relative transition-all duration-700 ease-in-out overflow-hidden" id="productsWrapper">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr items-stretch gap-5"
+                            id="productsContainer">
+                            <div class="col-span-full flex flex-col items-center justify-center min-h-96 py-12">
+                                <div
+                                    claass="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent">
+                                </div>
+                                <p class="mt-6 text-lg text-slate-600 font-medium">Loading products...</p>
                             </div>
-                            <p class="mt-6 text-lg text-slate-600 font-medium">Loading products...</p>
                         </div>
                     </div>
                 </div>

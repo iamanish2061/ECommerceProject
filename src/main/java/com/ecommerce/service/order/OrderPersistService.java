@@ -111,6 +111,7 @@ public class OrderPersistService {
             orderToBePersisted.addOrderItem(orderItem);
             product.setStock(product.getStock() - dto.quantity());
             userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.PURCHASE, 10);
+            userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.CART_ADD, -2* dto.quantity());
             redisService.incrementUserVector(user.getId(), product.getId(), 10);
         }
 
@@ -256,6 +257,7 @@ public class OrderPersistService {
 
             product.setStock(product.getStock() - dto.quantity());
             userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.PURCHASE, 10);
+            userActivityService.recordActivity(user.getId(), product.getId(), ActivityType.CART_ADD, -2* dto.quantity());
             redisService.incrementUserVector(user.getId(), product.getId(), 10);
         }
 

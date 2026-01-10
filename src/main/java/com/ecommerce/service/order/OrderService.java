@@ -11,6 +11,7 @@ import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.order.OrderMapper;
 import com.ecommerce.mapper.payment.PaymentMapper;
+import com.ecommerce.model.activity.ActivityType;
 import com.ecommerce.model.cart.CartModel;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
@@ -23,6 +24,7 @@ import com.ecommerce.repository.cart.CartRepository;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.service.payment.PaymentService;
+import com.ecommerce.service.recommendation.UserActivityService;
 import com.ecommerce.utils.EventHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final AddressMapper addressMapper;
     private final PaymentMapper paymentMapper;
+    private final UserActivityService userActivityService;
 
     private final NotificationProducer notificationProducer;
 
@@ -217,6 +220,10 @@ public class OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
         NotificationEvent event = EventHelper.createEventForOrderCanncellation(user, order);
+        order.getOrderItems().forEach(
+                orderItem -> userActivityService.recordActivity(user.getId(), orderItem.getProduct().getId(), ActivityType.PURCHASE, -10)
+        );
         notificationProducer.send("notify.user", event);
     }
+
 }
