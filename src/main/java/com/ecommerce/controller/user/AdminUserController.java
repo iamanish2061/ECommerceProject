@@ -1,10 +1,7 @@
 package com.ecommerce.controller.user;
 
 import com.ecommerce.dto.response.ApiResponse;
-import com.ecommerce.dto.response.user.DetailedUserResponse;
-import com.ecommerce.dto.response.user.AllUsersResponse;
-import com.ecommerce.dto.response.user.DriverInfoResponse;
-import com.ecommerce.dto.response.user.StaffInfoResponse;
+import com.ecommerce.dto.response.user.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.model.user.Role;
 import com.ecommerce.model.user.UserStatus;
@@ -28,9 +25,9 @@ public class AdminUserController {
     private final AdminUserService userService;
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<AllUsersResponse>>> getAllUsers(){
+    public ResponseEntity<ApiResponse<List<DetailedUser>>> getAllUsers(){
         //pagination
-        List<AllUsersResponse> users = userService.getAllUsers();
+        List<DetailedUser> users = userService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.ok(users, "Fetched info of all users"));
     }
 

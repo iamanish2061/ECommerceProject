@@ -81,7 +81,7 @@ const SpecificProductManager = {
         // Gallery
         if (p.product.images && p.product.images.length > 0) {
             document.getElementById('imageGallery').innerHTML = p.product.images.map(img =>
-                `<img src="${img.url}" class="w-full h-16 object-cover rounded border border-slate-200 cursor-pointer hover:opacity-75" onclick="document.getElementById('productImage').src='${img}'">`
+                `<img src="${img.url}" class="w-full h-16 object-cover rounded border border-slate-200 cursor-pointer hover:opacity-75" onclick="document.getElementById('productImage').src='${img.url}'">`
             ).join('');
         }
 

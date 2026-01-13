@@ -27,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -46,10 +48,10 @@ public class AdminUserService {
 
     private final RouteService routeService;
 
-    public List<AllUsersResponse> getAllUsers() {
+    public List<DetailedUser> getAllUsers() {
         List<UserModel> users = userRepository.findAll();
         return users.stream()
-                .map(userMapper::mapEntityToUserResponse)
+                .map(userMapper::mapEntityToDetailedUser)
                 .toList();
     }
 
@@ -58,16 +60,19 @@ public class AdminUserService {
                 .orElseThrow(()-> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.NOT_FOUND));
 
         DetailedUser user = userMapper.mapEntityToDetailedUser(userModel);
-        AddressModel filteredAddress = userModel.getAddresses()
-                .stream()
-                .filter(a-> a.getType() == AddressType.HOME)
-                .findFirst().orElse(null);
 
-        DetailedAddress address = filteredAddress != null
-                ? addressMapper.mapEntityToDetailedAddress(filteredAddress)
-                : null;
+        Map<String, DetailedAddress> responseAddresses = new HashMap<>();
+        userModel.getAddresses()
+                .forEach(address->{
+                    if(address.getType() == AddressType.HOME){
+                        responseAddresses.put(String.valueOf(AddressType.HOME), addressMapper.mapEntityToDetailedAddress(address));
+                    }
+                    else if (address.getType() == AddressType.WORK) {
+                        responseAddresses.put(String.valueOf(AddressType.WORK), addressMapper.mapEntityToDetailedAddress(address));
+                    }
+                });
 
-        return new DetailedUserResponse(user, address);
+        return new DetailedUserResponse(user, responseAddresses);
     }
 
     @Transactional
