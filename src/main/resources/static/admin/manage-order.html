@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Manage User Details</title>
+    <title>Admin - Manage Orders</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/toast.css">
+
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
@@ -17,8 +18,8 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+        .sidebar-transition {
+            transition: width 0.3s ease-in-out;
         }
 
         .nav-item:hover {
@@ -32,6 +33,10 @@
 
         .nav-label {
             white-space: nowrap;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
@@ -55,20 +60,11 @@
             overflow-x: hidden;
             overflow-y: hidden !important;
         }
-
-        .tab-active {
-            background: linear-gradient(to right, #2563eb, #4f46e5);
-            color: white;
-        }
-
-        .tab-inactive {
-            background: white;
-            color: #475569;
-        }
     </style>
 </head>
 
 <body class="min-h-screen bg-slate-50 flex overflow-hidden">
+
     <!-- Sidebar -->
     <aside id="sidebar"
         class="bg-indigo-950 text-slate-300 w-64 h-screen flex flex-col sidebar-transition relative z-50">
@@ -113,7 +109,7 @@
                 </li>
                 <li>
                     <a href="manage-user.html"
-                        class="nav-item active flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -135,7 +131,7 @@
                 </li>
                 <li>
                     <a href="manage-order.html"
-                        class="nav-item flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
+                        class="nav-item active flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -222,23 +218,13 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+    <main id="mainContent" class="flex-1 flex flex-col h-screen overflow-hidden">
         <!-- Header -->
         <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
-            <div class="flex items-center gap-4">
-                <a href="manage-user.html" class="text-slate-500 hover:text-indigo-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                </a>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-800">User Details</h1>
-                    <p class="text-xs text-slate-500">Manage specific user account</p>
-                </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Manage Orders</h1>
+                <p class="text-xs text-slate-500">View and manage all orders</p>
             </div>
-
             <div class="flex items-center gap-4">
                 <!-- notification -->
                 <div class="relative">
@@ -274,145 +260,84 @@
                     </div>
                 </div>
 
+
                 <a href="../profile.html"
                     class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border-2 border-indigo-200">
                     A
                 </a>
             </div>
-
         </header>
 
-        <!-- Body -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
-            <div id="loadingState" class="text-center py-20 text-slate-400">Loading User Details...</div>
+        <!-- Body Content -->
+        <div class="flex-1 flex flex-col overflow-hidden bg-slate-50/50">
+            <!-- Action Bar -->
+            <div class="p-6 pb-0 flex flex-col xl:flex-row gap-4 justify-between items-center">
 
-            <div id="userContent" class="hidden grid grid-cols-1 xl:grid-cols-4 gap-8">
-                <!-- Left Sidebar: User Profile & Core Actions -->
-                <div class="xl:col-span-1 space-y-8">
-                    <div
-                        class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col items-center text-center">
-                        <img id="uProfilePic" src="" alt="User"
-                            class="w-32 h-32 rounded-full object-cover border-4 border-indigo-50 mb-4 shadow-lg">
-                        <h2 id="uFullName" class="text-xl font-bold text-slate-800 mb-1"></h2>
-                        <p id="uUsername" class="text-sm text-slate-500 font-medium mb-4"></p>
-
-                        <div class="w-full flex justify-center gap-2 mb-6">
-                            <span id="uRoleBadge"
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600"></span>
-                            <span id="uStatusBadge"
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600"></span>
-                        </div>
-
-                        <div class="w-full space-y-2">
-                            <button onclick="SpecificUserUI.openModal('updateRoleModal')"
-                                class="w-full py-2 bg-indigo-50 text-indigo-600 rounded-xl font-semibold text-sm hover:bg-indigo-100 transition-colors">
-                                Update Role
-                            </button>
-                            <button onclick="SpecificUserUI.openModal('updateStatusModal')"
-                                class="w-full py-2 bg-slate-50 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-100 transition-colors">
-                                Update Status
-                            </button>
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4 w-full flex-wrap">
+                    <!-- Search Order ID -->
+                    <div class="relative w-full md:w-48">
+                        <input type="text" id="orderSearchId" placeholder="Search Order ID..."
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm font-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-3 h-5 w-5 text-slate-400"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
+                    <!-- Search Username -->
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="orderSearchUsername" placeholder="Search Username..."
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-3 h-5 w-5 text-slate-400"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <!-- Date Filter -->
+                    <select id="dateFilter"
+                        class="w-full md:w-48 px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm">
+                        <option value="">All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="month">Last 30 Days</option>
+                    </select>
+                    <!-- Status Filter -->
+                    <select id="statusFilter"
+                        class="w-full md:w-48 px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm">
+                        <option value="">All Status</option>
+                        <!-- Populated by JS -->
+                    </select>
                 </div>
 
-                <!-- Right Content: Addresses & Dynamic Views -->
-                <div class="xl:col-span-3 space-y-8">
-                    <!-- Address Hub -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xl font-bold text-slate-800">Address Hub</h3>
-                            <div class="flex gap-2">
-                                <button onclick="SpecificUserManager.switchAddressTab('home')" id="homeTab"
-                                    class="tab-active px-4 py-2 text-sm rounded-lg font-medium transition-all">
-                                    Home
-                                </button>
-                                <button onclick="SpecificUserManager.switchAddressTab('work')" id="workTab"
-                                    class="tab-inactive px-4 py-2 text-sm rounded-lg font-medium transition-all">
-                                    Work
-                                </button>
-                            </div>
-                        </div>
-                        <div id="addressContent" class="text-slate-600 text-sm">
-                            <p class="italic text-slate-400">Loading address...</p>
-                        </div>
-                    </div>
+            </div>
 
-                    <!-- Dynamic Action Buttons -->
-                    <div id="actionButtons" class="flex flex-wrap gap-4">
-                        <!-- Injected by JS based on Role -->
-                    </div>
-
-                    <!-- Dynamic Content Area (Orders, Appointments, Driver Info etc) -->
-                    <div id="dynamicContentArea"
-                        class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 hidden">
-                        <h3 id="dynamicContentTitle" class="text-xl font-bold text-slate-800 mb-4">Details</h3>
-                        <div id="dynamicContentBody"></div>
-                    </div>
-
+            <!-- Orders Table -->
+            <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Order ID</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Total</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-left">
+                                    Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-slate-400">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </main>
-
-    <!-- Modals -->
-
-    <!-- Update Role Modal -->
-    <div id="updateRoleModal"
-        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
-        onclick="if(event.target === this) SpecificUserUI.closeModal('updateRoleModal')">
-        <div class="bg-white rounded-lg p-6 w-80 shadow-xl">
-            <h3 class="text-lg font-bold mb-4">Update Role</h3>
-            <form id="updateRoleForm">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Select New Role</label>
-                    <select name="role" class="w-full border p-2 rounded">
-                        <option value="ROLE_USER">User</option>
-                        <option value="ROLE_DRIVER">Driver</option>
-                        <option value="ROLE_STAFF">Staff</option>
-                        <option value="ROLE_ADMIN">Admin</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded">Update Role</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Update Status Modal -->
-    <div id="updateStatusModal"
-        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
-        onclick="if(event.target === this) SpecificUserUI.closeModal('updateStatusModal')">
-        <div class="bg-white rounded-lg p-6 w-80 shadow-xl">
-            <h3 class="text-lg font-bold mb-4">Update Status</h3>
-            <form id="updateStatusForm">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Select New Status</label>
-                    <select name="status" class="w-full border p-2 rounded">
-                        <option value="ACTIVE">Active</option>
-                        <option value="SUSPENDED">Suspended</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded">Update Status</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Assign Driver Modal (Used directly here or could be dynamic) -->
-    <div id="assignDriverModal"
-        class="fixed inset-0 z-[60] hidden bg-gray-500 bg-opacity-75 flex items-center justify-center"
-        onclick="if(event.target === this) SpecificUserUI.closeModal('assignDriverModal')">
-        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
-            <h3 class="text-lg font-bold mb-4">Assign Delivery</h3>
-            <div class="text-sm text-slate-500 mb-4">
-                Confirm assigning delivery task to this driver?
-            </div>
-            <div class="flex gap-2">
-                <button onclick="SpecificUserUI.closeModal('assignDriverModal')"
-                    class="flex-1 border py-2 rounded">Cancel</button>
-                <button id="confirmAssignBtn" class="flex-1 bg-green-600 text-white py-2 rounded">Confirm</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Order Detail Modal -->
     <div id="orderDetailModal"
@@ -425,7 +350,7 @@
                     <p class="text-blue-100 text-xs font-medium tracking-wide">Order ID: #<span
                             id="popupOrderId">...</span></p>
                 </div>
-                <button onclick="SpecificUserUI.closeModal('orderDetailModal')"
+                <button onclick="OrderUI.closeModal('orderDetailModal')"
                     class="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-1.5 transition-all"><svg
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                         stroke="currentColor" class="w-5 h-5">
@@ -485,12 +410,21 @@
                         class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Grand Total</span><span
                         id="popupTotal" class="text-xl font-black text-white">...</span></div>
 
-                <div id="modalActionContainer"
-                    class="mt-4 hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <button id="modalCancelBtn"
-                        class="w-full bg-red-50 text-red-600 py-3 rounded-2xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-100">
-                        Cancel Order
-                    </button>
+                <!-- Change Status Section -->
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <h4 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>Change Status
+                    </h4>
+                    <div class="flex gap-3">
+                        <select id="statusSelect"
+                            class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white shadow-sm">
+                            <!-- Populated by JS -->
+                        </select>
+                        <button onclick="OrderManager.updateStatus()"
+                            class="px-6 py-2.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all shadow-md">
+                            Update
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -498,15 +432,14 @@
 
     <div id="toast-container"></div>
 
-
     <!-- Scripts -->
     <script src="../assets/js/api.js"></script>
 
     <script src="../assets/js/auth/authService.js"></script>
     <script src="../assets/js/notification/notificationService.js"></script>
-    <script src="js/user/manageUserService.js"></script>
+    <script src="js/order/manageOrderService.js"></script>
     <!-- Page Specific Scripts -->
-    <script src="js/user/manageSpecificUser.js"></script>
+    <script src="js/order/manageOrder.js"></script>
     <script src="../assets/js/notification/notification.js"></script>
 
     <script>
@@ -539,7 +472,7 @@
 
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
-            SpecificUserManager.init();
+            OrderManager.init();
         });
     </script>
 </body>

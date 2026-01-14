@@ -2,7 +2,10 @@ package com.ecommerce.service.user;
 
 import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
-import com.ecommerce.dto.response.user.*;
+import com.ecommerce.dto.response.user.DetailedUser;
+import com.ecommerce.dto.response.user.DetailedUserResponse;
+import com.ecommerce.dto.response.user.DriverInfoResponse;
+import com.ecommerce.dto.response.user.StaffInfoResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.user.UserMapper;

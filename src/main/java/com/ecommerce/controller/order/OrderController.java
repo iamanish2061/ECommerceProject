@@ -67,7 +67,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     @Operation(summary = "get detail of order that user clicks from the list of orders")
-    public ResponseEntity<ApiResponse<UserOrderResponse>> getDetailOfProduct(
+    public ResponseEntity<ApiResponse<UserOrderResponse>> getDetailOfOrder(
             @ValidId @PathVariable Long orderId,
             @AuthenticationPrincipal UserPrincipal currentUser
     ){

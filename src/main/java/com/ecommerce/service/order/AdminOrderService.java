@@ -4,6 +4,7 @@ package com.ecommerce.service.order;
 import com.ecommerce.dto.request.product.SellProductRequests;
 import com.ecommerce.dto.response.order.OrderResponse;
 import com.ecommerce.dto.response.order.SingleOrderResponse;
+import com.ecommerce.dto.response.order.UserOrderResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.order.OrderMapper;
@@ -104,14 +105,21 @@ public class AdminOrderService {
         return Arrays.asList("PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED", "INSTORE_COMPLETED");
     }
 
-    public List<OrderResponse> getOrderOfUser(Long userId) {
-        List<OrderModel> ordersOfUser = orderRepository.findByUserId(userId);
-        if(ordersOfUser == null){
-            throw new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND);
-        }
-        return ordersOfUser.stream()
-                .map(order-> orderMapper.mapEntityToOrderResponse(order, order.getUser().getUsername()))
-                .toList();
+    public UserOrderResponse getDetailsOfOrderForUserProfile(Long orderId) {
+        OrderModel order = orderRepository.findOrderOfUserInDetail(orderId)
+                .orElseThrow(()-> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        return new UserOrderResponse(
+                order.getId(),
+                order.getTotalAmount(),
+                order.getStatus(),
+                order.getCreatedAt(),
+                order.getOrderItems().stream()
+                        .map(orderMapper::mapEntityToOrderItemResponse).toList(),
+                addressMapper.mapEntityToAddressResponse(order.getAddress()),
+                paymentMapper.mapEntityToPaymentResponse(order.getPayment()),
+                order.getPhoneNumber()
+        );
     }
 
     public SingleOrderResponse getDetailOfOrder(Long orderId) {

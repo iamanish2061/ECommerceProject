@@ -24,8 +24,10 @@ public class GlobalExceptionHandler{
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<?>> handleBadCredentialException(ApplicationException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((ApiResponse.error("Invalid Credentials!", "INVALID_CREDENTIALS")));
+    public ResponseEntity<ApiResponse<?>> handleBadCredentialException(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Invalid Credentials!", "INVALID_CREDENTIALS"));
     }
 
     @ExceptionHandler(ApplicationException.class)

@@ -23,8 +23,33 @@ const ProductManager = {
     },
 
     async init() {
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn?.addEventListener('click', this.handleLogout);
         await this.loadAllData();
         this.setupEventListeners();
+    },
+
+    async handleLogout() {
+        if (!confirm('Are you sure you want to logout?')) return;
+
+        try {
+            // Try to call logout API if AuthService exists
+            if (typeof AuthService !== 'undefined' && AuthService.logout) {
+                const response = await AuthService.logout();
+                if (response?.success) {
+                    showToast('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 500);
+                } else {
+                    showToast('Failed to log out', 'error');
+                }
+            } else {
+                console.log("auth service not defined");
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     },
 
     async loadAllData() {

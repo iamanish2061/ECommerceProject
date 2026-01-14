@@ -5,6 +5,8 @@ import com.ecommerce.dto.request.product.SellProductRequests;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.order.OrderResponse;
 import com.ecommerce.dto.response.order.SingleOrderResponse;
+import com.ecommerce.dto.response.order.UserOrderResponse;
+import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.order.AdminOrderService;
 import com.ecommerce.validation.ValidId;
@@ -63,16 +65,13 @@ public class AdminOrderController {
         );
     }
 
-    //    getting all order of specific user
-    @GetMapping("/user/{userId}")
-    @Operation(summary = "can be removed if the filter can be done from frontend only - for fetching order of particular user")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersOfSpeificUser(
-            @ValidId @PathVariable Long userId
+    @GetMapping("/{orderId}/user-profile")
+    @Operation(summary = "get detail of order that admin clicks from the list of orders in user profile")
+    public ResponseEntity<ApiResponse<UserOrderResponse>> getDetailOfOrder(
+            @ValidId @PathVariable Long orderId
     ){
-        List<OrderResponse> orderResponses = adminOrderService.getOrderOfUser(userId);
-        return ResponseEntity.ok(
-                ApiResponse.ok(orderResponses, "Order fetched of user: "+userId)
-        );
+        UserOrderResponse response = adminOrderService.getDetailsOfOrderForUserProfile(orderId);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Detail of order: "+orderId));
     }
 
     //    detail of particular order

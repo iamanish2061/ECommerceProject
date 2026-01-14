@@ -39,6 +39,10 @@ const UserService = {
         return await request(`/admin/orders/user/${userId}`, 'GET');
     },
 
+    getOrderDetails: async (orderId) => {
+        return await request(`/admin/orders/${orderId}/user-profile`, 'GET');
+    },
+
     // Get User Appointments (Dummy)
     getUserAppointments: async (userId) => {
         // Mocking API delay

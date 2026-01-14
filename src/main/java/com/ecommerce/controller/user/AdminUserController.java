@@ -42,7 +42,6 @@ public class AdminUserController {
     @PutMapping("/role/{id}")
     public ResponseEntity<ApiResponse<Map<String, Role>>> updateRole(
             @ValidId @PathVariable Long id,
-            @NotBlank(message = "Role is required!")
             @RequestParam Role role
     )throws ApplicationException{
         userService.updateRole(id, role);

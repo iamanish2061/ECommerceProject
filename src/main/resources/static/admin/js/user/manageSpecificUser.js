@@ -21,6 +21,7 @@ const SpecificUserUI = {
             document.body.classList.add('modal-active');
         }
     },
+
     closeModal: (modalId) => {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -35,7 +36,7 @@ const SpecificUserUI = {
             // Check for image URLs
             if (typeof value === 'string' && (value.startsWith('http') || value.includes('/'))) {
                 // Assume it might be an image if valid url or path, but safer to check key name
-                if (key.toLowerCase().includes('document') || key.toLowerCase().includes('image') || key.toLowerCase().includes('license')) {
+                if (key.toLowerCase().includes('uploads') || key.toLowerCase().includes('image') || key.toLowerCase().includes('license')) {
                     content += `
                         <div class="col-span-2">
                              <p class="text-xs font-bold uppercase text-slate-400 mb-1">${key.replace(/([A-Z])/g, ' $1').trim()}</p>
@@ -75,13 +76,13 @@ const SpecificUserUI = {
                         ${orders.map(o => `
                             <tr class="hover:bg-slate-50">
                                 <td class="p-3">#${o.orderId}</td>
-                                <td class="p-3">${o.orderDate || 'N/A'}</td>
+                                <td class="p-3">${o.createdAt || 'N/A'}</td>
                                 <td class="p-3 font-bold">Rs. ${o.totalAmount}</td>
                                 <td class="p-3">
-                                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">${o.orderStatus}</span>
+                                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">${o.status}</span>
                                 </td>
                                 <td class="p-3">
-                                    <button class="text-indigo-600 hover:text-indigo-800 font-medium">View</button>
+                                    <button class="text-indigo-600 hover:text-indigo-800 font-medium" onclick="SpecificUserManager.showOrderDetails(${o.orderId})">View</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -142,8 +143,34 @@ const SpecificUserManager = {
         }
 
         document.title = "Admin - Manage User ID: " + this.userId;
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn?.addEventListener('click', this.handleLogout);
         await this.loadUserDetails();
         this.setupForms();
+        
+    },
+
+    async handleLogout() {
+        if (!confirm('Are you sure you want to logout?')) return;
+
+        try {
+            // Try to call logout API if AuthService exists
+            if (typeof AuthService !== 'undefined' && AuthService.logout) {
+                const response = await AuthService.logout();
+                if (response?.success) {
+                    showToast('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 500);
+                } else {
+                    showToast('Failed to log out', 'error');
+                }
+            } else {
+                console.log("auth service not defined");
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     },
 
     async loadUserDetails() {
@@ -235,7 +262,7 @@ const SpecificUserManager = {
             buttons.push({ label: 'Show User Appointments', action: 'SpecificUserManager.showAppointments()', color: 'bg-indigo-600 text-white' });
         } else if (role === 'ROLE_DRIVER') {
             buttons.push({ label: 'Show Driver Info', action: 'SpecificUserManager.showDriverInfo()', color: 'bg-indigo-600 text-white' });
-            buttons.push({ label: 'Assign Delivery', action: 'SpecificUserUI.openModal("assignDriverModal")', color: 'bg-green-600 text-white' });
+            buttons.push({ label: 'Assign Delivery', action: `SpecificUserUI.openModal('assignDriverModal')`, color: 'bg-green-600 text-white' });
         } else if (role === 'ROLE_STAFF') {
             buttons.push({ label: 'View Staff Info', action: 'SpecificUserManager.showStaffInfo()', color: 'bg-indigo-600 text-white' });
             buttons.push({ label: 'View Staff Appointment', action: 'SpecificUserManager.showAppointments()', color: 'bg-indigo-600 text-white' });
@@ -266,6 +293,165 @@ const SpecificUserManager = {
                 showToast(res.message, "error");
             }
         } catch (e) { showToast("Failed to fetch orders", "error"); }
+    },
+
+    async showOrderDetails(orderId) {
+        showToast("Fetching Order Details...");
+        try {
+            const res = await UserService.getOrderDetails(orderId);
+            if (res.success) {
+                this.populateOrderDetailModal(res.data);
+            } else {
+                showToast(res.message, "error");
+            }
+        } catch (e) {
+            showToast("Failed to fetch order details", "error");
+        }
+    },
+
+    getStatusStyle(status) {
+        switch (status.toUpperCase()) {
+            case 'DELIVERED':
+                return {
+                    bgClass: 'bg-emerald-50',
+                    textClass: 'text-emerald-600',
+                    icon: 'check-circle'
+                };
+            case 'CANCELLED':
+                return {
+                    bgClass: 'bg-red-50',
+                    textClass: 'text-red-600',
+                    icon: 'x-circle'
+                };
+            case 'PROCESSING':
+                return {
+                    bgClass: 'bg-blue-50',
+                    textClass: 'text-blue-600',
+                    icon: 'clock'
+                };
+            case 'SHIPPED':
+                return {
+                    bgClass: 'bg-indigo-50',
+                    textClass: 'text-indigo-600',
+                    icon: 'truck'
+                };
+            default:
+                return {
+                    bgClass: 'bg-slate-50',
+                    textClass: 'text-slate-600',
+                    icon: 'package'
+                };
+        }
+    },
+
+    populateOrderDetailModal(order) {
+        // Fix: Use 'this' to access the method
+        const statusInfo = this.getStatusStyle(order.status);
+
+        let date = 'N/A';
+        if (order.createdAt) {
+            date = new Date(order.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Update Status UI
+        const statusText = document.getElementById('popupStatus');
+        const statusBg = document.getElementById('popupStatusBg');
+        document.getElementById('popupOrderId').textContent = order.orderId;
+        if (statusText && statusBg) {
+            statusText.textContent = order.status;
+            statusText.className = `font-bold ${statusInfo.textClass} capitalize`;
+            statusBg.className = `p-3 rounded-full ${statusInfo.bgClass} ${statusInfo.textClass}`;
+        }
+
+        const popupDate = document.getElementById('popupDate');
+        if (popupDate) popupDate.textContent = date;
+
+        const paymentMethodEl = document.getElementById('popupPaymentMethod');
+        const paymentStatusEl = document.getElementById('popupPaymentStatus');
+
+        if (paymentMethodEl) {
+            if (order.payment) {
+                paymentMethodEl.textContent = (order.payment.paymentMethod || 'N/A').replace(/_/g, ' ');
+                if (paymentStatusEl) {
+                    paymentStatusEl.textContent = `Status: ${order.payment.paymentStatus || 'N/A'}`;
+                    if (order.payment.transactionId) {
+                        paymentStatusEl.textContent += ` | Ref: ${order.payment.transactionId}`;
+                    }
+                }
+            } else {
+                paymentMethodEl.textContent = 'Cash on Delivery';
+                if (paymentStatusEl) paymentStatusEl.textContent = 'Status: Pending';
+            }
+        }
+
+        const popupTotal = document.getElementById('popupTotal');
+        if (popupTotal) {
+            popupTotal.textContent = `Rs. ${(order.totalAmount || 0).toFixed(2).toLocaleString()}`;
+        }
+
+        // Removed Cancel Button Logic as per user request
+        const modalActionContainer = document.getElementById('modalActionContainer');
+        if (modalActionContainer) {
+            modalActionContainer.classList.add('hidden');
+        }
+
+        // Address Info
+        const address = order.address;
+        const addressContainer = document.getElementById('popupAddress');
+        if (addressContainer) {
+            if (address) {
+                addressContainer.innerHTML = `
+                    <p class="font-bold text-slate-800">${address.place || ''}</p>
+                    <p>${address.landmark || ''}</p>
+                    <p>${address.district || ''}, ${address.province || ''}</p>
+                    <p class="mt-2 flex items-center gap-2 text-indigo-600 font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        ${order.phoneNumber || 'N/A'}
+                    </p>
+                `;
+            } else {
+                addressContainer.innerHTML = '<p class="text-slate-400 italic">Address not available</p>';
+            }
+        }
+
+        // Items
+        const itemsContainer = document.getElementById('popupItemsContainer');
+        if (itemsContainer) {
+            itemsContainer.innerHTML = "";
+            if (order.orderItems && order.orderItems.length > 0) {
+                order.orderItems.forEach(item => {
+                    const product = item.product || {};
+                    const imageUrl = product.imageUrl || '../assets/svg/CutLab.svg'; // Fixed path for admin
+
+                    const itemHtml = `
+                        <div class="flex items-center gap-4 p-3 bg-slate-50/80 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all duration-300">
+                            <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-slate-100/50 flex-shrink-0">
+                                <img src="${imageUrl}" alt="${product.title || product.name || 'Product'}" class="w-full h-full object-contain">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[13px] font-bold text-slate-800 truncate">${product.title || product.name || 'Unknown Product'}</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <p class="text-[11px] font-medium text-slate-500">Qty: ${item.quantity || 0} × Rs. ${(item.price || 0).toFixed(2)}</p>
+                                    <p class="text-[13px] font-bold text-blue-600">Rs. ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+                });
+            } else {
+                itemsContainer.innerHTML = '<p class="text-slate-400 italic">No items found.</p>';
+            }
+        }
+
+        // Show Modal using UI helper
+        SpecificUserUI.openModal('orderDetailModal');
     },
 
     async showAppointments() {
@@ -307,6 +493,7 @@ const SpecificUserManager = {
     setupForms() {
         document.getElementById('updateRoleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            showToast("Updating role...", "info");
             const role = e.target.role.value;
             const res = await UserService.updateUserRole(this.userId, role);
             if (res.success) {
@@ -320,6 +507,7 @@ const SpecificUserManager = {
 
         document.getElementById('updateStatusForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            showToast("Updating status...", "info");
             const status = e.target.status.value;
             const res = await UserService.updateUserStatus(this.userId, status);
             if (res.success) {
@@ -332,20 +520,13 @@ const SpecificUserManager = {
         });
 
         document.getElementById('confirmAssignBtn').addEventListener('click', async () => {
-            // Logic for assigning driver - assuming simple toggle for now or backend handles logic
-            // But the API UserService.assignDriver(driverId) needs to be called
-            // However, assigning delivery usually implies assigning THIS driver to SOME order.
-            // The prompt requirement "Assign Delivery" button for Driver likely means "Assign A Delivery TO This Driver".
-            // The API `POST /api/admin/users/assign-driver/{driverId}` signature suggests maybe an auto-assignment or it needs a body?
-            // Checking controller: `AdminUserController.java` wasn't fully deep dived for that endpoint body.
-            // But assuming simple call based on instruction.
-
+            showToast("Assigning delivery...", "info");
             const res = await UserService.assignDriver(this.userId);
             if (res.success) {
-                showToast("Delivery assigned successfully", "success");
+                showToast(res.message || "Delivery assigned successfully", "success");
                 SpecificUserUI.closeModal('assignDriverModal');
             } else {
-                showToast(res.message, "error");
+                showToast(res.message || "Failed to assign delivery", "error");
             }
         });
     }
