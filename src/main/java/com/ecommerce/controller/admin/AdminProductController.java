@@ -1,11 +1,11 @@
-package com.ecommerce.controller.product;
+package com.ecommerce.controller.admin;
 
 
 import com.ecommerce.dto.request.product.*;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.product.NameAndIdResponse;
 import com.ecommerce.dto.response.product.SingleProductWithCostPriceResponse;
-import com.ecommerce.service.product.AdminProductService;
+import com.ecommerce.service.admin.AdminProductService;
 import com.ecommerce.validation.ValidId;
 import com.ecommerce.validation.ValidPrice;
 import com.ecommerce.validation.ValidQuantity;

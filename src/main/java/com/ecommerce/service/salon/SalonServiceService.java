@@ -31,24 +31,22 @@ public class SalonServiceService {
     private final ServiceMapper serviceMapper;
     private final StaffMapper staffMapper;
 
-    private static final String UPLOAD_DIR = "uploads/services/";
-
 //    User Methods
     public List<ServiceListResponse> getAllActiveServices() {
         return serviceRepository.findByActiveTrue().stream()
-                .map(serviceMapper::mapModelToServiceListResponse)
+                .map(serviceMapper::mapEntityToServiceListResponse)
                 .toList();
     }
 
     public List<ServiceListResponse> getServicesByCategory(String category) {
         return serviceRepository.findByCategoryAndActiveTrue(category).stream()
-                .map(serviceMapper::mapModelToServiceListResponse)
+                .map(serviceMapper::mapEntityToServiceListResponse)
                 .toList();
     }
 
     public List<ServiceListResponse> searchServices(String query) {
         return serviceRepository.findByNameContainingIgnoreCaseAndActiveTrue(query).stream()
-                .map(serviceMapper::mapModelToServiceListResponse)
+                .map(serviceMapper::mapEntityToServiceListResponse)
                 .toList();
     }
 
@@ -59,9 +57,9 @@ public class SalonServiceService {
     public ServiceDetailResponse getServiceDetail(Long id) {
         ServiceModel service = serviceRepository.findWithStaffById(id)
                 .orElseThrow(() -> new ApplicationException("Service not found with id: " + id, "NOT_FOUND", HttpStatus.NOT_FOUND));
-        ServiceListResponse serviceListResponse = serviceMapper.mapModelToServiceListResponse(service);
+        ServiceListResponse serviceListResponse = serviceMapper.mapEntityToServiceListResponse(service);
         List<StaffSummaryResponse> staffList = service.getStaff()
-                .stream().map(staffMapper::mapModelToStaffSummaryResponse)
+                .stream().map(staffMapper::mapEntityToStaffSummaryResponse)
                 .toList();
         return new ServiceDetailResponse(serviceListResponse, staffList);
     }
@@ -71,13 +69,13 @@ public class SalonServiceService {
 //    Admin Methods
     public List<ServiceListResponse> getAllServicesAdmin() {
         return serviceRepository.findAllByOrderByIdDesc().stream()
-                .map(serviceMapper::mapModelToServiceListResponse)
+                .map(serviceMapper::mapEntityToServiceListResponse)
                 .toList();
     }
 
     public List<ServiceListResponse> searchServicesAdmin(String query) {
         return serviceRepository.findByNameContainingIgnoreCase(query).stream()
-                .map(serviceMapper::mapModelToServiceListResponse)
+                .map(serviceMapper::mapEntityToServiceListResponse)
                 .toList();
     }
 

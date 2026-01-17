@@ -1,4 +1,4 @@
-package com.ecommerce.service.product;
+package com.ecommerce.service.admin;
 
 import com.ecommerce.dto.request.product.*;
 import com.ecommerce.dto.response.product.NameAndIdResponse;

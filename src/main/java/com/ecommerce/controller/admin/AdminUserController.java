@@ -1,11 +1,11 @@
-package com.ecommerce.controller.user;
+package com.ecommerce.controller.admin;
 
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.user.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.model.user.Role;
 import com.ecommerce.model.user.UserStatus;
-import com.ecommerce.service.user.AdminUserService;
+import com.ecommerce.service.admin.AdminUserService;
 import com.ecommerce.validation.ValidId;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;

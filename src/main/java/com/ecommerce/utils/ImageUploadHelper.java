@@ -21,6 +21,7 @@ public class ImageUploadHelper {
     private static final Path PRODUCT_UPLOAD_DIR = Paths.get("uploads/products").toAbsolutePath();
     private static final Path BRAND_UPLOAD_DIR = Paths.get("uploads/brands").toAbsolutePath();
     private static final Path CATEGORY_UPLOAD_DIR = Paths.get("uploads/categories").toAbsolutePath();
+    private static final Path SERVICE_UPLOAD_DIR = Paths.get("uploads/services").toAbsolutePath();
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/webp"
     );
@@ -86,6 +87,9 @@ public class ImageUploadHelper {
         } else if (type.equalsIgnoreCase("CATEGORY")) {
             uploadDir =CATEGORY_UPLOAD_DIR;
             returnPreSegment = "/uploads/categories/";
+        }else if(type.equalsIgnoreCase("SERVICE")){
+            uploadDir =SERVICE_UPLOAD_DIR;
+            returnPreSegment = "/uploads/services/";
         }
 
         String basename = HelperClass.generateSlug(name);

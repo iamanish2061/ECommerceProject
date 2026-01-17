@@ -17,10 +17,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@Validated
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/address")
+@RequiredArgsConstructor
+@Validated
 public class AddressController {
 
     private final AddressService addressService;

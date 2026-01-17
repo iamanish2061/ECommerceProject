@@ -1,4 +1,4 @@
-package com.ecommerce.service.user;
+package com.ecommerce.service.admin;
 
 import com.ecommerce.dto.response.address.DetailedAddress;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
