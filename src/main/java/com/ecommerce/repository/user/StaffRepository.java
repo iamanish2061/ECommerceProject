@@ -28,8 +28,6 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
     @EntityGraph(value = "Staff.user.services", type = EntityGraph.EntityGraphType.FETCH)
     Optional<Staff> findWithDetailsById(Long id);
 
-    // Find staff by expertise
-    List<Staff> findByExpertiseIn(StaffRole expertise);
 
     // Find staff qualified for a specific service
     @Query("SELECT s FROM Staff s JOIN s.services srv WHERE srv.id = :serviceId")
