@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CutLab - Salon Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/toast.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        #profileWrapper:hover #profileDropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0);
+        }
+
+        .service-card:hover .service-overlay {
+            opacity: 1;
+        }
+
+        .category-pill.active {
+            background-color: #2563eb;
+            color: white;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 relative w-full overflow-x-hidden">
+
+    <!-- Abstract Background Blobs -->
+    <div
+        class="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
+    </div>
+    <div
+        class="absolute top-0 right-0 w-96 h-96 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
+    </div>
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                    Cut<span class="text-blue-600">Lab</span>
+                </a>
+
+                <!-- Search Bar -->
+                <div class="hidden md:flex items-center flex-1 max-w-xl mx-8">
+                    <div class="relative flex-1">
+                        <input type="text" id="serviceSearch" placeholder="Search services (e.g. Haircut)..."
+                            class="w-full px-6 py-3 rounded-full border border-slate-200 focus:border-blue-400 focus:outline-none transition-all shadow-sm" />
+                        <svg class="absolute right-4 top-3.5 text-slate-400" width="20" height="20" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="product.html" class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">
+                        Shop
+                    </a>
+                    <a href="reviews.html" class="text-slate-700 hover:text-indigo-600 font-medium transition-colors">
+                        Review
+                    </a>
+                </div>
+
+                <!-- Auth & Profile -->
+                <div class="flex items-center gap-6">
+                    <!-- Cart with Badge -->
+                    <div class="relative">
+                        <div id="cartBtn"
+                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+
+                        </div>
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold 
+                            rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </div>
+
+                    <!-- notification -->
+                    <div class="relative">
+                        <div id="notificationBtn"
+                            class="text-slate-700 p-3 flex items-center justify-center cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                        </div>
+
+                        <span id="notificationCount" class="absolute -top-1 -right-1 hidden h-5 w-5">
+                            <span id="notifPing"
+                                class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span
+                                class="notif-count-text relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-red-500 text-white text-xs font-semibold shadow-lg ring-2 ring-white">0</span>
+                        </span>
+
+                        <div id="notificationDropdown"
+                            class="absolute left-1/2 -translate-x-1/2 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
+                            <div
+                                class="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                                <span class="font-bold text-slate-800 text-base">Notifications</span>
+                                <button id="markAllReadBtn"
+                                    class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Mark
+                                    all read</button>
+                            </div>
+                            <div id="notificationItemsList" class="max-h-[400px] overflow-y-auto"></div>
+                            <a href="notification.html"
+                                class="block py-4 text-center text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-t border-slate-50">View
+                                All Notifications</a>
+                        </div>
+                    </div>
+
+
+                    <!-- Profile Wrapper -->
+                    <div id="profileWrapper" class="relative">
+                        <!-- Profile Icon -->
+                        <a href="profile.html" class="flex items-center justify-center text-slate-700
+                                hover:text-indigo-600 transition-transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                        3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                        a7.5 7.5 0 0 1 14.998 0A17.933
+                                        17.933 0 0 1 12 21.75c-2.676
+                                        0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </a>
+
+                        <!-- Dropdown -->
+                        <div id="profileDropdown" class="absolute left-1/2 top-full mt-3 -translate-x-1/2
+                                min-w-[180px] bg-white rounded-2xl shadow-xl border
+                                opacity-0 invisible translate-y-1
+                                transition-all duration-200">
+
+                            <a href="profile.html" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-700
+                                    hover:bg-slate-100 rounded-t-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+                                            3.75 3.75 0 0 1 7.5 0ZM4.501 20.118
+                                            a7.5 7.5 0 0 1 14.998 0" />
+                                </svg>
+                                View Profile
+                            </a>
+
+                            <div class="h-px bg-slate-100"></div>
+
+                            <button id="logoutBtn" class="flex items-center gap-3 w-full px-5 py-3 text-sm text-left
+                                    text-red-600 hover:bg-red-50 rounded-b-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0
+                                            13.5 3h-6A2.25 2.25 0 0 0
+                                            5.25 5.25v13.5A2.25 2.25 0 0 0
+                                            7.5 21h6a2.25 2.25 0 0 0
+                                            2.25-2.25V15
+                                            M18 12H9
+                                            M14 8l4 4-4 4" />
+                                </svg>
+                                Logout
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button id="loginBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600
+                            text-white px-4 py-2 text-sm rounded-full font-medium
+                            hover:shadow-md transition-all hover:scale-105">
+                        Login
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Sidebar / Categories -->
+            <aside class="w-full md:w-64 flex-shrink-0">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-28">
+                    <h2 class="text-xl font-bold text-slate-800 mb-6">Categories</h2>
+                    <ul class="space-y-2" id="categoryList">
+                        <li>
+                            <button
+                                class="category-pill active w-full text-left px-4 py-3 rounded-xl transition-all font-medium"
+                                data-category="all">
+                                All Services
+                            </button>
+                        </li>
+                        <!-- Categories dynamically loaded -->
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <section class="flex-1">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 id="pageTitle" class="text-2xl font-bold text-slate-800">Explore Our Services</h1>
+                    <div class="text-sm text-slate-500 font-medium"><span id="serviceCount">0</span> services found
+                    </div>
+                </div>
+
+                <!-- Service Grid -->
+                <div id="serviceGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Skeletons / Loading state -->
+                    <div class="animate-pulse bg-white rounded-2xl h-80 shadow-sm"></div>
+                    <div class="animate-pulse bg-white rounded-2xl h-80 shadow-sm"></div>
+                    <div class="animate-pulse bg-white rounded-2xl h-80 shadow-sm"></div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden py-20 text-center">
+                    <img src="https://cdni.iconscout.com/illustration/premium/thumb/empty-state-2130362-1800926.png"
+                        class="w-48 mx-auto mb-6 opacity-30" alt="No services">
+                    <h3 class="text-xl font-bold text-slate-700">No services found</h3>
+                    <p class="text-slate-500">Try adjusting your search or category filter</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+
+
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[110]"></div>
+
+    <!-- Scripts -->
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/auth/authService.js"></script>
+    <script src="/assets/js/notification/notificationService.js"></script>
+    <script src="/assets/js/service/serviceService.js"></script>
+
+    <script src="/assets/js/navbar.js"></script>
+    <script src="/assets/js/service/service.js"></script>
+    <script src="/assets/js/notification/notification.js"></script>
+</body>
+
+</html>
