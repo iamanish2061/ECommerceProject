@@ -1,17 +1,20 @@
 package com.ecommerce.controller.admin;
 
+import com.ecommerce.dto.request.service.AssignStaffToServiceRequest;
 import com.ecommerce.dto.request.service.ServiceCreateRequest;
 import com.ecommerce.dto.request.service.ServiceUpdateRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.service.ServiceDetailResponse;
 import com.ecommerce.dto.response.service.ServiceListResponse;
+import com.ecommerce.dto.response.service.ServiceNameAndIdResponse;
+import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
 import com.ecommerce.service.salon.SalonServiceService;
 import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,10 +25,16 @@ import java.util.List;
 @RequestMapping("/api/admin/services")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+//@PreAuthorize("hasRole('ADMIN')")
 public class AdminServiceController {
 
     private final SalonServiceService salonServiceService;
+
+    @GetMapping("/name-and-id")
+    @Operation(summary = "to fetch name and id of staff for dropdown in adding staff to specific service form")
+    public ResponseEntity<ApiResponse<List<ServiceNameAndIdResponse>>> getNameAndIdOfServices(){
+        return ResponseEntity.ok(ApiResponse.ok(salonServiceService.getNameAndIdOfServices(), "Fetched name and id of services"));
+    }
 
     @GetMapping
     @Operation(summary = "fetch all services to list on admin ui")
@@ -41,15 +50,6 @@ public class AdminServiceController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(salonServiceService.getServiceDetail(id), "Fetched detail of service : "+id));
-    }
-
-    @GetMapping("/search")
-    @Operation(summary = "to fetch searched services")
-    public ResponseEntity<ApiResponse<List<ServiceListResponse>>> searchServices(
-            @RequestParam String query
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(salonServiceService.searchServicesAdmin(query), "Fetched searched service successfully"));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -81,26 +81,6 @@ public class AdminServiceController {
         return ResponseEntity.ok(ApiResponse.ok("Toggled Successfully"));
     }
 
-    @PostMapping("/{id}/staff/{staffId}")
-    @Operation(summary = "to assign staff to service")
-    public ResponseEntity<ApiResponse<?>> assignStaffToService(
-            @ValidId @PathVariable Long id,
-            @ValidId @PathVariable Long staffId
-    ) {
-        salonServiceService.assignStaffToService(id, staffId);
-        return ResponseEntity.ok(ApiResponse.ok("Staff assigned to service successfully"));
-    }
-
-    @DeleteMapping("/{id}/staff/{staffId}")
-    @Operation(summary = "to remove staff from that service")
-    public ResponseEntity<ApiResponse<?>> removeStaffFromService(
-            @ValidId @PathVariable Long id,
-            @ValidId @PathVariable Long staffId
-    ) {
-        salonServiceService.removeStaffFromService(id, staffId);
-        return ResponseEntity.ok(ApiResponse.ok("Staff removed from service"));
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> deleteService(
             @ValidId @PathVariable Long id
@@ -108,4 +88,15 @@ public class AdminServiceController {
         salonServiceService.deleteService(id);
         return ResponseEntity.ok(ApiResponse.ok("Service deleted successfully"));
     }
+
+    @PostMapping("/assign-staff/{serviceId}")
+    @Operation(summary = "assign staff to the any service")
+    public ResponseEntity<ApiResponse<?>> assignStaffToService(
+            @ValidId @PathVariable Long serviceId,
+            @Valid @RequestBody AssignStaffToServiceRequest request
+    ){
+        salonServiceService.assignStaffToService(serviceId, request);
+        return ResponseEntity.ok(ApiResponse.ok("Successfully added staff in service: "+serviceId));
+    }
+
 }

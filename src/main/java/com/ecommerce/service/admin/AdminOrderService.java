@@ -105,23 +105,6 @@ public class AdminOrderService {
         return Arrays.asList("PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED", "INSTORE_COMPLETED");
     }
 
-    public UserOrderResponse getDetailsOfOrderForUserProfile(Long orderId) {
-        OrderModel order = orderRepository.findOrderOfUserInDetail(orderId)
-                .orElseThrow(()-> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
-
-        return new UserOrderResponse(
-                order.getId(),
-                order.getTotalAmount(),
-                order.getStatus(),
-                order.getCreatedAt(),
-                order.getOrderItems().stream()
-                        .map(orderMapper::mapEntityToOrderItemResponse).toList(),
-                addressMapper.mapEntityToAddressResponse(order.getAddress()),
-                paymentMapper.mapEntityToPaymentResponse(order.getPayment()),
-                order.getPhoneNumber()
-        );
-    }
-
     public SingleOrderResponse getDetailOfOrder(Long orderId) {
         OrderModel order = orderRepository.findDetailsOfOrderById(orderId)
                 .orElseThrow(()->new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
@@ -148,6 +131,31 @@ public class AdminOrderService {
 
         orderModel.setStatus(status);
         orderRepository.save(orderModel);
+    }
+
+
+//    for admin user page
+    public List<OrderResponse> getOrdersOf(Long userId){
+        return orderRepository.findByUserId(userId).stream()
+                .map(o-> orderMapper.mapEntityToOrderResponse(o, o.getUser().getUsername()))
+                .toList();
+    }
+
+    public UserOrderResponse getDetailsOfOrderForUserProfile(Long orderId) {
+        OrderModel order = orderRepository.findOrderOfUserInDetail(orderId)
+                .orElseThrow(()-> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        return new UserOrderResponse(
+                order.getId(),
+                order.getTotalAmount(),
+                order.getStatus(),
+                order.getCreatedAt(),
+                order.getOrderItems().stream()
+                        .map(orderMapper::mapEntityToOrderItemResponse).toList(),
+                addressMapper.mapEntityToAddressResponse(order.getAddress()),
+                paymentMapper.mapEntityToPaymentResponse(order.getPayment()),
+                order.getPhoneNumber()
+        );
     }
 
 }

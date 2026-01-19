@@ -64,15 +64,6 @@ public class AdminOrderController {
         );
     }
 
-    @GetMapping("/{orderId}/user-profile")
-    @Operation(summary = "get detail of order that admin clicks from the list of orders in user profile")
-    public ResponseEntity<ApiResponse<UserOrderResponse>> getDetailOfOrder(
-            @ValidId @PathVariable Long orderId
-    ){
-        UserOrderResponse response = adminOrderService.getDetailsOfOrderForUserProfile(orderId);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Detail of order: "+orderId));
-    }
-
     //    detail of particular order
     @GetMapping("/{orderId}")
     @Operation(summary = "to fetch detailed information of any order")
@@ -98,6 +89,22 @@ public class AdminOrderController {
         );
     }
 
+//    ----- for admin - manage-specific-user.html page to list orders there -----
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "to fetch list of orders in user page of admin")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersOf(
+            @ValidId @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(adminOrderService.getOrdersOf(userId), "Fetched order list of user: "+userId));
+    }
 
+    @GetMapping("/{orderId}/user-profile")
+    @Operation(summary = "get detail of order that admin clicks from the list of orders in user profile")
+    public ResponseEntity<ApiResponse<UserOrderResponse>> getDetailOfOrder(
+            @ValidId @PathVariable Long orderId
+    ){
+        UserOrderResponse response = adminOrderService.getDetailsOfOrderForUserProfile(orderId);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Detail of order: "+orderId));
+    }
 
 }

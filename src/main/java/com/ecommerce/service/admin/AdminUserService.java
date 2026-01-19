@@ -5,7 +5,6 @@ import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.dto.response.user.DetailedUser;
 import com.ecommerce.dto.response.user.DetailedUserResponse;
 import com.ecommerce.dto.response.user.DriverInfoResponse;
-import com.ecommerce.dto.response.user.StaffInfoResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.address.AddressMapper;
 import com.ecommerce.mapper.user.UserMapper;
@@ -13,7 +12,10 @@ import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
-import com.ecommerce.model.user.*;
+import com.ecommerce.model.user.Driver;
+import com.ecommerce.model.user.Role;
+import com.ecommerce.model.user.UserModel;
+import com.ecommerce.model.user.UserStatus;
 import com.ecommerce.rabbitmq.producer.NotificationProducer;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.address.AddressRepository;
@@ -28,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,13 +98,6 @@ public class AdminUserService {
                 .orElseThrow(()->
                         new ApplicationException("Details not found!", "DETAILS_NOT_FOUND", HttpStatus.NOT_FOUND));
         return userMapper.mapEntityToDriverInfoResponse(driver);
-    }
-
-    public StaffInfoResponse getStaffInformation(Long id) {
-        Staff staff = staffRepository.findStaffDetailWithLeaveInfoById(id)
-                .orElseThrow(()-> new ApplicationException("Details not found!", "DETAILS_NOT_FOUND", HttpStatus.NOT_FOUND));
-        staff.getStaffLeave().removeIf(leave-> leave.getLeaveDate().isBefore(LocalDate.now()));
-        return userMapper.mapEntityToStaffInfoResponse(staff);
     }
 
     public void assignDeliveryToDriver(Long driverId) {

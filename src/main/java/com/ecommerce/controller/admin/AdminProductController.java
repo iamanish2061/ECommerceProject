@@ -9,6 +9,7 @@ import com.ecommerce.service.admin.AdminProductService;
 import com.ecommerce.validation.ValidId;
 import com.ecommerce.validation.ValidPrice;
 import com.ecommerce.validation.ValidQuantity;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,9 +30,16 @@ public class AdminProductController {
 
     private final AdminProductService adminProductService;
 
-//    --------main page maa huney operations haru-----------
-//    for adding brand : format form maa xa mero desktop ko
+    //    get product name and id for putting in dropdown to sell product in store
+    @GetMapping("/id-and-name")
+    @Operation(summary = "to fetch id and name of product for selling product instore (form maa use hunxa)")
+    public ResponseEntity<ApiResponse<List<NameAndIdResponse>>> getNameAndIdOfAllProducts(){
+        List<NameAndIdResponse> response = adminProductService.getNameAndIdOfAllProducts();
+        return ResponseEntity.ok(ApiResponse.ok(response, "Fetched name and if of products successfully"));
+    }
+
     @PostMapping(value = "/brand", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "to add brand from admin side")
     public ResponseEntity<ApiResponse<?>> addBrand(
             @Valid @RequestPart("addBrandRequest") BrandRequest brandRequest,
             @RequestPart("logo") MultipartFile logo
@@ -42,6 +50,7 @@ public class AdminProductController {
 
 //    for adding category
     @PostMapping(value = "/category", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "to add category from admin side")
     public ResponseEntity<ApiResponse<?>> addCategory(
             @Valid @RequestPart("addCategoryRequest")CategoryRequest addCategoryRequest,
             @RequestPart("image") MultipartFile image
@@ -52,6 +61,7 @@ public class AdminProductController {
 
 //    for adding tags
     @PostMapping("/tags")
+    @Operation(summary = "to add tag from admin side")
     public ResponseEntity<ApiResponse<String>> addTag(
             @Valid @RequestBody TagRequest tagRequest
     ){
@@ -62,6 +72,7 @@ public class AdminProductController {
 
     // send brand and category slug ---for adding product
     @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "to add new product from admin side")
     public ResponseEntity<ApiResponse<SingleProductWithCostPriceResponse>> addNewProduct(
             @Valid @RequestPart("addProductRequest") ProductRequest addProductRequest,
             @RequestPart("imageFiles") List<MultipartFile> imageFiles
@@ -75,6 +86,7 @@ public class AdminProductController {
 //    --------specific product detail page maa huney operations haru-----------
 //    for getting detail of specific product
     @GetMapping("/{id}")
+    @Operation(summary = "to get details of required product")
     public ResponseEntity<ApiResponse<SingleProductWithCostPriceResponse>> getAdminDetailOfProduct(
             @ValidId @PathVariable Long id
     ){
@@ -84,6 +96,7 @@ public class AdminProductController {
 
 //    for updating price of product
     @PutMapping("/{id}/price")
+    @Operation(summary = "to update price of specific product")
     public ResponseEntity<ApiResponse<?>> updateProductPrice(
             @ValidId @PathVariable Long id,
             @ValidPrice @RequestParam BigDecimal price
@@ -94,6 +107,7 @@ public class AdminProductController {
 
 //    for updating quantity/stock of product
     @PutMapping("/{id}/quantity")
+    @Operation(summary = "to update stock of specific product")
     public ResponseEntity<ApiResponse<?>> updateProductQuantity(
             @ValidId @PathVariable Long id,
             @ValidQuantity @RequestParam int quantity
@@ -103,9 +117,8 @@ public class AdminProductController {
     }
 
 //    for adding tags to specific product
-//    like offer tag, discount tag
-//    checkbox bata tag select garney and list banayera pathaune (checking if the product already has that tag frintend mai )
     @PutMapping("/add-tag-to-product/{productId}")
+    @Operation(summary = "to add existing tags to specific product")
     public ResponseEntity<ApiResponse<?>> addTagToProduct(
             @RequestBody TagOperationRequest request,
             @ValidId
@@ -119,8 +132,8 @@ public class AdminProductController {
 
 //    for removing tag from specific product
 //    like offer tag, discount tag
-//    checkbox bata tag select garney and list banayera pathaune (checking if the product already has that tag frintend mai )
     @PutMapping("/remove-tag-from-product/{productId}")
+    @Operation(summary = "to remove tag from specific product")
     public ResponseEntity<ApiResponse<?>> removeTagFromProduct(
             @RequestBody TagOperationRequest request,
             @ValidId
@@ -134,6 +147,7 @@ public class AdminProductController {
 
 //    update short description
     @PutMapping("/update-short-description/{productId}")
+    @Operation(summary = "to update short description of specific product")
     public ResponseEntity<ApiResponse<?>> updateShortDescription(
             @RequestBody ShortDescriptionRequest request,
             @ValidId
@@ -147,6 +161,7 @@ public class AdminProductController {
 
 //    update long description
     @PutMapping("/update-long-description/{productId}")
+    @Operation(summary = "to update long description of specific product")
     public ResponseEntity<ApiResponse<?>> updateLongDescription(
             @RequestBody LongDescriptionRequest request,
             @ValidId
@@ -156,13 +171,6 @@ public class AdminProductController {
         return ResponseEntity.ok(
                 ApiResponse.ok("Long description updated successfully.")
         );
-    }
-
-//    get product name and id for putting in dropdown to sell product in store
-    @GetMapping("/id-and-name")
-    public ResponseEntity<ApiResponse<List<NameAndIdResponse>>> getNameAndIdOfAllProducts(){
-        List<NameAndIdResponse> response = adminProductService.getNameAndIdOfAllProducts();
-        return ResponseEntity.ok(ApiResponse.ok(response, "Fetched name and if of products successfully"));
     }
 
 
