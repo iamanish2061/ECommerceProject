@@ -2,6 +2,9 @@ package com.ecommerce.repository.service;
 
 import com.ecommerce.model.service.StaffWorkingHours;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
@@ -18,7 +21,9 @@ public interface StaffWorkingHoursRepository extends JpaRepository<StaffWorkingH
     Optional<StaffWorkingHours> findByStaffIdAndDayOfWeek(Long staffId, DayOfWeek dayOfWeek);
 
     // Delete all working hours for a staff (for bulk update)
-    void deleteByStaffId(Long staffId);
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from StaffWorkingHours s where s.staff.id = :staffId")
+    void deleteByStaffId(@Param("staffId") Long staffId);
 
     // Check if staff works on a specific day
     boolean existsByStaffIdAndDayOfWeekAndIsWorkingDayTrue(Long staffId, DayOfWeek dayOfWeek);

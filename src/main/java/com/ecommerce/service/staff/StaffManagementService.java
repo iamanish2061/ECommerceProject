@@ -6,6 +6,7 @@ import com.ecommerce.dto.request.staff.WorkingHoursRequest;
 import com.ecommerce.dto.response.service.ServiceSummaryResponse;
 import com.ecommerce.dto.response.service.StaffDetailResponse;
 import com.ecommerce.dto.response.staff.LeaveSummaryResponse;
+import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
 import com.ecommerce.dto.response.staff.StaffListResponse;
 import com.ecommerce.dto.response.staff.WorkingHourResponse;
 import com.ecommerce.exception.ApplicationException;
@@ -18,6 +19,7 @@ import com.ecommerce.model.service.StaffLeave;
 import com.ecommerce.model.service.StaffWorkingHours;
 import com.ecommerce.model.user.Role;
 import com.ecommerce.model.user.Staff;
+import com.ecommerce.model.user.StaffRole;
 import com.ecommerce.model.user.UserModel;
 import com.ecommerce.repository.service.AppointmentRepository;
 import com.ecommerce.repository.service.ServiceRepository;
@@ -53,16 +55,28 @@ public class StaffManagementService {
     private final LeaveMapper leaveMapper;
 
     // ==================== List Methods ====================
+    public List<StaffRole> getExpertFieldList() {
+        return List.of(
+                StaffRole.BARBER,
+                StaffRole.BEAUTICIAN,
+                StaffRole.COLORIST,
+                StaffRole.HAIR_STYLIST,
+                StaffRole.RECEPTIONIST,
+                StaffRole.NAIL_TECHNICIAN,
+                StaffRole.THERAPIST,
+                StaffRole.MAKEUP_ARTIST
+        );
+    }
+
+    public List<NameAndIdOfStaffResponse> getNameAndIdOfStaff() {
+        return staffRepository.findAllByOrderByIdDesc().stream().map(
+                s-> new NameAndIdOfStaffResponse(s.getId(), s.getUser().getFullName())
+        ).toList();
+    }
 
     public List<StaffListResponse> getAllStaff() {
         List<Staff> staff =  staffRepository.findAllByOrderByIdDesc();
         return staff.stream()
-                .map(s-> staffMapper.mapEntityToStaffListResponse(s, s.getServices().size()))
-                .toList();
-    }
-
-    public List<StaffListResponse> searchStaff(String query) {
-        return staffRepository.searchByName(query).stream()
                 .map(s-> staffMapper.mapEntityToStaffListResponse(s, s.getServices().size()))
                 .toList();
     }
@@ -151,16 +165,21 @@ public class StaffManagementService {
                 .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
 
         workingHoursRepository.deleteByStaffId(staffId);
+        System.out.println("hello success");
 
-        for (WorkingHoursRequest schedule : requests) {
-            StaffWorkingHours hours = new StaffWorkingHours();
-            hours.setStaff(staff);
-            hours.setDayOfWeek(schedule.dayOfWeek());
-            hours.setStartTime(schedule.startTime());
-            hours.setEndTime(schedule.endTime());
-            hours.setWorkingDay(schedule.isWorkingDay());
-            workingHoursRepository.save(hours);
-        }
+        List<StaffWorkingHours> hoursList = requests.stream()
+                .map(schedule -> {
+                    StaffWorkingHours hours = new StaffWorkingHours();
+                    hours.setStaff(staff);
+                    hours.setDayOfWeek(schedule.dayOfWeek());
+                    hours.setStartTime(schedule.startTime());
+                    hours.setEndTime(schedule.endTime());
+                    hours.setWorkingDay(schedule.isWorkingDay());
+                    return hours;
+                })
+                .toList();
+
+        workingHoursRepository.saveAll(hoursList);
     }
 
 
@@ -212,4 +231,6 @@ public class StaffManagementService {
         staff.removeService(service);
         staffRepository.save(staff);
     }
+
+
 }

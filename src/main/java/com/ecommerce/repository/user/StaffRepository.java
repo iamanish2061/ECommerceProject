@@ -21,7 +21,7 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
     @EntityGraph(value = "Staff.user.services", type = EntityGraph.EntityGraphType.FETCH)
     List<Staff> findAllByOrderByIdDesc();
 
-    // Get staff by user ID
+        // Get staff by user ID
     Optional<Staff> findByUserId(Long userId);
 
     // Get staff with user and service details

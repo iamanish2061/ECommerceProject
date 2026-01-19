@@ -1,9 +1,11 @@
 package com.ecommerce.service.salon;
 
+import com.ecommerce.dto.request.service.AssignStaffToServiceRequest;
 import com.ecommerce.dto.request.service.ServiceCreateRequest;
 import com.ecommerce.dto.request.service.ServiceUpdateRequest;
 import com.ecommerce.dto.response.service.ServiceDetailResponse;
 import com.ecommerce.dto.response.service.ServiceListResponse;
+import com.ecommerce.dto.response.service.ServiceNameAndIdResponse;
 import com.ecommerce.dto.response.staff.StaffSummaryResponse;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.service.ServiceMapper;
@@ -67,14 +69,14 @@ public class SalonServiceService {
 
 
 //    Admin Methods
-    public List<ServiceListResponse> getAllServicesAdmin() {
-        return serviceRepository.findAllByOrderByIdDesc().stream()
-                .map(serviceMapper::mapEntityToServiceListResponse)
+    public List<ServiceNameAndIdResponse> getNameAndIdOfServices() {
+        return serviceRepository.findAll().stream()
+                .map(s-> new ServiceNameAndIdResponse(s.getId(), s.getName()))
                 .toList();
     }
 
-    public List<ServiceListResponse> searchServicesAdmin(String query) {
-        return serviceRepository.findByNameContainingIgnoreCase(query).stream()
+    public List<ServiceListResponse> getAllServicesAdmin() {
+        return serviceRepository.findAllByOrderByIdDesc().stream()
                 .map(serviceMapper::mapEntityToServiceListResponse)
                 .toList();
     }
@@ -129,33 +131,24 @@ public class SalonServiceService {
     }
 
     @Transactional
-    public void assignStaffToService(Long serviceId, Long staffId) {
-        ServiceModel service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new ApplicationException("Service not found with id: " + serviceId, "NOT_FOUND", HttpStatus.NOT_FOUND));
-        Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
-
-        staff.addService(service);
-        staffRepository.save(staff);
-    }
-
-    @Transactional
-    public void removeStaffFromService(Long serviceId, Long staffId) {
-        ServiceModel service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new ApplicationException("Service not found with id: " + serviceId, "NOT_FOUND", HttpStatus.NOT_FOUND));
-        Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
-
-        staff.removeService(service);
-        staffRepository.save(staff);
-    }
-
-    @Transactional
     public void deleteService(Long id) {
         if (!serviceRepository.existsById(id)) {
             throw new ApplicationException("Service not found with id: " + id, "NOT_FOUND", HttpStatus.NOT_FOUND);
         }
         serviceRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void assignStaffToService(Long serviceId, AssignStaffToServiceRequest request) {
+        ServiceModel service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new ApplicationException("Service not found with id: " + serviceId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+        request.staffIds().forEach(id->{
+                    Staff staff = staffRepository.findById(id)
+                            .orElseThrow(() -> new ApplicationException("Staff not found with id: " + id, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                    staff.addService(service);
+                    staffRepository.save(staff);
+                }
+        );
     }
 
 }

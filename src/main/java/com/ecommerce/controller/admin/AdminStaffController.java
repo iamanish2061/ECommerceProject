@@ -5,50 +5,31 @@ import com.ecommerce.dto.request.staff.StaffLeaveRequest;
 import com.ecommerce.dto.request.staff.WorkingHoursRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.service.StaffDetailResponse;
+import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
 import com.ecommerce.dto.response.staff.StaffListResponse;
+import com.ecommerce.model.user.StaffRole;
 import com.ecommerce.service.staff.StaffManagementService;
 import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/admin/staff")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 @Validated
 public class AdminStaffController {
 
     private final StaffManagementService staffManagementService;
 
-    @GetMapping
-    @Operation(summary = "to fetch all staff to list in admin ui")
-    public ResponseEntity<ApiResponse<List<StaffListResponse>>> getAllStaff() {
-        return ResponseEntity.ok(
-                ApiResponse.ok(staffManagementService.getAllStaff(), "Fetched staff successfully"));
-    }
-
-    @GetMapping("/search")
-    @Operation(summary = "to fetch searched staff")
-    public ResponseEntity<ApiResponse<List<StaffListResponse>>> searchStaff(
-            @RequestParam String query
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(staffManagementService.searchStaff(query), "Fetched searched staff successfully"));
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "to get detail of staff")
-    public ResponseEntity<ApiResponse<StaffDetailResponse>> getStaffDetail(
-            @ValidId @PathVariable Long id
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.ok(staffManagementService.getStaffDetail(id), "Fetched detail of staff: "+id));
+//    used in specific-user-html to add user a expert role
+    @GetMapping("/expert-list")
+    @Operation(summary = "to get the list of expert fields")
+    public ResponseEntity<ApiResponse<List<StaffRole>>> getExpertFieldList(){
+        return ResponseEntity.ok(ApiResponse.ok(staffManagementService.getExpertFieldList(), "Fetched the list of expert field"));
     }
 
     @PostMapping("/assign")
@@ -60,6 +41,30 @@ public class AdminStaffController {
         return ResponseEntity.ok(ApiResponse.ok("Role assigned successfully"));
     }
 
+//    used in service.html of admin to add staff as checkbox
+    @GetMapping("/name-and-id")
+    @Operation(summary = "to fetch name and id of staff for dropdown in adding staff to specific service form")
+    public ResponseEntity<ApiResponse<List<NameAndIdOfStaffResponse>>> getNameAndIdOfStaff(){
+        return ResponseEntity.ok(ApiResponse.ok(staffManagementService.getNameAndIdOfStaff(), "Fetched name and id of staff"));
+    }
+
+//    for staff page
+    @GetMapping
+    @Operation(summary = "to fetch all staff to list in admin ui")
+    public ResponseEntity<ApiResponse<List<StaffListResponse>>> getAllStaff() {
+        return ResponseEntity.ok(
+                ApiResponse.ok(staffManagementService.getAllStaff(), "Fetched staff successfully"));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "to get detail of staff")
+    public ResponseEntity<ApiResponse<StaffDetailResponse>> getStaffDetail(
+            @ValidId @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(staffManagementService.getStaffDetail(id), "Fetched detail of staff: "+id));
+    }
+
     @PostMapping("/{id}/working-hours")
     @Operation(summary = "to add working hour of each day")
     public ResponseEntity<ApiResponse<?>> setWorkingHours(
@@ -68,26 +73,6 @@ public class AdminStaffController {
     ) {
         staffManagementService.setWorkingHours(id, requests);
         return ResponseEntity.ok(ApiResponse.ok("Working hour set successfully"));
-    }
-
-    @PostMapping("/{id}/leave")
-    @Operation(summary = "to add staff leave after approval")
-    public ResponseEntity<ApiResponse<?>> addStaffLeave(
-            @ValidId @PathVariable Long id,
-            @RequestBody StaffLeaveRequest request
-    ) {
-        staffManagementService.addStaffLeave(id, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{id}/leave/{leaveId}")
-    @Operation(summary = "to remove staff leave")
-    public ResponseEntity<ApiResponse<?>> removeStaffLeave(
-            @ValidId @PathVariable Long id,
-            @ValidId @PathVariable Long leaveId
-    ) {
-        staffManagementService.removeStaffLeave(id, leaveId);
-        return ResponseEntity.ok(ApiResponse.ok("Leave removed successfully"));
     }
 
     @PostMapping("/{id}/services")
@@ -108,5 +93,29 @@ public class AdminStaffController {
     ) {
         staffManagementService.removeServiceFromStaff(id, serviceId);
         return ResponseEntity.ok(ApiResponse.ok("Service assignment removed from staff"));
+    }
+
+
+
+
+// for dashboard as admin handles the submitted form
+    @PostMapping("/{id}/leave")
+    @Operation(summary = "to add staff leave after approval")
+    public ResponseEntity<ApiResponse<?>> addStaffLeave(
+            @ValidId @PathVariable Long id,
+            @RequestBody StaffLeaveRequest request
+    ) {
+        staffManagementService.addStaffLeave(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/leave/{leaveId}")
+    @Operation(summary = "to remove staff leave")
+    public ResponseEntity<ApiResponse<?>> removeStaffLeave(
+            @ValidId @PathVariable Long id,
+            @ValidId @PathVariable Long leaveId
+    ) {
+        staffManagementService.removeStaffLeave(id, leaveId);
+        return ResponseEntity.ok(ApiResponse.ok("Leave removed successfully"));
     }
 }
