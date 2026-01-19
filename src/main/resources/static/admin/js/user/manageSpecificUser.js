@@ -1,18 +1,3 @@
-function showToast(message, type = "info", duration = 1500) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}
-
 const SpecificUserUI = {
     openModal: (modalId) => {
         const modal = document.getElementById(modalId);
@@ -123,7 +108,8 @@ const SpecificUserUI = {
                 </table>
             </div>
          `;
-    }
+    },
+
 };
 
 const SpecificUserManager = {
@@ -147,7 +133,7 @@ const SpecificUserManager = {
         logoutBtn?.addEventListener('click', this.handleLogout);
         await this.loadUserDetails();
         this.setupForms();
-        
+
     },
 
     async handleLogout() {
@@ -260,12 +246,12 @@ const SpecificUserManager = {
         if (role === 'ROLE_USER') {
             buttons.push({ label: 'Show User Orders', action: 'SpecificUserManager.showOrders()', color: 'bg-indigo-600 text-white' });
             buttons.push({ label: 'Show User Appointments', action: 'SpecificUserManager.showAppointments()', color: 'bg-indigo-600 text-white' });
+            buttons.push({ label: 'Assign Staff', action: 'SpecificUserManager.openAssignStaffModal()', color: 'bg-green-600 text-white' });
         } else if (role === 'ROLE_DRIVER') {
             buttons.push({ label: 'Show Driver Info', action: 'SpecificUserManager.showDriverInfo()', color: 'bg-indigo-600 text-white' });
             buttons.push({ label: 'Assign Delivery', action: `SpecificUserUI.openModal('assignDriverModal')`, color: 'bg-green-600 text-white' });
         } else if (role === 'ROLE_STAFF') {
-            buttons.push({ label: 'View Staff Info', action: 'SpecificUserManager.showStaffInfo()', color: 'bg-indigo-600 text-white' });
-            buttons.push({ label: 'View Staff Appointment', action: 'SpecificUserManager.showAppointments()', color: 'bg-indigo-600 text-white' });
+            this.showDynamicContent("Staff Details", "<p>Please see staff tab for info</p>");
         }
 
         container.innerHTML = buttons.map(b => `
@@ -478,16 +464,41 @@ const SpecificUserManager = {
         } catch (e) { showToast("Failed to fetch driver info", "error"); }
     },
 
-    async showStaffInfo() {
-        showToast("Fetching Staff Info...");
+    async openAssignStaffModal() {
+        showToast("Loading and expertise and services...");
         try {
-            const res = await UserService.getStaffInfo(this.userId);
-            if (res.success) {
-                this.showDynamicContent('Staff Information', SpecificUserUI.renderInfoCard('Staff Profile', res.data));
-            } else {
-                showToast(res.message, "error");
+            const [roleRes, serviceRes] = await Promise.all([
+                UserService.getExpertFieldList(),
+                UserService.getIdAndNameOfServices()
+            ]);
+
+            if (!roleRes.success || !serviceRes.success) {
+                showToast("Failed to load required data", "error");
+                return;
             }
-        } catch (e) { showToast("Failed to fetch staff info", "error"); }
+
+            const expertiseSelect = document.querySelector('#assignStaffForm select[name="expertiseIn"]');
+            const servicesChecklist = document.getElementById('servicesChecklist');
+
+            // Populate Expertise
+            expertiseSelect.innerHTML = '<option value="" disabled selected>Select expertise...</option>' +
+                roleRes.data.map(role => `<option value="${role}">${role}</option>`).join('');
+
+            // Populate Services
+            servicesChecklist.innerHTML = serviceRes.data.map(s => `
+                <label class="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all">
+                    <input type="checkbox" name="serviceIds" value="${s.id}" class="w-4 h-4 text-indigo-600 rounded">
+                    <span class="text-sm font-medium text-slate-700">${s.name}</span>
+                </label>
+            `).join('');
+
+            document.querySelector('#assignStaffForm input[name="userId"]').value = this.userId;
+            SpecificUserUI.openModal('assignStaffModal');
+
+        } catch (e) {
+            console.error(e);
+            showToast("Error preparing assignment form", "error");
+        }
     },
 
     setupForms() {
@@ -527,6 +538,32 @@ const SpecificUserManager = {
                 SpecificUserUI.closeModal('assignDriverModal');
             } else {
                 showToast(res.message || "Failed to assign delivery", "error");
+            }
+        });
+
+        document.getElementById('assignStaffForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showToast("Assigning staff role...", "info");
+            const formData = new FormData(e.target);
+            const serviceIds = Array.from(formData.getAll('serviceIds')).map(id => parseInt(id));
+
+            const payload = {
+                userId: parseInt(formData.get('userId')),
+                expertiseIn: formData.get('expertiseIn'),
+                serviceIds: serviceIds
+            };
+
+            try {
+                const res = await UserService.assignUserAsStaff(payload);
+                if (res.success) {
+                    showToast("User assigned as staff successfully", "success");
+                    SpecificUserUI.closeModal('assignStaffModal');
+                    this.loadUserDetails(); // Reload to reflect role change
+                } else {
+                    showToast(res.message, "error");
+                }
+            } catch (error) {
+                showToast("Failed to assign staff role", "error");
             }
         });
     }

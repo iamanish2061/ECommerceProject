@@ -1,6 +1,5 @@
 const ProductService = {
-    // --- Fetch Data ---
-
+    // ----- for manage-product.html -----
     async getAllBrands() {
         return request('/products/brand-details', 'GET');
     },
@@ -21,10 +20,7 @@ const ProductService = {
         return request('/admin/products/id-and-name', 'GET');
     },
 
-    // --- Add Data ---
-
     async addBrand(formData) {
-        // api.js handles FormData automatically (sets multipart if detected)
         return request('/admin/products/brand', 'POST', formData);
     },
 
@@ -40,13 +36,11 @@ const ProductService = {
         return request('/admin/products/', 'POST', formData);
     },
 
-    // --- Sell Products ---
-
     async sellProducts(sellRequestList) {
         return request('/admin/orders/sell-products', 'POST', sellRequestList);
     },
 
-    // --- Specific Product ---
+    // ----- for manage-specific-product.html -----
 
     async getProductDetails(id) {
         return request(`/admin/products/${id}`, 'GET');

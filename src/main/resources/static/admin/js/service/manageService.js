@@ -1,23 +1,3 @@
-/**
- * manageService.js - Admin service management logic
- * Refactored to match manageProduct.js structure
- */
-
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}
-
 const ServiceManager = {
     state: {
         services: [],
@@ -31,6 +11,7 @@ const ServiceManager = {
         await ServiceManager.loadAllData();
         ServiceManager.setupEventListeners();
         ServiceManager.setupCategoryToggles();
+        ServiceManager.setupAssignStaffListener();
     },
 
     handleLogout: async () => {
@@ -177,6 +158,13 @@ const ServiceManager = {
         });
     },
 
+    setupAssignStaffListener: () => {
+        const form = document.getElementById('assignStaffToServiceForm');
+        if (form) {
+            form.addEventListener('submit', ServiceManager.handleAssignStaffSubmit);
+        }
+    },
+
     setupCategoryToggles: () => {
         const selectContainer = document.getElementById('categorySelectContainer');
         const inputContainer = document.getElementById('categoryInputContainer');
@@ -255,6 +243,27 @@ const ServiceManager = {
                     document.getElementById('imagePlaceholder').classList.remove('hidden');
                 }
 
+                // Handle Specialists rendering
+                const specialistsSection = document.getElementById('specialistsSection');
+                const specialistsList = document.getElementById('serviceSpecialistsList');
+
+                if (data.specialists && data.specialists.length > 0) {
+                    specialistsSection.classList.remove('hidden');
+                    specialistsList.innerHTML = data.specialists.map(s => `
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm transition-all hover:border-indigo-100 group">
+                            <img src="${s.profileUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name)}" 
+                                class="w-10 h-10 rounded-full object-cover border border-gray-50" alt="${s.name}">
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-800">${s.name}</div>
+                                <div class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest">${s.expertiseIn.replace(/_/g, ' ')}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    specialistsSection.classList.add('hidden');
+                    specialistsList.innerHTML = '';
+                }
+
                 ServiceUI.openModal('addServiceModal');
             }
         } catch (error) {
@@ -266,7 +275,7 @@ const ServiceManager = {
     handleSaveService: async (e) => {
         e.preventDefault();
 
-        // Show loading info
+        showToast("Adding new service", "info");
         const btn = document.querySelector('button[form="newServiceForm"]');
         const originalText = btn.innerText;
         btn.disabled = true;
@@ -376,6 +385,76 @@ const ServiceManager = {
         } catch (error) {
             console.error(error);
         }
+    },
+
+    openAssignStaffModal: async () => {
+        showToast("Loading staff and services...", "info");
+        try {
+            const [staffRes, servicesRes] = await Promise.all([
+                ManageServiceService.getNameAndIdOfStaff(),
+                ManageServiceService.getAllServices() // Already have services in state, but ensuring fresh data if needed, or use state.
+            ]);
+
+            if (!staffRes.success) {
+                showToast("Failed to load staff list", "error");
+                return;
+            }
+
+            const staffChecklist = document.getElementById('staffChecklist');
+            const serviceSelect = document.querySelector('#assignStaffToServiceForm select[name="serviceId"]');
+
+            // Populate services dropdown
+            const services = ServiceManager.state.services;
+            serviceSelect.innerHTML = '<option value="" disabled selected>Select service...</option>' +
+                services.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+            // Populate staff checkboxes
+            staffChecklist.innerHTML = staffRes.data.map(staff => `
+                <label class="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all">
+                    <input type="checkbox" name="staffIds" value="${staff.id}" class="w-4 h-4 text-indigo-600 rounded">
+                    <div>
+                        <span class="text-sm font-bold text-slate-800">${staff.name}</span>
+                    </div>
+                </label>
+            `).join('');
+
+            ServiceUI.openModal('assignStaffToServiceModal');
+
+        } catch (error) {
+            console.error(error);
+            showToast("Error preparing assignment form", "error");
+        }
+    },
+
+    handleAssignStaffSubmit: async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const serviceId = formData.get('serviceId');
+        const staffIds = Array.from(formData.getAll('staffIds')).map(id => parseInt(id));
+
+        if (staffIds.length === 0) {
+            showToast("Please select at least one staff", "warning");
+            return;
+        }
+
+        const payload = {
+            staffIds: staffIds
+        };
+
+        showToast("Assigning staff...", "info");
+        try {
+            const res = await ManageServiceService.assignStaffToSpecificService(serviceId, payload);
+            if (res.success) {
+                showToast("Staff assigned successfully", "success");
+                ServiceUI.closeModal('assignStaffToServiceModal');
+                ServiceManager.loadAllData();
+            } else {
+                showToast(res.message, "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to assign staff", "error");
+        }
     }
 };
 
@@ -395,6 +474,9 @@ const ServiceUI = {
             // Reset Category UI to default (Select mode)
             document.getElementById('categoryInputContainer').classList.add('hidden');
             document.getElementById('categorySelectContainer').classList.remove('hidden');
+
+            // Hide specialists for new service
+            document.getElementById('specialistsSection').classList.add('hidden');
         }
     },
 
