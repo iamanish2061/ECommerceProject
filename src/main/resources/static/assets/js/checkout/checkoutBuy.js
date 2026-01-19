@@ -9,7 +9,7 @@ async function initCheckoutBuyPage() {
         // 1) load all brands for sidebar
         const [productResp, cartResp] = await Promise.all([
             checkoutService.getProductInfo(productId),
-            cartService.getCartCount()
+            checkoutService.getCartCount()
         ])
         productData = productResp.data;
         if (cartResp.success) {
@@ -75,21 +75,6 @@ const totalPriceEl = document.getElementById("totalPrice");
 
 
 const checkoutBtn = document.getElementById("checkoutButton");
-
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}
 
 // ===== ADDRESS TYPE (HOME / WORK) =====
 document.querySelectorAll("input[name='address_type']").forEach(radio => {

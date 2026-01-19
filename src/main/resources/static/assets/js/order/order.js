@@ -1,13 +1,53 @@
+// State management for orders page
+let state = {
+    orders: [],
+    cartCount: 0
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    initOrdersPage();
+    init();
 });
 
-async function initOrdersPage() {
+// Initialize the page
+async function init() {
     try {
-        await renderOrderHistory();
-    } catch (err) {
-        console.error('Error initializing orders page:', err);
-        showToast("Failed to load orders", "error");
+        // Show loading state
+        const container = document.getElementById('ordersList');
+        if (container) {
+            container.innerHTML = `
+                <div class="flex items-center justify-center py-20">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p class="text-slate-500 ml-4 font-medium">Loading your orders...</p>
+                </div>
+            `;
+        }
+
+        const [ordersRes, cartRes] = await Promise.all([
+            orderService.getOrderHistory(),
+            productService.getCartCount()
+        ]);
+
+        if (ordersRes.success) {
+            state.orders = ordersRes.data || [];
+        }
+
+        if (cartRes.success) {
+            state.cartCount = cartRes.data.totalCartItems || 0;
+        }
+
+        renderOrderHistory();
+        updateCartCount();
+
+    } catch (error) {
+        console.error('Error initializing orders page:', error);
+        showToast("Failed to load orders. Please reload the page.", "error");
+    }
+}
+
+function updateCartCount() {
+    const cartCountEl = document.getElementById('cartCount');
+    if (cartCountEl) {
+        cartCountEl.textContent = state.cartCount;
     }
 }
 
@@ -15,19 +55,9 @@ async function renderOrderHistory() {
     const container = document.getElementById('ordersList');
     if (!container) return;
 
-    // Show loading state
-    container.innerHTML = `
-        <div class="flex items-center justify-center py-20">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p class="text-slate-500 ml-4 font-medium">Loading your orders...</p>
-        </div>
-    `;
-
-    const response = await orderService.getOrderHistory();
-
-    if (response.success && response.data && response.data.length > 0) {
+    if (state.orders && state.orders.length > 0) {
         container.innerHTML = "";
-        response.data.forEach(order => {
+        state.orders.forEach(order => {
             const orderCard = createOrderCard(order);
             container.insertAdjacentHTML('beforeend', orderCard);
         });
@@ -236,8 +266,8 @@ async function handleCancelOrder(orderId) {
                     populateOrderDetailModal(detailResponse.data);
                 }
             }
-            // Refresh order history to update card statuses
-            await renderOrderHistory();
+            // Refresh order history and cart count to update everything
+            await init();
         } else {
             showToast(response.message || "Failed to cancel order", "error");
         }
@@ -297,17 +327,3 @@ window.onclick = function (event) {
     }
 }
 
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}

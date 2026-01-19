@@ -28,21 +28,6 @@ function toSlug(str) {
         .replace(/^-+|-+$/g, '');
 }
 
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}
-
 // Helper to extract array from API responses
 function toArray(res) {
     if (!res) return [];
@@ -87,7 +72,7 @@ async function init() {
             productService.getProductsByBrandDetails(),
             productService.getProductsTags(),
             productService.getProducts(),
-            cartService.getCartCount()
+            productService.getCartCount()
         ]);
 
         state.categories = toArray(categoriesRes);
@@ -809,7 +794,7 @@ function updateCartCount() {
 }
 
 async function updateCartCountByFetching() {
-    const resp = await cartService.getCartCount();
+    const resp = await productService.getCartCount();
     if (resp.success) {
         state.cartCount = resp.data.totalCartItems || 0;
         updateCartCount();

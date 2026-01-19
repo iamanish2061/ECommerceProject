@@ -16,9 +16,21 @@ const ServicePage = {
         document.getElementById('cartBtn').addEventListener('click', () => {
             window.location.href = 'cart.html';
         });
-        await ServicePage.loadCategories();
-        await ServicePage.loadServices();
-        ServicePage.setupEventListeners();
+
+        Promise.all([
+            ServicePage.loadCategories(),
+            ServicePage.loadServices(),
+            ServicePage.loadCartCount()
+        ]).then(() => {
+            ServicePage.setupEventListeners();
+        });
+    },
+
+    loadCartCount: async () => {
+        const response = await ServiceService.getCartCount();
+        if (response.success) {
+            document.getElementById('cartCount').innerText = response.data.totalCartItems;
+        }
     },
 
     setupEventListeners: () => {
@@ -32,20 +44,6 @@ const ServicePage = {
                 ServicePage.loadServices();
             }, 500);
         });
-
-        // Modal close listeners
-        document.getElementById('closeModalBtn').addEventListener('click', ServicePage.closeModal);
-        document.getElementById('closeModalBg').addEventListener('click', ServicePage.closeModal);
-
-        // Date change listener
-        document.getElementById('bookingDate').addEventListener('change', ServicePage.onDateChange);
-
-        // Recommendation button
-        document.getElementById('getRecommendationsBtn').addEventListener('click', ServicePage.getRecommendations);
-        document.getElementById('showManualTimeBtn').addEventListener('click', ServicePage.showManualTimeSlots);
-
-        // Booking button
-        document.getElementById('proceedToBookBtn').addEventListener('click', ServicePage.handleBooking);
     },
 
     loadCategories: async () => {

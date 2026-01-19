@@ -20,21 +20,6 @@ function toSlug(str) {
         .replace(/^-+|-+$/g, '');
 }
 
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}
-
 // simple helper to get an array from your API response
 function toArray(res) {
     if (!res) return [];
@@ -62,7 +47,7 @@ async function initBrandPage() {
         // 1) load all brands for sidebar
         const [brandsRes, cartResp] = await Promise.all([
             productService.getProductsByBrandDetails(),
-            cartService.getCartCount()
+            productService.getCartCount()
         ])
         brandState.brands = toArray(brandsRes);
         if (cartResp.success) {
@@ -479,7 +464,7 @@ function updateCartCount() {
 }
 
 async function updateCartCountByFetching() {
-    const resp = await cartService.getCartCount();
+    const resp = await productService.getCartCount();
     if (resp.success) {
         brandState.cartCount = resp.data.totalCartItems || 0;
         updateCartCount();

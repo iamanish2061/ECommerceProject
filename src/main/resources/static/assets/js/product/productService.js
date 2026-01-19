@@ -38,6 +38,9 @@ const productService = {
     },
     async buyNow(productId){
         return await request(`/order/buy-now/${productId}`, 'POST');
-    }
+    },
+    async getCartCount(){
+        return await request(`/cart/count`, 'GET');
+    },
 
 };

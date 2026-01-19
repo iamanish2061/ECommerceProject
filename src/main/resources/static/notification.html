@@ -257,6 +257,7 @@
 </body>
 
 <script src="assets/js/api.js"></script>
+<script src="assets/js/toast.js"></script>
 
 <script src="assets/js/notification/notificationService.js"></script>
 <script src="assets/js/auth/authService.js"></script>
@@ -267,20 +268,6 @@
 
 <!-- Page-specific script for All Notifications -->
 <script>
-
-    function showToast(message, type = "info", duration = 3000) {
-        const toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) return;
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => toast.remove(), duration);
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
         const listContainer = document.getElementById('allNotificationsList');
         const summaryEl = document.getElementById('notificationSummary');

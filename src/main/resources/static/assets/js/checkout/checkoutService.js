@@ -17,6 +17,10 @@ const checkoutService = {
 
     async processCartCheckout(info) {
         return await request(`/orders/checkout`, 'POST', info);
+    },
+
+    async getCartCount() {
+        return await request(`/cart/count`, 'GET');
     }
 
 }

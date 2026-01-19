@@ -5,20 +5,6 @@ let detailsState = {
     cartCount: 0
 };
 
-// Toast
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => toast.remove(), duration);
-}
-
 // Get product ID from URL
 function getProductIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
@@ -60,7 +46,7 @@ async function initDetailsPage() {
     try {
         const [res, cartResp] = await Promise.all([
             productService.getProductsById(id),
-            cartService.getCartCount()
+            productService.getCartCount()
         ])
 
         if (!res || res.success === false) {
@@ -246,7 +232,7 @@ function updateCartCount() {
 }
 
 async function updateCartCountByFetching() {
-    const resp = await cartService.getCartCount();
+    const resp = await productService.getCartCount();
     if (resp.success) {
         detailsState.cartCount = resp.data.totalCartItems || 0;
         updateCartCount();

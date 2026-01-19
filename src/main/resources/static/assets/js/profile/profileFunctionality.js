@@ -10,24 +10,10 @@ let state = {
     },
     orders: [],
     driverStatus: null,
-    isLoading: false
+    isLoading: false,
+    cartCount: 0
 };
 
-
-function showToast(message, type = "info", duration = 3000) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
-}
 
 function togglePasswordVisibility(inputId, button) {
     const input = document.getElementById(inputId);
@@ -91,6 +77,24 @@ function updateAddressUI() {
     updateSingleAddress('home', state.addresses.home);
     updateSingleAddress('work', state.addresses.work);
 }
+
+async function updateCartCount() {
+    try {
+        const cartCountEl = document.getElementById('cartCount');
+        const resp = await profileService.getCartCount();
+        if (resp.success) {
+            state.cartCount = resp.data.totalCartItems;
+        } else {
+            showToast(resp.message, "error");
+        }
+
+        if (cartCountEl) cartCountEl.textContent = state.cartCount;
+    } catch (e) {
+        console.log(e);
+        showToast("Error updating cart count", "error");
+    }
+}
+
 function updateSingleAddress(type, address) {
     const addressContainer = document.getElementById(`${type}Address`);
 
@@ -144,6 +148,7 @@ function updateOrdersUI() {
 
     ordersContainer.innerHTML = state.orders.map(order => createOrderCard(order)).join('');
 }
+
 function createOrderCard(order) {
     const statusColors = {
         confirmed: { bg: 'bg-blue-100', text: 'text-blue-700' },
@@ -180,6 +185,7 @@ function createOrderCard(order) {
         </div>
     `;
 }
+
 function getOrderActionButton(order) {
     const status = order.status.toLowerCase();
 
@@ -222,6 +228,7 @@ async function fetchProfile() {
         state.isLoading = false;
     }
 }
+
 async function fetchAddresses() {
     try {
         const homeResponse = await profileService.getAddressType('HOME');
@@ -240,6 +247,7 @@ async function fetchAddresses() {
         showToast('Error loading addresses', "error");
     }
 }
+
 async function fetchOrders() {
     try {
         const response = await profileService.getOrderForProfile();
@@ -295,8 +303,6 @@ function switchAddressTab(tab) {
 
 
 
-
-
 //modal functions for the the profile picturees and other password modals
 
 function openEditModal() {
@@ -318,7 +324,6 @@ function openPasswordModal() {
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
 }
-
 
 function closePasswordModal() {
     document.getElementById('passwordModal').classList.remove('flex');
@@ -372,6 +377,7 @@ function openAddressModal(type = 'home') {
         saveBtn.textContent = 'Save Address';
     }
 }
+
 function closeAddressModal() {
     document.getElementById('addressModal').classList.add('hidden');
     document.getElementById('addressModal').classList.remove('flex');
@@ -382,11 +388,13 @@ function closeAddressModal() {
         if (el) el.value = '';
     })
 }
+
 function openLicenseModal() {
     document.getElementById('licenseModal').classList.remove('hidden');
     document.getElementById('licenseModal').classList.add('flex');
     //set current timestamp for submitted at
 }
+
 function closeLicenseModal() {
     document.getElementById('licenseModal').classList.add('hidden');
     document.getElementById('licenseModal').classList.remove('flex');
@@ -418,6 +426,7 @@ function handleImageUpload(event) {
 
     uploadProfilePhoto(formData);
 }
+
 async function uploadProfilePhoto(formData) {
     try {
         showToast('Upoloading photo....', 'info');
@@ -531,6 +540,7 @@ async function saveAddress() {
     }
 
 }
+
 async function updateAddress() {
     const type = document.getElementById('addressType').value.toUpperCase();
     const province = document.getElementById('province').value;
@@ -619,7 +629,6 @@ if (locateBtn) {
         // updateAddressFields(location.components, location.roadInfo); // Disabled to prevent overwriting user input
     });
 }
-
 
 
 //Order functions
@@ -820,6 +829,7 @@ async function saveLicense() {
         showToast("Error submitting application", "error");
     }
 }
+
 document.addEventListener('DOMContentLoaded', function () {
     const licenseFileInput = document.getElementById('licenseFile');
     if (licenseFileInput) {
@@ -844,8 +854,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
-
 
 
 //logout function  use the previous function
@@ -883,7 +891,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         fetchProfile(),
         fetchAddresses(),
         fetchOrders(),
-        checkDriverStatus()
+        checkDriverStatus(),
+        updateCartCount()
     ]);
 
     state.isLoading = false;

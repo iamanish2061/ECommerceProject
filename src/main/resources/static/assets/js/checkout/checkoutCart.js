@@ -16,7 +16,7 @@ async function initCheckoutCartPage() {
         // Load cart items for summary
         await renderCartItems();
 
-        const cartResp = await cartService.getCartCount();
+        const cartResp = await checkoutService.getCartCount();
         if (cartResp.success) {
             cartCount = cartResp.data.totalCartItems || 0;
         }

@@ -17,5 +17,9 @@ const ServiceService = {
 
     getAllCategories: async () => {
         return await request('/services/categories');
+    },
+
+    getCartCount: async () => {
+        return await request('/cart/count');
     }
 };

@@ -54,5 +54,11 @@ const profileService = {
 
     async cancelOrder(orderId) {
         return await request(`/orders/cancel/${orderId}`, 'PUT');
+    },
+
+
+    // ==================== CART METHODS ====================
+    async getCartCount() {
+        return await request(`/cart/count`, 'GET');
     }
 };
