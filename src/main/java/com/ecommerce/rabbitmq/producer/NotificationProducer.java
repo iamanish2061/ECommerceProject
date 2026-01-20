@@ -22,13 +22,15 @@ public class NotificationProducer {
     private String exchange;
 
     public void send(String routingKey, NotificationEvent event) {
+        if(event == null){
+            return;
+        }
         // Auto-generate ID and timestamp if they aren't set
         if (event.getId() == null) event.setId(UUID.randomUUID().toString());
         if (event.getCreatedAt() == null) event.setCreatedAt(LocalDateTime.now());
 
         log.info("Pushing notification to {}: {}", routingKey, event.getTitle());
 
-        // This uses your custom ObjectMapper automatically
         rabbitTemplate.convertAndSend(exchange, routingKey, event);
     }
 }

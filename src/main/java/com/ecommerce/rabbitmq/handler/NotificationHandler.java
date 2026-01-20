@@ -36,7 +36,7 @@ public class NotificationHandler {
             saveAndSendToAdmin(event);
         } else if (eventCastedType == NotificationType.ORDER_SHIPPED) {
             saveAndSendToUser(event);
-        } else if (eventCastedType== NotificationType.APPOINTMENT_BOOKED || eventCastedType == NotificationType.APPOINTMENT_CANCELLED) {
+        } else if (eventCastedType== NotificationType.APPOINTMENT_BOOKED || eventCastedType == NotificationType.APPOINTMENT_CANCELLED || eventCastedType == NotificationType.APPOINTMENT_COMPLETED) {
             saveAndSendToUser(event);
             saveAndSendToAdmin(event);
             saveAndSendToStaff(event);
@@ -118,7 +118,6 @@ public class NotificationHandler {
                     String.valueOf(event.getMetadata().get("staffUsername")),
                     "/queue/notifications",
                     Map.of("message", event.getMetadata().get("staffMessage"))
-
             );
         }
     }

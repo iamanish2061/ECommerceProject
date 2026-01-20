@@ -1,5 +1,6 @@
 package com.ecommerce.utils;
 
+import com.ecommerce.dto.intermediate.AppointmentDetailForEvent;
 import com.ecommerce.dto.intermediate.OrderItemDTO;
 import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.model.notification.NotificationType;
@@ -144,6 +145,80 @@ public class EventHelper {
                 .title("INSTORE PURCHASE")
                 .message(null)
                 .type(NotificationType.INSTORE_PURCHASE)
+                .metadata(metaData)
+                .build();
+    }
+
+    public static NotificationEvent createEventForAppointment(AppointmentDetailForEvent detail) {
+        Map<String, Object> metaData = Map.of(
+                "adminMessage", detail.getUser()+" has booked an appointment of service: "+detail.getServiceName()+ " staff: "+detail.getStaffId()+" for: "+detail.getAppointmentDate(),
+                "email", detail.getEmail(),
+                "staffId", detail.getStaffId(),
+                "staffUsername", detail.getStaffName(),
+                "staffMessage", detail.getUser()+" has booked an appointment of service: "+detail.getServiceName()+" for: "+ detail.getAppointmentDate()
+        );
+        return NotificationEvent.builder()
+                .recipientId(detail.getUserId())
+                .username(detail.getUser())
+                .title("APPOINTMENT BOOKED")
+                .message("Your service: "+detail.getServiceName()+" has been booked for: " +detail.getAppointmentDate())
+                .type(NotificationType.APPOINTMENT_BOOKED)
+                .metadata(metaData)
+                .build();
+
+    }
+
+    public static NotificationEvent createEventForAppointmentCancellation(AppointmentDetailForEvent detail){
+        Map<String, Object> metaData = Map.of(
+                "adminMessage", detail.getUser()+" appointment of service: "+detail.getServiceName()+" for: "+detail.getAppointmentDate()+" has been cancelled",
+                "email", detail.getEmail(),
+                "staffId", detail.getStaffId(),
+                "staffUsername", detail.getStaffName(),
+                "staffMessage", detail.getUser()+" appointment of service: "+detail.getServiceName()+" for: "+ detail.getAppointmentDate()+" has been cancelled"
+        );
+        return NotificationEvent.builder()
+                .recipientId(detail.getUserId())
+                .username(detail.getUser())
+                .title("APPOINTMENT CANCELLED")
+                .message("Your service: "+detail.getServiceName()+" for: " +detail.getAppointmentDate()+" has been cancelled")
+                .type(NotificationType.APPOINTMENT_CANCELLED)
+                .metadata(metaData)
+                .build();
+    }
+
+    public static NotificationEvent createEventForAppointmentCompletion(AppointmentDetailForEvent detail) {
+        Map<String, Object> metaData = Map.of(
+                "adminMessage", detail.getUser()+" appointment of service: "+detail.getServiceName()+ " and staff: "+detail.getStaffId()+" has been completed.",
+                "email", detail.getEmail(),
+                "staffId", detail.getStaffId(),
+                "staffUsername", detail.getStaffName(),
+                "staffMessage", detail.getUser()+"  appointment of service: "+detail.getServiceName()+" has been completed."
+        );
+        return NotificationEvent.builder()
+                .recipientId(detail.getUserId())
+                .username(detail.getUser())
+                .title("APPOINTMENT COMPLETED")
+                .message("Your service: "+detail.getServiceName()+" has been completed.")
+                .type(NotificationType.APPOINTMENT_COMPLETED)
+                .metadata(metaData)
+                .build();
+
+    }
+
+    public static NotificationEvent createEventForAppointmentNoShow(AppointmentDetailForEvent detail){
+        Map<String, Object> metaData = Map.of(
+                "adminMessage", detail.getUser()+" did not show up for an appointment of "+detail.getAppointmentDate(),
+                "email", detail.getEmail(),
+                "staffId", detail.getStaffId(),
+                "staffUsername", detail.getStaffName(),
+                "staffMessage", detail.getUser()+" did not show up for an appointment of "+detail.getAppointmentDate()
+        );
+        return NotificationEvent.builder()
+                .recipientId(detail.getUserId())
+                .username(detail.getUser())
+                .title("APPOINTMENT CANCELLED")
+                .message("You did not attend for "+detail.getServiceName()+" of: " +detail.getAppointmentDate())
+                .type(NotificationType.APPOINTMENT_CANCELLED)
                 .metadata(metaData)
                 .build();
     }

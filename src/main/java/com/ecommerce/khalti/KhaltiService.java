@@ -2,6 +2,7 @@ package com.ecommerce.khalti;
 
 import com.ecommerce.mapper.payment.PaymentMapper;
 import com.ecommerce.model.payment.PaymentModel;
+import com.ecommerce.service.appointment.AppointmentPersistService;
 import com.ecommerce.service.order.OrderPersistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class KhaltiService {
     private final KhaltiConfig config;
     private final RestTemplate restTemplate;
     private final OrderPersistService successPaymentOrderService;
+    private final AppointmentPersistService appointmentPersistService;
     private final PaymentMapper paymentMapper;
 
     public KhaltiResponse initiatePayment(KhaltiRequest khalti){
@@ -50,7 +52,11 @@ public class KhaltiService {
         PaymentModel payment = paymentMapper.mapKhaltiToPaymentModel(response);
 
         if(!"COMPLETED".equalsIgnoreCase(response.getStatus())){
-            successPaymentOrderService.handleKhaltiOrderDetails(false, payment, response.getPurchase_order_id());
+            if(response.getPurchase_order_id().startsWith("APT_")){
+                appointmentPersistService.handleKhaltiAppointmentDetails(false, payment, response.getPurchase_order_id());
+            }else{
+                successPaymentOrderService.handleKhaltiOrderDetails(false, payment, response.getPurchase_order_id());
+            }
             return false;
         }
 
@@ -71,10 +77,18 @@ public class KhaltiService {
                 String status = (String) body.get("status");
                 String transactionId = (String) body.get("transaction_id");
                 if(!transactionId.isEmpty() && transactionId.equalsIgnoreCase(response.getTransaction_id()) && status.equalsIgnoreCase("Completed")){
-                    successPaymentOrderService.handleKhaltiOrderDetails(true, payment, response.getPurchase_order_id());
+                    if(response.getPurchase_order_id().startsWith("APT_")){
+                        appointmentPersistService.handleKhaltiAppointmentDetails(true, payment, response.getPurchase_order_id());
+                    }else{
+                        successPaymentOrderService.handleKhaltiOrderDetails(true, payment, response.getPurchase_order_id());
+                    }
                     return true;
                 }else{
-                    successPaymentOrderService.handleKhaltiOrderDetails(false, payment, response.getPurchase_order_id());
+                    if(response.getPurchase_order_id().startsWith("APT_")){
+                        appointmentPersistService.handleKhaltiAppointmentDetails(false, payment, response.getPurchase_order_id());
+                    }else{
+                        successPaymentOrderService.handleKhaltiOrderDetails(false, payment, response.getPurchase_order_id());
+                    }
                     return false;
                 }
             }

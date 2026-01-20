@@ -28,17 +28,22 @@ public class EmailConsumer {
                 break;
             case ORDER_CANCELLED:
                 emailService.sendEmail(
-                        new EmailSenderRequest(userEmail, "Order Cancelled", "<p>Your order has been cancelled.</p>")
+                        new EmailSenderRequest(userEmail, "Order Cancelled", "Your order has been cancelled.")
                 );
                 break;
             case APPOINTMENT_BOOKED:
                 emailService.sendEmail(
-                        new EmailSenderRequest(userEmail, "Appointment Booked", "<p>Your appointment has been booked.</p>")
+                        new EmailSenderRequest(userEmail, "Appointment Booked", "Your appointment has been booked.")
+                );
+                break;
+            case APPOINTMENT_COMPLETED:
+                emailService.sendEmail(
+                        new EmailSenderRequest(userEmail, "Appointment Completed", "Your appointment has been completed.")
                 );
                 break;
             case APPOINTMENT_CANCELLED:
                 emailService.sendEmail(
-                        new EmailSenderRequest(userEmail, "Appointment Cancelled", "<p>Your appointment has been cancelled.</p>")
+                        new EmailSenderRequest(userEmail, "Appointment Cancelled", "Your appointment has been cancelled.")
                 );
                 break;
         }

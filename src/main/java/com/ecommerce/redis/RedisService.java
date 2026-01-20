@@ -1,5 +1,6 @@
 package com.ecommerce.redis;
 
+import com.ecommerce.dto.intermediate.TempAppointmentDetails;
 import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.model.notification.Notification;
@@ -24,23 +25,22 @@ public class RedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
-
-    public String getCode(String key){
-        try{
+    public String getCode(String key) {
+        try {
             Object o = redisTemplate.opsForValue().get(key);
-            return (o!=null)? o.toString():null;
-        }catch (Exception e){
-            log.error("Exception ",e);
+            return (o != null) ? o.toString() : null;
+        } catch (Exception e) {
+            log.error("Exception ", e);
             return null;
         }
     }
 
-    public boolean setCode(String key, String value, Long ttl){
-        try{
+    public boolean setCode(String key, String value, Long ttl) {
+        try {
             redisTemplate.opsForValue().set(key, value, ttl, TimeUnit.SECONDS);
             return true;
-        }catch (Exception e){
-            log.error("Exception " ,e);
+        } catch (Exception e) {
+            log.error("Exception ", e);
             return false;
         }
     }
@@ -49,47 +49,44 @@ public class RedisService {
         redisTemplate.delete(email);
     }
 
-//for incrementing user vector after any activity
+    // for incrementing user vector after any activity
     public void incrementUserVector(Long userId, Long productId, int score) {
         String key = "user_vector:" + userId;
         redisTemplate.opsForHash().increment(key, productId.toString(), score);
-        redisTemplate.expire(key, 90, TimeUnit.DAYS);           // Optional: expire in 90 days if user inactive
+        redisTemplate.expire(key, 90, TimeUnit.DAYS); // Optional: expire in 90 days if user inactive
     }
 
-//    for updating viewed product
-    public void updateViewedProduct(Long userId, Long productId){
-        String viewedKey = "viewed:"+userId+":"+productId;
+    // for updating viewed product
+    public void updateViewedProduct(Long userId, Long productId) {
+        String viewedKey = "viewed:" + userId + ":" + productId;
         boolean alreadyViewed = redisTemplate.hasKey(viewedKey);
-        if(!alreadyViewed){
+        if (!alreadyViewed) {
             incrementUserVector(userId, productId, 1);
             redisTemplate.opsForValue().set(viewedKey, "1", 48, TimeUnit.HOURS);
         }
     }
 
-//    Get a user's interest vector safely
+    // Get a user's interest vector safely
     public Map<Object, Object> getUserVector(Long userId) {
         return redisTemplate.opsForHash().entries("user_vector:" + userId);
     }
 
-//    Save the calculated similarities as a Sorted Set
+    // Save the calculated similarities as a Sorted Set
     public void saveSimilarUsers(Long userId, List<Map.Entry<Long, Double>> topSimilar) {
         String key = "user_similar:" + userId;
         redisTemplate.delete(key);
-        topSimilar.forEach(entry ->
-                redisTemplate.opsForZSet().add(key, entry.getKey().toString(), entry.getValue())
-        );
+        topSimilar.forEach(entry -> redisTemplate.opsForZSet().add(key, entry.getKey().toString(), entry.getValue()));
     }
 
-//    Get the IDs of similar users
+    // Get the IDs of similar users
     public Set<Object> getSimilarUserIds(Long userId) {
         // Fetches top 30 most similar users
         return redisTemplate.opsForZSet().reverseRange("user_similar:" + userId, 0, 29);
     }
 
-
-//    temporary order service
-//    for saving order details before redirecting to payment
-    public void saveOrderDetails(String key, TempOrderDetails orderDetails){
+    // temporary order service
+    // for saving order details before redirecting to payment
+    public void saveOrderDetails(String key, TempOrderDetails orderDetails) {
         try {
             String json = objectMapper.writeValueAsString(orderDetails);
             redisTemplate.opsForValue().set(key, json, 30, TimeUnit.MINUTES);
@@ -100,11 +97,12 @@ public class RedisService {
         }
     }
 
-//    for getting order details to store in db after successful payment
-    public TempOrderDetails getOrderDetails(String key){
+    // for getting order details to store in db after successful payment
+    public TempOrderDetails getOrderDetails(String key) {
         try {
             Object value = redisTemplate.opsForValue().get(key);
-            if (value == null) return null;
+            if (value == null)
+                return null;
 
             return objectMapper.readValue(value.toString(), TempOrderDetails.class);
         } catch (JsonProcessingException e) {
@@ -116,8 +114,8 @@ public class RedisService {
         }
     }
 
-//    for deleting order details to store in db after successful payment
-    public void deleteOrderDetails(String key){
+    // for deleting order details to store in db after successful payment
+    public void deleteOrderDetails(String key) {
         try {
             redisTemplate.delete(key);
         } catch (Exception e) {
@@ -125,9 +123,49 @@ public class RedisService {
         }
     }
 
+    // ==================== Appointment Booking ====================
 
-//    notification
-//    Gets the current unread count.
+    public void saveTempAppointment(String key, TempAppointmentDetails details) {
+        try {
+            key = "appointment:"+key;
+            String json = objectMapper.writeValueAsString(details);
+            redisTemplate.opsForValue().set(key, json, 30, TimeUnit.MINUTES);
+            log.info("Saved temp appointment to Redis: {}", key);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize TempAppointmentDetails for Redis", e);
+        } catch (Exception e) {
+            log.error("Failed to save temp appointment to Redis", e);
+        }
+    }
+
+    public TempAppointmentDetails getTempAppointment(String key) {
+        try {
+            key = "appointment:"+key;
+            Object value = redisTemplate.opsForValue().get(key);
+            if (value == null)
+                return null;
+            return objectMapper.readValue(value.toString(), TempAppointmentDetails.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to deserialize TempAppointmentDetails from Redis", e);
+            return null;
+        } catch (Exception e) {
+            log.error("Failed to retrieve temp appointment from Redis", e);
+            return null;
+        }
+    }
+
+    public void deleteTempAppointment(String key) {
+        try {
+            key = "appointment:"+key;
+            redisTemplate.delete(key);
+            log.info("Deleted temp appointment from Redis: {}", key);
+        } catch (Exception e) {
+            log.error("Failed to delete temp appointment from Redis", e);
+        }
+    }
+
+    // notification
+    // Gets the current unread count.
     public Integer getUnreadCount(Long userId) {
         try {
             Object count = redisTemplate.opsForValue().get("unread_notifications:" + userId);
@@ -137,7 +175,7 @@ public class RedisService {
         }
     }
 
-//    Adds the full notification DTO to a Redis List for the user.
+    // Adds the full notification DTO to a Redis List for the user.
     public void addUnreadNotification(Long userId, Notification notification) {
         try {
             String key = "unread_list:" + userId;
@@ -155,12 +193,13 @@ public class RedisService {
         }
     }
 
-//    Fetches all unread notification objects for the user icon.
+    // Fetches all unread notification objects for the user icon.
     public List<Notification> getUnreadNotifications(Long userId) {
         String key = "unread_list:" + userId;
         List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
 
-        if (rawList == null) return List.of();
+        if (rawList == null)
+            return List.of();
 
         return rawList.stream()
                 .map(obj -> {
@@ -174,7 +213,7 @@ public class RedisService {
                 .toList();
     }
 
-//    Removes a specific notification from the Redis list when marked as read.
+    // Removes a specific notification from the Redis list when marked as read.
     public void removeNotificationFromRedis(String userId, String notificationId) {
         String key = "unread_list:" + userId;
         List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
@@ -190,13 +229,13 @@ public class RedisService {
         }
     }
 
-//    removes all notification of that user
-    public void removeAllNotificationFromRedis(String userId){
+    // removes all notification of that user
+    public void removeAllNotificationFromRedis(String userId) {
         String key = "unread_list:" + userId;
         redisTemplate.delete(key);
     }
 
-//   for adding delivery list to redis
+    // for adding delivery list to redis
     public void addDeliveryAddressList(Long driverId, List<AssignedDeliveryResponse> orderedList) {
         try {
             String key = "driver_route:" + driverId;
@@ -209,12 +248,13 @@ public class RedisService {
         }
     }
 
-//    get delivery address list
+    // get delivery address list
     public List<AssignedDeliveryResponse> getDeliveryAddressList(Long driverId) {
         try {
             String key = "driver_route:" + driverId;
             Object value = redisTemplate.opsForValue().get(key);
-            if (value == null) return List.of();
+            if (value == null)
+                return List.of();
 
             return objectMapper.readValue(value.toString(),
                     objectMapper.getTypeFactory().constructCollectionType(List.class, AssignedDeliveryResponse.class));
@@ -225,6 +265,3 @@ public class RedisService {
     }
 
 }
-
-
-

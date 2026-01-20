@@ -8,6 +8,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class EmailService {
     }
 
     public void sendOrderInfoEmail(String to, Map<String, Object> metadata) {
-        org.thymeleaf.context.Context context = new org.thymeleaf.context.Context();
+        Context context = new org.thymeleaf.context.Context();
         context.setVariables(metadata);
 
         try {
