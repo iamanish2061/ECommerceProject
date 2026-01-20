@@ -4,17 +4,20 @@ import com.ecommerce.dto.request.service.BookingRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.appointment.AppointmentDetailResponse;
 import com.ecommerce.dto.response.appointment.AppointmentResponse;
-import com.ecommerce.dto.response.appointment.BookingResponse;
-import com.ecommerce.dto.response.service.TimeSlotRecommendation;
+import com.ecommerce.dto.response.payment.PaymentRedirectResponse;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.appointment.AppointmentBookingService;
 import com.ecommerce.validation.ValidId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,80 +26,49 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
 
     private final AppointmentBookingService bookingService;
+    private static final String LOGIN_MSG = "Please login to continue";
+    private static final String LOGIN_CODE = "NOT_LOGGED_IN";
 
-    @GetMapping("/recommendations")
-    @Operation(summary = "to fetch recommendation of appointment time for any service")
-    public ResponseEntity<ApiResponse<List<TimeSlotRecommendation>>> getRecommendations(
+    @GetMapping("/time")
+    @Operation(summary = "to fetch available time and recommendation of appointment time for any service")
+    public ResponseEntity<ApiResponse<?>> getAvailableTime(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam Long serviceId,
-            @RequestParam(required = false) Long staffId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue", "NOT_LOGGED_IN"));
+            @RequestParam @NotNull(message = "Booking date is required") @FutureOrPresent(message = "Date cannot be in the past") @JsonFormat(pattern = "yyyy-MM-dd") LocalDate bookingDate,
+            @RequestParam(required = false) Long staffId) {
+        if (staffId == null) {
+            staffId = 0L;
         }
-        return ResponseEntity.ok(ApiResponse.ok(
-                bookingService.getRecommendations(
-                        currentUser.getUser().getId(),
-                        serviceId,
-                        staffId,
-                        startDate,
-                        endDate
-                ), "Recommendation fetched successfully"
-        ));
+        if (currentUser == null) {
+            return ResponseEntity.ok(ApiResponse.ok(
+                    bookingService.getAvailableTime(
+                            serviceId,
+                            bookingDate,
+                            staffId),
+                    "Available time fetched successfully"));
+        } else {
+            return ResponseEntity
+                    .ok(ApiResponse.ok(bookingService.getRecommendationAndTime(currentUser.getUser().getId(), serviceId, bookingDate, staffId), "Recommended time and available time fetched successfully"));
+        }
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BookingResponse>> createBooking(
+    @Operation(summary = "to book an appointment")
+    public ResponseEntity<ApiResponse<PaymentRedirectResponse>> createBooking(
             @AuthenticationPrincipal UserPrincipal currentUser,
-            @RequestBody BookingRequest request
+            @Valid @RequestBody BookingRequest request
     ) {
-        if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue", "NOT_LOGGED_IN"));
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
         }
         return ResponseEntity.ok(
-                ApiResponse.ok(bookingService.createBooking(currentUser.getUser().getId(), request),"Booking successful"));
-    }
-
-    @PostMapping("/{transactionId}/confirm")
-    public ResponseEntity<ApiResponse<AppointmentResponse>> confirmBooking(
-            @AuthenticationPrincipal UserPrincipal currentUser,
-            @PathVariable String transactionId
-    ) {
-        if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue", "NOT_LOGGED_IN"));
-        }
-        return ResponseEntity.ok(
-                ApiResponse.ok(bookingService.confirmBooking(transactionId, currentUser.getUser().getId()), "Confirmed"));
-    }
-
-    @GetMapping("/my-appointments")
-    @Operation(summary = "to fetch all appointments of user")
-    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getMyAppointments(
-            @AuthenticationPrincipal UserPrincipal currentUser
-    ) {
-        if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue", "NOT_LOGGED_IN"));
-        }
-        return ResponseEntity.ok(
-                ApiResponse.ok(bookingService.getUserAppointments(currentUser.getUser().getId()), "Fetched all appointments of user: "+currentUser.getUser().getId()));
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "to fetch detail of any appointment")
-    public ResponseEntity<ApiResponse<AppointmentDetailResponse>> getAppointmentDetail(
-            @AuthenticationPrincipal UserPrincipal currentUser,
-            @ValidId @PathVariable Long id
-    ) {
-        if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue", "NOT_LOGGED_IN"));
-        }
-        return ResponseEntity.ok(ApiResponse.ok(
-                bookingService.getAppointmentDetail(id, currentUser.getUser().getId()), "Fetched detail successfully"));
+                ApiResponse.ok(bookingService.createBooking(currentUser.getUser().getId(), request),
+                        "Ready to redirect"));
     }
 
     @PostMapping("/{id}/cancel")
@@ -105,10 +77,48 @@ public class BookingController {
             @AuthenticationPrincipal UserPrincipal currentUser,
             @ValidId @PathVariable Long id
     ) {
-        if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue", "NOT_LOGGED_IN"));
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
         }
-        bookingService.cancelAppointment(id, currentUser.getUser().getId());
+        bookingService.cancelAppointment(id, currentUser.getUser());
         return ResponseEntity.ok(ApiResponse.ok("Appointment cancelled successfully"));
+    }
+
+    @GetMapping("/for-profile")
+    @Operation(summary = "to list on profile page")
+    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getRecentThreeAppointments(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ){
+        if(currentUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+        }
+        List<AppointmentResponse> response = bookingService.getRecentAppointmentsOf(currentUser.getUser());
+        return ResponseEntity.ok(ApiResponse.ok(response, "Recent appointments of user: "+currentUser.getUser().getId()));
+    }
+
+    @GetMapping("/my-appointments")
+    @Operation(summary = "to fetch all appointments of user")
+    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getMyAppointments(
+            @AuthenticationPrincipal UserPrincipal currentUser
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+        }
+        return ResponseEntity.ok(
+                ApiResponse.ok(bookingService.getUserAppointments(currentUser.getUser().getId()),
+                        "Fetched all appointments of user: " + currentUser.getUser().getId()));
+    }
+
+    @GetMapping("/appointment/{id}")
+    @Operation(summary = "to fetch detail of any appointment")
+    public ResponseEntity<ApiResponse<AppointmentDetailResponse>> getAppointmentDetail(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @ValidId @PathVariable Long id
+    ) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+        }
+        return ResponseEntity.ok(ApiResponse.ok(
+                bookingService.getAppointmentDetail(id, currentUser.getUser().getId()), "Fetched detail successfully"));
     }
 }

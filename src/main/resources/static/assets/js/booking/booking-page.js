@@ -18,8 +18,19 @@ const BookingPage = {
             return;
         }
 
-        await BookingPage.loadServiceDetails();
-        BookingPage.setupEventListeners();
+        Promise.all([
+            BookingPage.loadServiceDetails(),
+            BookingPage.loadCartCount()
+        ]).then(() => {
+            BookingPage.setupEventListeners();
+        });
+    },
+
+    loadCartCount: async () => {
+        const response = await ServiceService.getCartCount();
+        if (response.success) {
+            document.getElementById('cartCount').innerText = response.data.totalCartItems;
+        }
     },
 
     loadServiceDetails: async () => {

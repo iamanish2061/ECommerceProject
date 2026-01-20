@@ -26,5 +26,7 @@ const BookingService = {
 
     cancelAppointment: async (id) => {
         return await request(`/bookings/${id}/cancel`, 'POST');
-    }
+    },
+
+    
 };
