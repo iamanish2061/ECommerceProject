@@ -3,7 +3,6 @@ package com.ecommerce.service.order;
 import com.ecommerce.dto.intermediate.OrderItemDTO;
 import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.exception.ApplicationException;
-import com.ecommerce.mapper.payment.PaymentMapper;
 import com.ecommerce.model.activity.ActivityType;
 import com.ecommerce.model.order.OrderItem;
 import com.ecommerce.model.order.OrderModel;
@@ -50,8 +49,6 @@ public class OrderPersistService {
     private final UserActivityService userActivityService;
     private final SimilarUserUpdater similarUserUpdater;
     private final NotificationProducer notificationProducer;
-
-    private final PaymentMapper paymentMapper;
 
     public String executeSingleCodOrder(ProductModel product, UserModel user, TempOrderDetails tempOrder) {
         OrderModel orderToBePersisted = OrderModel.builder()

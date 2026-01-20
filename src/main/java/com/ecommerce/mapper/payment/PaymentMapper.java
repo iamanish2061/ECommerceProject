@@ -1,8 +1,13 @@
 package com.ecommerce.mapper.payment;
 
+import com.ecommerce.dto.response.appointment.AppointmentSummaryResponse;
+import com.ecommerce.dto.response.payment.AdminPaymentResponse;
+import com.ecommerce.dto.response.payment.DetailAdminPaymentResponse;
 import com.ecommerce.dto.response.payment.PaymentResponse;
 import com.ecommerce.esewa.Esewa;
 import com.ecommerce.khalti.KhaltiCallbackDTO;
+import com.ecommerce.mapper.order.OrderMapper;
+import com.ecommerce.mapper.user.UserMapper;
 import com.ecommerce.model.payment.PaymentModel;
 import com.ecommerce.model.payment.PaymentStatus;
 import org.mapstruct.Mapper;
@@ -11,7 +16,7 @@ import org.mapstruct.Named;
 
 import java.math.BigDecimal;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses={UserMapper.class, OrderMapper.class})
 public interface PaymentMapper {
 
     @Mapping(source = "id", target = "paymentId")
@@ -70,5 +75,16 @@ public interface PaymentMapper {
         return new BigDecimal(cleanedAmount).multiply(BigDecimal.valueOf(0.01));
     }
 
+    @Mapping(target = "response", source = "payment")
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "orderId", source = "order.id")
+    @Mapping(target = "appointmentId", source = "appointment.id")
+    AdminPaymentResponse mapEntityToAdminPaymentResponse(PaymentModel payment);
+
+    @Mapping(target = "response", source = "payment")
+    @Mapping(target = "userResponse", source = "payment.user")
+    @Mapping(target = "orderResponse", source = "payment.order")
+    @Mapping(target = "appointmentResponse", source = "appointment")
+    DetailAdminPaymentResponse mapEntityToDetailAdminPaymentResponse(PaymentModel payment, AppointmentSummaryResponse appointment);
 
 }

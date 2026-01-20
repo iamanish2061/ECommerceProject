@@ -21,5 +21,4 @@ public interface UserMapper {
 
     DriverInfoResponse mapEntityToDriverInfoResponse(Driver driver);
 
-    StaffInfoResponse mapEntityToStaffInfoResponse(Staff staff);
 }
