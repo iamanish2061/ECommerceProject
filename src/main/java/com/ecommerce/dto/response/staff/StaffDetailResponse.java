@@ -1,8 +1,6 @@
-package com.ecommerce.dto.response.service;
+package com.ecommerce.dto.response.staff;
 
-import com.ecommerce.dto.response.staff.LeaveSummaryResponse;
-import com.ecommerce.dto.response.staff.StaffListResponse;
-import com.ecommerce.dto.response.staff.WorkingHourResponse;
+import com.ecommerce.dto.response.service.ServiceSummaryResponse;
 
 import java.util.List;
 

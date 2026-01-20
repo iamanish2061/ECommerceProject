@@ -27,4 +27,9 @@ public interface StaffWorkingHoursRepository extends JpaRepository<StaffWorkingH
 
     // Check if staff works on a specific day
     boolean existsByStaffIdAndDayOfWeekAndIsWorkingDayTrue(Long staffId, DayOfWeek dayOfWeek);
+
+    @Query("SELECT s FROM StaffWorkingHours s WHERE s.staff.id IN :staffIds AND s.dayOfWeek = :dayOfWeek")
+    List<StaffWorkingHours> findAllByStaffIdInAndDayOfWeek(
+            @Param("staffIds") List<Long> staffIds,
+            @Param("dayOfWeek") DayOfWeek dayOfWeek);
 }

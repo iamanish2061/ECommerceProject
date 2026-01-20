@@ -36,4 +36,9 @@ public interface StaffLeaveRepository extends JpaRepository<StaffLeave, Long> {
 
     // Delete leave
     void deleteByIdAndStaffId(Long id, Long staffId);
+
+    @Query("SELECT l FROM StaffLeave l WHERE l.staff.id IN :staffIds AND l.leaveDate = :leaveDate")
+    List<StaffLeave> findAllByStaffIdInAndLeaveDate(
+            @Param("staffIds") List<Long> staffIds,
+            @Param("leaveDate") LocalDate leaveDate);
 }

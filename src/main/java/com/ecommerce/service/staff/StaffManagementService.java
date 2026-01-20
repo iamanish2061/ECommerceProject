@@ -4,7 +4,7 @@ import com.ecommerce.dto.request.staff.StaffAssignRequest;
 import com.ecommerce.dto.request.staff.StaffLeaveRequest;
 import com.ecommerce.dto.request.staff.WorkingHoursRequest;
 import com.ecommerce.dto.response.service.ServiceSummaryResponse;
-import com.ecommerce.dto.response.service.StaffDetailResponse;
+import com.ecommerce.dto.response.staff.StaffDetailResponse;
 import com.ecommerce.dto.response.staff.LeaveSummaryResponse;
 import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
 import com.ecommerce.dto.response.staff.StaffListResponse;
@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -64,32 +63,31 @@ public class StaffManagementService {
                 StaffRole.RECEPTIONIST,
                 StaffRole.NAIL_TECHNICIAN,
                 StaffRole.THERAPIST,
-                StaffRole.MAKEUP_ARTIST
-        );
+                StaffRole.MAKEUP_ARTIST);
     }
 
     public List<NameAndIdOfStaffResponse> getNameAndIdOfStaff() {
         return staffRepository.findAllByOrderByIdDesc().stream().map(
-                s-> new NameAndIdOfStaffResponse(s.getId(), s.getUser().getFullName())
-        ).toList();
+                s -> new NameAndIdOfStaffResponse(s.getId(), s.getUser().getFullName())).toList();
     }
 
     public List<StaffListResponse> getAllStaff() {
-        List<Staff> staff =  staffRepository.findAllByOrderByIdDesc();
+        List<Staff> staff = staffRepository.findAllByOrderByIdDesc();
         return staff.stream()
-                .map(s-> staffMapper.mapEntityToStaffListResponse(s, s.getServices().size()))
+                .map(s -> staffMapper.mapEntityToStaffListResponse(s, s.getServices().size()))
                 .toList();
     }
 
     public StaffDetailResponse getStaffDetail(Long staffId) {
         Staff staff = staffRepository.findWithDetailsById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
         StaffListResponse response = staffMapper.mapEntityToStaffListResponse(staff, staff.getServices().size());
         List<ServiceSummaryResponse> serviceResponse = staff.getServices().stream()
-                        .map(serviceMapper::mapEntityToServiceSummaryResponse)
+                .map(serviceMapper::mapEntityToServiceSummaryResponse)
                 .toList();
 
-        List<WorkingHourResponse> workingHours =  workingHoursRepository.findByStaffId(staff.getId()).stream()
+        List<WorkingHourResponse> workingHours = workingHoursRepository.findByStaffId(staff.getId()).stream()
                 .map(workingHourMapper::mapEntityToWorkingHourResponse)
                 .toList();
 
@@ -99,7 +97,7 @@ public class StaffManagementService {
                 .toList();
 
         int upcomingCount = appointmentRepository
-                .findUpcomingByStaffId(staff.getId(), LocalDateTime.now()).size();
+                .findUpcomingByStaffId(staff.getId(), LocalDate.now()).size();
 
         return new StaffDetailResponse(response, serviceResponse, workingHours, leave, upcomingCount);
     }
@@ -108,10 +106,12 @@ public class StaffManagementService {
     @Transactional
     public void assignStaffRole(StaffAssignRequest request) {
         UserModel user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new ApplicationException("User not found with id: " + request.userId(), "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("User not found with id: " + request.userId(), "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
 
         if (staffRepository.existsByUserId(request.userId())) {
-            throw new ApplicationException("User is already assigned as staff", "ALREADY_ASSIGNED", HttpStatus.CONFLICT);
+            throw new ApplicationException("User is already assigned as staff", "ALREADY_ASSIGNED",
+                    HttpStatus.CONFLICT);
         }
 
         // Create staff record
@@ -157,12 +157,12 @@ public class StaffManagementService {
         }
     }
 
-
     // ==================== Working Hours ====================
     @Transactional
     public void setWorkingHours(Long staffId, List<WorkingHoursRequest> requests) {
         Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
 
         workingHoursRepository.deleteByStaffId(staffId);
         System.out.println("hello success");
@@ -182,12 +182,12 @@ public class StaffManagementService {
         workingHoursRepository.saveAll(hoursList);
     }
 
-
     // ==================== Leave Management ====================
     @Transactional
     public void addStaffLeave(Long staffId, StaffLeaveRequest request) {
         Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
 
         // Check if leave already exists for this date
         if (leaveRepository.findByStaffIdAndLeaveDate(staffId, request.leaveDate()).isPresent()) {
@@ -209,12 +209,12 @@ public class StaffManagementService {
         leaveRepository.deleteByIdAndStaffId(leaveId, staffId);
     }
 
-
     // ==================== Service Assignment ====================
     @Transactional
     public void assignServicesToStaff(Long staffId, List<Long> serviceIds) {
         Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
 
         List<ServiceModel> services = serviceRepository.findAllById(serviceIds);
         staff.addServices(services);
@@ -224,13 +224,14 @@ public class StaffManagementService {
     @Transactional
     public void removeServiceFromStaff(Long staffId, Long serviceId) {
         Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Staff not found with id: " + staffId, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
         ServiceModel service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new ApplicationException("Service not found with id: " + serviceId, "NOT_FOUND", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Service not found with id: " + serviceId, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND));
 
         staff.removeService(service);
         staffRepository.save(staff);
     }
-
 
 }

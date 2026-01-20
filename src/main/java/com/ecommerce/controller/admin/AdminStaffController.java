@@ -4,7 +4,7 @@ import com.ecommerce.dto.request.staff.StaffAssignRequest;
 import com.ecommerce.dto.request.staff.StaffLeaveRequest;
 import com.ecommerce.dto.request.staff.WorkingHoursRequest;
 import com.ecommerce.dto.response.ApiResponse;
-import com.ecommerce.dto.response.service.StaffDetailResponse;
+import com.ecommerce.dto.response.staff.StaffDetailResponse;
 import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
 import com.ecommerce.dto.response.staff.StaffListResponse;
 import com.ecommerce.model.user.StaffRole;
