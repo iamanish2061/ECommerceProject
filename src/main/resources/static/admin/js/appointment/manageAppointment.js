@@ -102,6 +102,7 @@ const AppointmentManager = {
 
     async loadAppointments() {
         try {
+            showToast("Loading appointments...", "info");
             const res = await ManageAppointmentService.getAllAppointments();
             if (res.success) {
                 this.allAppointments = res.data || [];
@@ -151,7 +152,7 @@ const AppointmentManager = {
         }
 
         if (searchService) {
-            filtered = filtered.filter(a => (a.response?.name || '').toLowerCase().includes(searchService));
+            filtered = filtered.filter(a => (a.serviceResponse?.name || '').toLowerCase().includes(searchService));
         }
 
         if (statusFilter) {
@@ -218,13 +219,13 @@ const AppointmentManager = {
                     <td class="p-4">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
-                                ${(apt.username || 'U').charAt(0).toUpperCase()}
+                                ${(apt.userResponse?.username || apt.username || 'U').charAt(0).toUpperCase()}
                             </div>
-                            <span class="font-medium text-slate-700 text-sm truncate max-w-[120px]">${apt.username || 'N/A'}</span>
+                            <span class="font-medium text-slate-700 text-sm truncate max-w-[120px]">${apt.userResponse?.username || apt.username || 'N/A'}</span>
                         </div>
                     </td>
                     <td class="p-4">
-                        <span class="text-sm font-semibold text-slate-700">${apt.response?.name || 'Service'}</span>
+                        <span class="text-sm font-semibold text-slate-700">${apt.serviceResponse?.name || 'Service'}</span>
                     </td>
                     <td class="p-4 text-sm text-slate-600">${date}</td>
                     <td class="p-4 text-sm text-slate-600 font-medium">${time}</td>
@@ -274,12 +275,14 @@ const AppointmentManager = {
         statusBg.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="${style.icon}" /></svg>`;
 
         // Customer
-        document.getElementById('popupCustName').textContent = apt.userResponse?.fullName || 'N/A';
-        document.getElementById('popupCustEmail').textContent = apt.userResponse?.email || 'N/A';
-        document.getElementById('custAvatar').textContent = (apt.userResponse?.fullName || 'U').charAt(0).toUpperCase();
+        document.getElementById('popupCustName').textContent = apt.userResponse?.fullName || apt.userResponse?.username || 'N/A';
+        document.getElementById('popupCustEmail').textContent = apt.userResponse?.email || '';
+        document.getElementById('custAvatar').textContent = (apt.userResponse?.fullName || apt.userResponse?.username || 'U').charAt(0).toUpperCase();
 
         // Staff
-        document.getElementById('popupStaffName').textContent = apt.staffResponse?.staffName || 'N/A';
+        document.getElementById('popupStaffName').textContent = apt.staffResponse?.name || 'Any Specialist';
+        const staffRole = document.getElementById('popupStaffRole');
+        if (staffRole) staffRole.textContent = apt.staffResponse?.expertiseIn || 'Expert Stylist';
         const staffImg = document.getElementById('staffImg');
         const staffInitial = document.getElementById('staffInitial');
         if (apt.staffResponse?.profileUrl) {
@@ -289,7 +292,7 @@ const AppointmentManager = {
         } else {
             staffImg.classList.add('hidden');
             staffInitial.classList.remove('hidden');
-            staffInitial.textContent = (apt.staffResponse?.staffName || 'S').charAt(0).toUpperCase();
+            staffInitial.textContent = (apt.staffResponse?.name || 'S').charAt(0).toUpperCase();
         }
 
         // Service
@@ -310,15 +313,18 @@ const AppointmentManager = {
         // Payment
         const payStatus = document.getElementById('payStatus');
         const payMethod = document.getElementById('payMethod');
+        const payAmount = document.getElementById('payAmount');
         const payTrans = document.getElementById('payTransaction');
 
         if (apt.paymentResponse) {
             payMethod.textContent = (apt.paymentResponse.paymentMethod || 'Online').replace(/_/g, ' ');
             payStatus.textContent = apt.paymentResponse.paymentStatus || 'PENDING';
+            payAmount.textContent = `Rs. ${(apt.paymentResponse.totalAmount || 0).toFixed(2)}`;
             payTrans.textContent = `Transaction Ref: ${apt.paymentResponse.transactionId || 'N/A'}`;
         } else {
             payMethod.textContent = 'Unpaid / Manual';
             payStatus.textContent = 'PENDING';
+            payAmount.textContent = 'Rs. 0.00';
             payTrans.textContent = 'No transaction data available';
         }
 
