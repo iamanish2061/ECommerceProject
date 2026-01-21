@@ -303,7 +303,11 @@
                 class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex justify-between items-start text-white rounded-t-3xl">
                 <div>
                     <h3 class="text-xl font-bold mb-1">Payment Detail</h3>
-                    <p class="text-blue-100 text-xs font-medium tracking-wide">ID: #<span id="popupPayId">...</span></p>
+                    <div class="flex items-center gap-3 text-blue-100 text-xs font-medium tracking-wide">
+                        <span>ID: #<span id="popupPayId">...</span></span>
+                        <span class="opacity-50">•</span>
+                        <span id="popupDateHeader">...</span>
+                    </div>
                 </div>
                 <button onclick="PaymentUI.closeModal('paymentDetailModal')"
                     class="hover:bg-white/10 rounded-full p-1.5 transition-all"><svg xmlns="http://www.w3.org/2000/svg"
@@ -340,6 +344,8 @@
                         <div id="relationBadge" class="text-right">
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Linked To</p>
                             <p id="relationId" class="text-sm font-bold text-indigo-600">...</p>
+                            <span id="relationStatus"
+                                class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 border border-slate-200 mt-1 inline-block">...</span>
                         </div>
                     </div>
                 </div>
@@ -373,6 +379,8 @@
             </div>
         </div>
     </div>
+
+    <div id="toast-container"></div>
 
     <!-- Scripts -->
     <script src="../assets/js/api.js"></script>

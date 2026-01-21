@@ -14,12 +14,23 @@ const ServiceManager = {
         ServiceManager.setupAssignStaffListener();
     },
 
-    handleLogout: async () => {
+    async handleLogout() {
         if (!confirm('Are you sure you want to logout?')) return;
+
         try {
+            // Try to call logout API if AuthService exists
             if (typeof AuthService !== 'undefined' && AuthService.logout) {
-                await AuthService.logout();
-                window.location.href = '/auth/login.html';
+                const response = await AuthService.logout();
+                if (response?.success) {
+                    showToast('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 500);
+                } else {
+                    showToast('Failed to log out', 'error');
+                }
+            } else {
+                console.log("auth service not defined");
             }
         } catch (error) {
             console.error('Logout error:', error);
@@ -27,6 +38,7 @@ const ServiceManager = {
     },
 
     loadAllData: async () => {
+        showToast("Loading services...", "info");
         try {
             // Fetch services and active categories in parallel
             const [servicesRes, categoriesRes] = await Promise.all([
@@ -192,6 +204,7 @@ const ServiceManager = {
     // --- Actions ---
 
     handleEditClick: async (id) => {
+        showToast("Loading service details...", "info");
         try {
             const res = await ManageServiceService.getServiceDetail(id);
             if (res.success) {

@@ -15,17 +15,31 @@ const StaffManager = {
         StaffManager.setupEventListeners();
     },
 
-    handleLogout: async () => {
-        if (!confirm('Logout?')) return;
+    async handleLogout() {
+        if (!confirm('Are you sure you want to logout?')) return;
+
         try {
+            // Try to call logout API if AuthService exists
             if (typeof AuthService !== 'undefined' && AuthService.logout) {
-                await AuthService.logout();
-                window.location.href = '/auth/login.html';
+                const response = await AuthService.logout();
+                if (response?.success) {
+                    showToast('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 500);
+                } else {
+                    showToast('Failed to log out', 'error');
+                }
+            } else {
+                console.log("auth service not defined");
             }
-        } catch (e) { console.error(e); }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     },
 
     loadAllData: async () => {
+        showToast("Loading staff...", "info");
         try {
             const res = await ManageStaffService.getAllStaff();
             if (res.success) {
@@ -99,6 +113,7 @@ const StaffManager = {
     },
 
     handleViewClick: async (id) => {
+        showToast("Loading staff details...", "info");
         try {
             StaffManager.state.selectedStaffId = id;
             const res = await ManageStaffService.getStaffDetail(id);

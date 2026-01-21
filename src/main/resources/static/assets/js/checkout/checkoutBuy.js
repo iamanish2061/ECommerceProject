@@ -256,7 +256,6 @@ checkoutBtn.addEventListener("click", async function () {
         const response = await checkoutService.processSingleProductCheckout(productData.id, body);
         if (response.success) {
             const paymentData = response.data;
-            console.log("Payment Data:", paymentData);
 
             if (paymentData.method === "CASH_ON_DELIVERY") {
                 showToast("Order placed successfully! Pay on delivery.", "success");

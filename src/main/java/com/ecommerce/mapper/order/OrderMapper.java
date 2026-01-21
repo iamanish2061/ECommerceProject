@@ -2,6 +2,7 @@ package com.ecommerce.mapper.order;
 
 import com.ecommerce.dto.response.order.OrderItemResponse;
 import com.ecommerce.dto.response.order.OrderResponse;
+import com.ecommerce.dto.response.order.OrderSummaryResponse;
 import com.ecommerce.mapper.product.ProductMapper;
 import com.ecommerce.model.order.OrderItem;
 import com.ecommerce.model.order.OrderModel;
@@ -25,5 +26,7 @@ public interface OrderMapper {
     @Mapping(source = "product", target = "product")
     OrderItemResponse mapEntityToOrderItemResponse(OrderItem item);
 
+    @Mapping(target = "orderId", source = "id")
+    OrderSummaryResponse mapEntityToOrderSummaryResponse(OrderModel order);
 
 }

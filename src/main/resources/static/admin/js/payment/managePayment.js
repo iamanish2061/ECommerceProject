@@ -48,13 +48,30 @@ const PaymentManager = {
     },
 
     async handleLogout() {
-        if (confirm('Are you sure?')) {
-            await AuthService.logout();
-            window.location.href = '/auth/login.html';
+        if (!confirm('Are you sure you want to logout?')) return;
+
+        try {
+            // Try to call logout API if AuthService exists
+            if (typeof AuthService !== 'undefined' && AuthService.logout) {
+                const response = await AuthService.logout();
+                if (response?.success) {
+                    showToast('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 200);
+                } else {
+                    showToast('Failed to log out', 'error');
+                }
+            } else {
+                console.log("auth service not defined");
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
         }
     },
 
     async loadPayments() {
+        showToast("Loading payments...", "info");
         try {
             const res = await ManagePaymentService.getAllPayments();
             if (res.success) {
@@ -110,7 +127,7 @@ const PaymentManager = {
         }
 
         if (searchUser) {
-            filtered = filtered.filter(p => (p.username || '').toLowerCase().includes(searchUser));
+            filtered = filtered.filter(p => (p.username || p.userResponse?.username || '').toLowerCase().includes(searchUser));
         }
 
         if (status) {
@@ -151,10 +168,15 @@ const PaymentManager = {
 
             // Relation identification logic
             let relationHtml = '';
-            if (p.orderId) {
-                relationHtml = `<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">ORDER #${p.orderId}</span>`;
-            } else if (p.appointmentId) {
-                relationHtml = `<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 text-[10px] font-bold border border-indigo-100">APT #${p.appointmentId}</span>`;
+            const orderId = p.orderId || p.orderResponse?.orderId;
+            const aptId = p.appointmentId || p.appointmentResponse?.appointmentId;
+
+            if (orderId) {
+                relationHtml = `<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">ORDER #${orderId}</span>`;
+            } else if (p.orderResponse) {
+                relationHtml = `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100">IN-STORE</span>`;
+            } else if (aptId) {
+                relationHtml = `<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 text-[10px] font-bold border border-indigo-100">APT #${aptId}</span>`;
             } else {
                 relationHtml = `<span class="text-slate-300 text-[10px]">--</span>`;
             }
@@ -168,8 +190,8 @@ const PaymentManager = {
                     <td class="p-4 font-bold text-slate-800 text-sm">#${res.paymentId}</td>
                     <td class="p-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 border border-slate-200">${(p.username || 'U').charAt(0).toUpperCase()}</div>
-                            <span class="text-sm font-semibold text-slate-700">${p.username || 'N/A'}</span>
+                            <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 border border-slate-200">${(p.username || p.userResponse?.username || 'U').charAt(0).toUpperCase()}</div>
+                            <span class="text-sm font-semibold text-slate-700">${p.username || p.userResponse?.username || 'N/A'}</span>
                         </div>
                     </td>
                     <td class="p-4 text-center">${relationHtml}</td>
@@ -188,7 +210,7 @@ const PaymentManager = {
     },
 
     async viewDetail(id) {
-        showToast("Loading...");
+        showToast("Loading detail...");
         this.currentPayId = id;
         try {
             const res = await ManagePaymentService.getPaymentDetail(id);
@@ -210,25 +232,37 @@ const PaymentManager = {
         document.getElementById('popupAmount').textContent = `Rs. ${(pay.totalAmount || 0).toFixed(2)}`;
         document.getElementById('popupMethod').textContent = (pay.paymentMethod || 'N/A').replace(/_/g, ' ');
         document.getElementById('popupTransId').textContent = pay.transactionId || 'N/A';
+        const dateStr = pay.paymentDate ? new Date(pay.paymentDate).toLocaleString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : 'N/A';
+        document.getElementById('popupDateHeader').textContent = dateStr;
 
         const statusEl = document.getElementById('popupStatus');
         statusEl.textContent = pay.paymentStatus;
         statusEl.className = `text-sm font-bold uppercase tracking-widest ${pay.paymentStatus === 'COMPLETED' ? 'text-emerald-600' : 'text-slate-600'}`;
 
-        document.getElementById('popupUserName').textContent = user.fullName || 'N/A';
-        document.getElementById('popupUserEmail').textContent = user.email || 'N/A';
-        document.getElementById('userInit').textContent = (user.fullName || 'U').charAt(0).toUpperCase();
+        const displayName = user.fullName || user.username || 'N/A';
+        document.getElementById('popupUserName').textContent = displayName;
+        document.getElementById('popupUserEmail').textContent = user.email || '';
+        document.getElementById('userInit').textContent = displayName.charAt(0).toUpperCase();
 
         const relationId = document.getElementById('relationId');
+        const relStatus = document.getElementById('relationStatus');
         if (data.orderResponse) {
-            relationId.textContent = `Order #${data.orderResponse.orderId}`;
-            relationId.className = 'text-sm font-bold text-blue-600';
+            const orderIdVal = data.orderResponse.orderId;
+            relationId.textContent = orderIdVal ? `Order #${orderIdVal}` : 'In-Store Order';
+            relationId.className = orderIdVal ? 'text-sm font-bold text-blue-600' : 'text-sm font-bold text-emerald-600';
+            relStatus.textContent = data.orderResponse.status || 'N/A';
+            relStatus.classList.remove('hidden');
         } else if (data.appointmentResponse) {
             relationId.textContent = `Appointment #${data.appointmentResponse.appointmentId}`;
             relationId.className = 'text-sm font-bold text-indigo-600';
+            relStatus.textContent = data.appointmentResponse.status || 'N/A';
+            relStatus.classList.remove('hidden');
         } else {
             relationId.textContent = 'None';
             relationId.className = 'text-sm font-bold text-slate-400';
+            relStatus.classList.add('hidden');
         }
 
         const select = document.getElementById('statusSelect');

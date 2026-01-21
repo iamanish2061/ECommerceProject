@@ -47,22 +47,13 @@ const UserService = {
         return await request(`/admin/orders/${orderId}/user-profile`, 'GET');
     },
 
-    // Get User Appointments (Dummy for now)
-    // BAKI XA
+    // Get User Appointments
     getUserAppointments: async (userId) => {
-        // Mocking API delay
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve({
-                    success: true,
-                    data: [
-                        { id: 101, serviceName: "Haircut", date: "2024-01-15", time: "10:00 AM", status: "SCHEDULED" },
-                        { id: 102, serviceName: "Beard Trim", date: "2024-01-12", time: "02:00 PM", status: "COMPLETED" },
-                        { id: 105, serviceName: "Facial", date: "2024-01-10", time: "11:00 AM", status: "CANCELLED" }
-                    ]
-                });
-            }, 500);
-        });
+        return await request(`/admin/appointments/user/${userId}`, 'GET');
+    },
+
+    getAppointmentDetails: async (appointmentId) => {
+        return await request(`/admin/appointments/${appointmentId}`, 'GET');
     },
 
     // get info like service and expertise for assigning staff

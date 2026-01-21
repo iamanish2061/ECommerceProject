@@ -74,6 +74,7 @@ const OrderManager = {
     },
 
     async loadOrders() {
+        showToast("Loading orders...", "info");
         try {
             const res = await OrderService.getAllOrders();
             if (res.success) {

@@ -45,6 +45,7 @@ const SpecificProductManager = {
     },
 
     async loadProductData() {
+        showToast("Loading product details...", "info");
         try {
             const res = await ProductService.getProductDetails(this.productId);
             if (res.success) {

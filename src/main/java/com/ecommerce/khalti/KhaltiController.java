@@ -19,12 +19,12 @@ public class KhaltiController {
     @GetMapping("/khalti-response-handle")
     public RedirectView handleResponse(KhaltiCallbackDTO values) {
         boolean isVerified = khaltiService.verifyPayment(values);
-        String query = "amount=" + URLEncoder.encode(values.getAmount().toString(), StandardCharsets.UTF_8)
+        String query = "amount=" + URLEncoder.encode(String.valueOf((Long.parseLong(values.getAmount())*0.01)), StandardCharsets.UTF_8)
                 + "&transactionId=" + URLEncoder.encode(values.getTransaction_id(), StandardCharsets.UTF_8);
         if (isVerified)
-            return new RedirectView("/success.html"+query);
+            return new RedirectView("/success.html?"+query);
         else{
-            return new RedirectView("/failure.html"+query);
+            return new RedirectView("/failure.html?"+query);
         }
     }
 }

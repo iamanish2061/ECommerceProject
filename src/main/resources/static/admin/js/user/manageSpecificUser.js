@@ -82,25 +82,30 @@ const SpecificUserUI = {
         return `
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 border-b">
+                    <thead class="bg-slate-50 border-b text-slate-400">
                         <tr>
-                            <th class="p-3 font-semibold text-slate-600">Service</th>
-                             <th class="p-3 font-semibold text-slate-600">Date</th>
-                            <th class="p-3 font-semibold text-slate-600">Time</th>
-                            <th class="p-3 font-semibold text-slate-600">Status</th>
+                            <th class="p-3 font-bold uppercase text-[10px] tracking-wider">Service</th>
+                            <th class="p-3 font-bold uppercase text-[10px] tracking-wider">Date</th>
+                            <th class="p-3 font-bold uppercase text-[10px] tracking-wider">Time</th>
+                            <th class="p-3 font-bold uppercase text-[10px] tracking-wider">Status</th>
+                            <th class="p-3 font-bold uppercase text-[10px] tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
+                    <tbody class="divide-y text-slate-700">
                         ${appointments.map(a => `
-                            <tr>
-                                <td class="p-3 font-medium">${a.serviceName}</td>
-                                <td class="p-3">${a.date}</td>
-                                <td class="p-3">${a.time}</td>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-3 font-bold text-slate-800">${a.response?.name || 'N/A'}</td>
+                                <td class="p-3 font-medium">${a.appointmentDate || 'N/A'}</td>
+                                <td class="p-3 font-medium">${a.startTime || 'N/A'} - ${a.endTime || 'N/A'}</td>
                                 <td class="p-3">
-                                     <span class="px-2 py-1 rounded-full text-xs font-bold 
+                                     <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest 
                                         ${a.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                a.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">
+                a.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                    a.status === 'BOOKED' ? 'bg-indigo-100 text-indigo-700' : 'bg-yellow-100 text-yellow-700'}">
                                      ${a.status}</span>
+                                </td>
+                                <td class="p-3">
+                                    <button onclick="SpecificUserManager.showAppointmentDetails(${a.appointmentId})" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs uppercase tracking-wider">View Detail</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -441,7 +446,7 @@ const SpecificUserManager = {
     },
 
     async showAppointments() {
-        showToast("Fetching Appointments...");
+        showToast("Fetching User Appointments...");
         try {
             const res = await UserService.getUserAppointments(this.userId);
             if (res.success) {
@@ -449,7 +454,99 @@ const SpecificUserManager = {
             } else {
                 showToast(res.message, "error");
             }
-        } catch (e) { showToast("Failed to fetch appointments", "error"); }
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to fetch appointments", "error");
+        }
+    },
+
+    async showAppointmentDetails(aptId) {
+        showToast("Fetching Appointment Details...");
+        try {
+            const res = await UserService.getAppointmentDetails(aptId);
+            if (res.success) {
+                this.populateAppointmentModal(res.data);
+                SpecificUserUI.openModal('appointmentDetailModal');
+            } else {
+                showToast(res.message, "error");
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to fetch appointment details", "error");
+        }
+    },
+
+
+    populateAppointmentModal(apt) {
+        const style = this.getStatusStyle(apt.status);
+
+        // Header
+        document.getElementById('popupAptId').textContent = apt.appointmentId;
+        const statusText = document.getElementById('popupStatus');
+        const statusBg = document.getElementById('popupStatusBg');
+        statusText.textContent = apt.status;
+        statusText.className = `text-base font-bold capitalize leading-none ${style.textClass}`;
+        statusBg.className = `p-2.5 rounded-xl ${style.bgClass} ${style.textClass}`;
+
+        // Customer
+        document.getElementById('popupCustName').textContent = apt.userResponse?.fullName || apt.userResponse?.username || 'N/A';
+        document.getElementById('popupCustEmail').textContent = apt.userResponse?.email || '';
+        document.getElementById('custAvatar').textContent = (apt.userResponse?.fullName || apt.userResponse?.username || 'U').charAt(0).toUpperCase();
+
+        // Staff
+        document.getElementById('popupStaffName').textContent = apt.staffResponse?.name || 'Any Specialist';
+        const staffRole = document.getElementById('popupStaffRole');
+        if (staffRole) staffRole.textContent = apt.staffResponse?.expertiseIn || 'Expert Stylist';
+        const staffImg = document.getElementById('staffImg');
+        const staffInitial = document.getElementById('staffInitial');
+        if (apt.staffResponse?.profileUrl) {
+            staffImg.src = apt.staffResponse.profileUrl;
+            staffImg.classList.remove('hidden');
+            staffInitial.classList.add('hidden');
+        } else {
+            staffImg.classList.add('hidden');
+            staffInitial.classList.remove('hidden');
+            staffInitial.textContent = (apt.staffResponse?.name || 'S').charAt(0).toUpperCase();
+        }
+
+        // Service
+        document.getElementById('popupSvcName').textContent = apt.serviceResponse?.name || 'N/A';
+        document.getElementById('popupSvcDuration').textContent = `Duration: ${apt.serviceResponse?.durationMinutes || '...'} mins`;
+        document.getElementById('popupSvcPrice').textContent = `Rs. ${(apt.totalAmount || 0).toFixed(2)}`;
+        if (apt.serviceResponse?.imageUrl) {
+            document.getElementById('svcImg').src = apt.serviceResponse.imageUrl;
+        }
+
+        // Schedule
+        document.getElementById('popupAptDate').textContent = apt.appointmentDate || 'N/A';
+        document.getElementById('popupAptTime').textContent = `${apt.startTime || ''} - ${apt.endTime || ''}`;
+
+        // Notes
+        document.getElementById('popupNotes').textContent = apt.specialNotes || 'No special notes provided';
+
+        // Payment
+        const payStatus = document.getElementById('payStatus');
+        const payMethod = document.getElementById('payMethod');
+        const payAmount = document.getElementById('payAmount');
+        const payTrans = document.getElementById('payTransaction');
+
+        if (apt.paymentResponse) {
+            payMethod.textContent = (apt.paymentResponse.paymentMethod || 'Online').replace(/_/g, ' ');
+            payStatus.textContent = apt.paymentResponse.paymentStatus || 'PENDING';
+            payAmount.textContent = `Rs. ${(apt.paymentResponse.totalAmount || 0).toFixed(2)}`;
+            payTrans.textContent = `Transaction Ref: ${apt.paymentResponse.transactionId || 'N/A'}`;
+        } else {
+            payMethod.textContent = 'Unpaid / Manual';
+            payStatus.textContent = 'PENDING';
+            payAmount.textContent = 'Rs. 0.00';
+            payTrans.textContent = 'No transaction data available';
+        }
+
+        // Status Select
+        const statusSelect = document.getElementById('statusSelect');
+        if (statusSelect) {
+            statusSelect.value = apt.status;
+        }
     },
 
     async showDriverInfo() {
