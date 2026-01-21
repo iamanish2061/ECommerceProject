@@ -43,17 +43,17 @@ public class BookingController {
         if (staffId == null) {
             staffId = 0L;
         }
-        if (currentUser == null) {
+//        if (currentUser == null) {
             return ResponseEntity.ok(ApiResponse.ok(
                     bookingService.getAvailableTime(
                             serviceId,
                             bookingDate,
                             staffId),
                     "Available time fetched successfully"));
-        } else {
-            return ResponseEntity
-                    .ok(ApiResponse.ok(bookingService.getRecommendationAndTime(currentUser.getUser().getId(), serviceId, bookingDate, staffId), "Recommended time and available time fetched successfully"));
-        }
+//        } else {
+//            return ResponseEntity
+//                    .ok(ApiResponse.ok(bookingService.getRecommendationAndTime(currentUser.getUser().getId(), serviceId, bookingDate, staffId), "Recommended time and available time fetched successfully"));
+//        }
     }
 
     @PostMapping

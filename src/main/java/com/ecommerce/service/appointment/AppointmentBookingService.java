@@ -340,4 +340,11 @@ public class AppointmentBookingService {
         notificationProducer.send("notify.user", event);
     }
 
+
+//    for user specific page to view
+    public List<AppointmentResponse> getAppointmentsOf(Long userId) {
+        return appointmentRepository.findByCustomerIdOrderByAppointmentDateDesc(userId).stream()
+                .map(appointmentMapper::mapEntityToAppointmentResponse)
+                .toList();
+    }
 }

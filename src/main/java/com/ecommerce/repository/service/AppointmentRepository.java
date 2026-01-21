@@ -1,5 +1,6 @@
 package com.ecommerce.repository.service;
 
+import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.service.Appointment;
 import com.ecommerce.model.service.AppointmentStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -30,15 +31,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("staffIds") List<Long> staffIds,
             @Param("date") LocalDate date
     );
-
-    // 3. Fetching for Admin (Listing) - Uses your NamedEntityGraph
-    @EntityGraph(value = "Appointment.customer.staff.service.payment", type = EntityGraph.EntityGraphType.FETCH)
-    List<Appointment> findAllByAppointmentDate(LocalDate date);
-
-
-    // 5. Fetching for a Specific Staff Member (Staff Dashboard)
-    @EntityGraph(value = "Appointment.customer.service", type = EntityGraph.EntityGraphType.FETCH)
-    List<Appointment> findByStaffIdAndAppointmentDate(Long staffId, LocalDate date);
 
     // Count staff appointments on a specific date (for workload calculation)
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.staff.id = :staffId " +
@@ -71,17 +63,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @EntityGraph("Appointment.customer.staff.service.payment")
     List<Appointment> findAllByOrderByAppointmentDateDesc();
 
-    // Filter by status
-    @EntityGraph("Appointment.customer.staff.service.payment")
-    List<Appointment> findByStatusOrderByAppointmentDateDesc(AppointmentStatus status);
-
-    // Filter by date range (for admin)
-    @EntityGraph("Appointment.customer.staff.service.payment")
-    @Query("SELECT a FROM Appointment a WHERE a.appointmentDate >= :start " +
-                    "AND a.appointmentDate <= :end ORDER BY a.appointmentDate DESC")
-    List<Appointment> findByDateRange(
-                    @Param("start") LocalDate start,
-                    @Param("end") LocalDate end);
 
     // Upcoming appointments for a staff member (for dashboard)
     @Query("SELECT a FROM Appointment a WHERE a.staff.id = :staffId " +
@@ -91,5 +72,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findUpcomingByStaffId(
                     @Param("staffId") Long staffId,
                     @Param("today") LocalDate today);
+
+    @EntityGraph(value = "Appointment.customer.staff.user.service.payment", type = EntityGraph.EntityGraphType.FETCH)
+    List<Appointment> findTop5ByOrderByCreatedAtDesc();
 
 }

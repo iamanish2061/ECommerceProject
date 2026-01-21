@@ -22,5 +22,5 @@ public record AppointmentDetailAdminResponse(
                 ServiceSummaryResponse serviceResponse,
                 PaymentResponse paymentResponse,
                 StaffSummaryResponse staffResponse,
-                AllUsersResponse userResponse) {
-}
+                AllUsersResponse userResponse
+) {}

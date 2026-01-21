@@ -49,4 +49,13 @@ public class AdminAppointmentController {
         return ResponseEntity.ok(ApiResponse.ok("Status updated successfully"));
     }
 
+    //    ----- for admin - manage-specific-user.html page to list appointment there -----
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "to fetch list of appointments in user page of admin")
+    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> getAppointmentsOf(
+            @ValidId @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(bookingService.getAppointmentsOf(userId), "Fetched appointment list of user: "+userId));
+    }
+
 }
