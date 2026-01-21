@@ -36,7 +36,7 @@ public class Review {
     @NotNull
     private Integer rating;
 
-//    title refers to speific product or service
+//    title refers to specific product or service
     private String title;
 
     @Column(columnDefinition = "TEXT")
