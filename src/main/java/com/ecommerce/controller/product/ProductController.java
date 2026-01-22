@@ -136,4 +136,18 @@ public class ProductController {
     }
 
 
+//    index page ko laagi
+
+    @GetMapping("/new-arrivals")
+    @Operation(summary = "to fetch new arrived products in index page")
+    public ResponseEntity<ApiResponse<List<BriefProductsResponse>>> getNewArrivedProducts(){
+        return ResponseEntity.ok(ApiResponse.ok(productService.getNewArrivedProducts(),"New arrived products fetched"));
+    }
+
+    @GetMapping("/best-sellers")
+    @Operation(summary = "to fetch new arrived products in index page")
+    public ResponseEntity<ApiResponse<List<BriefProductsResponse>>> getBestSeller(){
+        return ResponseEntity.ok(ApiResponse.ok(productService.getBestSeller(),"Best selling products fetched"));
+    }
+
 }

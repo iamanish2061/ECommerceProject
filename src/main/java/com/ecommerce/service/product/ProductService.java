@@ -133,18 +133,6 @@ public class ProductService {
                 .toList();
     }
 
-    public List<BriefProductsResponse> getAllProductsExcept(List<Long> recommendedIds) {
-        if (recommendedIds == null || recommendedIds.isEmpty()) {
-            return getAllProducts();
-        }
-        List<ProductModel> products = productRepository.findAllByIdNotIn(recommendedIds);
-        if(products.isEmpty())
-            throw new ApplicationException("No products found!", "PRODUCT_NOT_FOUND", HttpStatus.NOT_FOUND);
-        return products.stream()
-                .map(productMapper::mapEntityToBriefProductsResponse)
-                .toList();
-    }
-
     public SingleProductResponse getDetailOfProduct(UserPrincipal currentUser, Long id) {
         ProductModel product = productRepository.findProductDetailsById(id).orElseThrow(()->
                 new ApplicationException("Product not found!", "PRODUCT_NOT_FOUND", HttpStatus.BAD_REQUEST));
@@ -270,6 +258,11 @@ public class ProductService {
 
         }
 
+        if(excludedIds.isEmpty()){
+            List<BriefProductsResponse> products = getAllProducts();
+            return Map.of("products", products);
+        }
+
 //        all products
         List<BriefProductsResponse> products = productRepository.findAllByIdNotIn(new ArrayList<>(excludedIds))
                 .stream()
@@ -281,4 +274,17 @@ public class ProductService {
         return response;
     }
 
+    public List<BriefProductsResponse> getNewArrivedProducts() {
+        return productRepository.findAllWithImageFromTagSlug("new-arrival").stream()
+                .limit(4)
+                .map(productMapper::mapEntityToBriefProductsResponse)
+                .toList();
+    }
+
+    public List<BriefProductsResponse> getBestSeller() {
+        return productRepository.findAllWithImageFromTagSlug("best-seller").stream()
+                .limit(4)
+                .map(productMapper::mapEntityToBriefProductsResponse)
+                .toList();
+    }
 }
