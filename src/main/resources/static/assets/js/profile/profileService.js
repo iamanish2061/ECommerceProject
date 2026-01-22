@@ -40,10 +40,6 @@ const profileService = {
 
 
     // ==================== ORDER METHODS ====================
-    async getDetailOrder() {
-        return await request(`/orders`, 'GET');
-    },
-
     async getOrderForProfile() {
         return await request(`/orders/for-profile`, 'GET');
     },
@@ -54,6 +50,19 @@ const profileService = {
 
     async cancelOrder(orderId) {
         return await request(`/orders/cancel/${orderId}`, 'PUT');
+    },
+
+    // =====================APPOINTMENT METHODS ==============
+    async getAppointmentForProfile() {
+        return await request(`/bookings/for-profile`, 'GET');
+    },
+
+    async getSpecificAppointmentDetail(appointmentId) {
+        return await request(`/bookings/appointment/${appointmentId}`, 'GET');
+    },
+
+    async cancelAppointment(appointmentId) {
+        return await request(`/bookings/${appointmentId}/cancel`, 'PUT');
     },
 
 

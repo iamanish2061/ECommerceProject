@@ -9,6 +9,7 @@ let state = {
         work: null
     },
     orders: [],
+    appointments: [],
     driverStatus: null,
     isLoading: false,
     cartCount: 0
@@ -149,6 +150,126 @@ function updateOrdersUI() {
     ordersContainer.innerHTML = state.orders.map(order => createOrderCard(order)).join('');
 }
 
+function updateAppointmentsUI() {
+    const appointmentsContainer = document.getElementById('appointmentsContainer');
+    if (!appointmentsContainer) return;
+
+    if (state.appointments.length === 0) {
+        appointmentsContainer.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-slate-500 font-medium">No appointments yet</p>
+                <a href="service.html" class="mt-4 inline-block text-blue-600 hover:text-blue-700 font-medium">
+                    Book Service Now
+                </a>
+            </div>
+        `;
+        return;
+    }
+
+    appointmentsContainer.innerHTML = state.appointments.map(apt => createAppointmentCard(apt)).join('');
+}
+
+function createAppointmentCard(apt) {
+    const statusColors = {
+        booked: { bg: 'bg-indigo-100', text: 'text-indigo-700' },
+        pending: { bg: 'bg-blue-100', text: 'text-blue-700' },
+        completed: { bg: 'bg-green-100', text: 'text-green-700' },
+        cancelled: { bg: 'bg-red-100', text: 'text-red-700' },
+        no_show: { bg: 'bg-slate-100', text: 'text-slate-700' }
+    };
+    const status = apt.status.toLowerCase();
+    const style = statusColors[status] || statusColors.pending;
+
+    // Service Info from DTO response (ServiceSummaryResponse)
+    const serviceName = apt.response?.name || 'Service';
+    const totalAmount = apt.totalAmount || 0;
+    const date = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    return `
+        <div class="relative bg-gradient-to-br from-indigo-50/50 to-blue-50/50 rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <span class="absolute top-4 right-4 ${style.bg} ${style.text} px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm z-10">
+                ${apt.status}
+            </span>
+            <div class="bg-gradient-to-br from-indigo-100 to-blue-100 h-28 flex items-center justify-center">
+                <span class="text-5xl">✂️</span>
+            </div>
+            <div class="p-6">
+                <h4 class="font-bold text-slate-800 text-lg mb-1 truncate">${serviceName}</h4>
+                <div class="flex flex-col gap-1 mb-4">
+                    <p class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        ${date}
+                    </p>
+                    <p class="text-[11px] font-bold text-indigo-600 flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        ${apt.startTime} - ${apt.endTime}
+                    </p>
+                </div>
+                <div class="flex items-center justify-between mb-4 mt-2">
+                    <span class="font-bold text-indigo-600 text-lg">Rs. ${totalAmount.toFixed(2)}</span>
+                </div>
+                <button onclick="viewAppointmentDetails('${apt.appointmentId}')"
+                    class="w-full mb-3 bg-slate-800 text-white py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-slate-900 transition-colors shadow-sm">
+                    View Info
+                </button>
+                ${getAppointmentActionButton(apt)}
+            </div>
+        </div>
+    `;
+}
+
+function getAppointmentActionButton(apt) {
+    const status = apt.status.toLowerCase();
+
+    // Only show cancel button for booked/pending appointments
+    if (status === 'booked' || status === 'pending') {
+        // Check if appointment start time is at least 30 minutes from now
+        const now = new Date();
+
+        // Combine appointment date and start time to create full datetime
+        // apt.appointmentDate is the date, apt.startTime is the time (e.g., "10:00" or "10:00 AM")
+        const appointmentDate = new Date(apt.appointmentDate);
+        const startTimeParts = apt.startTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+
+        if (startTimeParts) {
+            let hours = parseInt(startTimeParts[1], 10);
+            const minutes = parseInt(startTimeParts[2], 10);
+            const period = startTimeParts[3];
+
+            // Convert to 24-hour format if AM/PM is present
+            if (period) {
+                if (period.toUpperCase() === 'PM' && hours !== 12) {
+                    hours += 12;
+                } else if (period.toUpperCase() === 'AM' && hours === 12) {
+                    hours = 0;
+                }
+            }
+
+            appointmentDate.setHours(hours, minutes, 0, 0);
+        }
+
+        // Calculate difference in milliseconds
+        const timeDiff = appointmentDate.getTime() - now.getTime();
+        const thirtyMinutesInMs = 30 * 60 * 1000;
+
+        // Only show cancel button if appointment is more than 30 minutes away
+        if (timeDiff > thirtyMinutesInMs) {
+            return `
+                <button onclick="cancelUserAppointment('${apt.appointmentId}')"
+                    class="w-full bg-red-50 text-red-600 border border-red-100 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors">
+                    Cancel
+                </button>
+            `;
+        }
+    }
+    return '';
+}
+
+
 function createOrderCard(order) {
     const statusColors = {
         confirmed: { bg: 'bg-blue-100', text: 'text-blue-700' },
@@ -253,7 +374,7 @@ async function fetchOrders() {
         const response = await profileService.getOrderForProfile();
         if (response?.success) {
             state.orders = response.data || [];
-            updateOrdersUI(); // <--- This was missing
+            updateOrdersUI();
         } else {
             showToast("Failed to load orders", "error");
         }
@@ -262,6 +383,22 @@ async function fetchOrders() {
         showToast("Failed to fetch orders", "error");
     }
 }
+
+async function fetchAppointments() {
+    try {
+        const response = await profileService.getAppointmentForProfile();
+        if (response?.success) {
+            state.appointments = response.data || [];
+            updateAppointmentsUI();
+        } else {
+            showToast("Failed to load appointments", "error");
+        }
+    } catch (error) {
+        console.error("Error fetching appointments", error);
+        showToast("Failed to fetch appointments", "error");
+    }
+}
+
 
 //left to update the ui for this
 async function checkDriverStatus() {
@@ -691,6 +828,172 @@ function trackOrder(orderId) {
     window.location.href = `/track-order.html?orderId=${orderId}`;
 }
 
+// Appointment detailed view and actions
+function viewAllAppointments() {
+    showToast("Opening all appointments", "info");
+    window.location.href = 'appointments.html';
+}
+
+async function viewAppointmentDetails(aptId) {
+    try {
+        showToast("Fetching appointment info...", "info");
+        const response = await profileService.getSpecificAppointmentDetail(aptId);
+
+        if (response?.success) {
+            populateAppointmentDetailModal(response.data);
+            openAppointmentDetailModal();
+        } else {
+            showToast("Failed to load appointment details", "error");
+        }
+    } catch (error) {
+        console.error("Error fetching appointment details", error);
+        showToast("Network error", "error");
+    }
+}
+
+async function cancelUserAppointment(aptId) {
+    if (confirm(`Are you sure you want to cancel appointment #${aptId}?`)) {
+        try {
+            showToast("Cancelling appointment...", "info");
+            const response = await profileService.cancelAppointment(aptId);
+            if (response.success) {
+                // Refresh local state
+                const apt = state.appointments.find(a => a.appointmentId == aptId);
+                if (apt) apt.status = 'CANCELLED';
+                updateAppointmentsUI();
+                showToast(response.message || "Cancelled successfully", "success");
+            } else {
+                showToast(response.message || "Failed to cancel", "error");
+            }
+        } catch (error) {
+            console.error("Error cancelling appointment", error);
+            showToast("Error in cancelling appointment", "error");
+        }
+    }
+}
+
+// Modal Control for Appointments
+function openAppointmentDetailModal() {
+    const modal = document.getElementById('appointmentDetailModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeAppointmentDetailModal() {
+    const modal = document.getElementById('appointmentDetailModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+}
+
+function populateAppointmentDetailModal(apt) {
+    const style = getAppointmentStatusStyle(apt.status);
+    const dateStr = new Date(apt.appointmentDate).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Header
+    document.getElementById('aptPopupId').textContent = apt.appointmentId;
+
+    // Status
+    const statusText = document.getElementById('aptPopupStatus');
+    const statusBg = document.getElementById('aptPopupStatusBg');
+    statusText.textContent = apt.status;
+    statusText.className = `font-bold text-base leading-none ${style.textClass} capitalize`;
+    statusBg.className = `p-3 rounded-full ${style.bgClass} ${style.textClass}`;
+
+    document.getElementById('aptPopupDate').textContent = dateStr;
+
+    // Specialist
+    const staff = apt.staffResponse;
+    const staffNameEl = document.getElementById('aptPopupStaffName');
+    const staffRoleEl = document.getElementById('aptPopupStaffRole');
+    const staffImg = document.getElementById('aptStaffImg');
+    const staffInitial = document.getElementById('aptStaffInitial');
+
+    if (staff) {
+        staffNameEl.textContent = staff.name || 'Specialist';
+        staffRoleEl.textContent = staff.expertiseIn || 'Expert Stylist';
+        if (staff.profileUrl) {
+            staffImg.src = staff.profileUrl;
+            staffImg.classList.remove('hidden');
+            staffInitial.classList.add('hidden');
+        } else {
+            staffImg.classList.add('hidden');
+            staffInitial.classList.remove('hidden');
+            staffInitial.textContent = (staff.name || 'S').charAt(0).toUpperCase();
+        }
+    } else {
+        staffNameEl.textContent = 'Any Specialist';
+        staffRoleEl.textContent = 'Expert Stylist';
+        staffImg.classList.add('hidden');
+        staffInitial.classList.remove('hidden');
+        staffInitial.textContent = 'A';
+    }
+
+    // Service
+    const svc = apt.serviceResponse;
+    document.getElementById('aptPopupSvcName').textContent = svc?.name || 'Service';
+    document.getElementById('aptPopupSvcDuration').textContent = `Duration: ${svc?.durationMinutes || 0} mins`;
+    if (svc?.imageUrl) document.getElementById('aptPopupSvcImg').src = svc.imageUrl || "/assets/svg/CutLab.svg";
+
+    // Schedule Values
+    document.getElementById('aptPopupDateVal').textContent = apt.appointmentDate;
+    document.getElementById('aptPopupTimeVal').textContent = `${apt.startTime} - ${apt.endTime}`;
+
+    // Notes
+    document.getElementById('aptPopupNotes').textContent = apt.specialNotes || 'No special notes provided';
+
+    // Payment Info
+    const pay = apt.paymentResponse;
+    const payInfo = document.getElementById('aptPaymentInfo');
+    if (pay) {
+        document.getElementById('aptPopupPaymentMethod').textContent = (pay.paymentMethod || 'Online').replace(/_/g, ' ');
+        document.getElementById('aptPopupPaymentStatus').textContent = `Status: ${pay.paymentStatus || 'PENDING'} | Amount: Rs. ${pay.totalAmount?.toFixed(2) || '0.00'}`;
+    } else {
+        document.getElementById('aptPopupPaymentMethod').textContent = 'Unpaid / At Branch';
+        document.getElementById('aptPopupPaymentStatus').textContent = 'Status: PENDING';
+    }
+
+    // Payment Type (Advance Paid or Full Paid based on status)
+    const paymentTypeEl = document.getElementById('aptPopupPaymentType');
+    if (paymentTypeEl) {
+        const isFullPaid = apt.status.toLowerCase() === 'completed';
+        paymentTypeEl.textContent = isFullPaid ? 'Full Paid' : 'Advance Paid';
+        paymentTypeEl.className = `font-bold text-sm leading-none ${isFullPaid ? 'text-emerald-600' : 'text-amber-600'}`;
+    }
+
+    document.getElementById('aptPopupTotal').textContent = `Rs. ${apt.totalAmount.toFixed(2)}`;
+
+    // Actions (Cancellation button)
+    const actionArea = document.getElementById('aptActionArea');
+    const status = apt.status.toLowerCase();
+    if (status === 'booked' || status === 'pending') {
+        actionArea.innerHTML = `
+            <button onclick="cancelUserAppointment('${apt.appointmentId}'); closeAppointmentDetailModal();"
+                class="w-full bg-red-600 text-white py-3.5 rounded-2xl font-bold uppercase tracking-wider hover:bg-red-700 transition-all shadow-lg hover:shadow-red-100 transform hover:-translate-y-0.5 active:translate-y-0">
+                Cancel Appointment
+            </button>
+        `;
+    } else {
+        actionArea.innerHTML = '';
+    }
+}
+
+function getAppointmentStatusStyle(status) {
+    const s = status.toUpperCase();
+    if (s === 'COMPLETED') return { bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' };
+    if (s === 'CANCELLED') return { bgClass: 'bg-red-50', textClass: 'text-red-600' };
+    if (s === 'BOOKED' || s === 'PENDING') return { bgClass: 'bg-indigo-50', textClass: 'text-indigo-600' };
+    return { bgClass: 'bg-slate-50', textClass: 'text-slate-600' };
+}
+
+
 
 // Modal Control Functions
 function openOrderDetailModal() {
@@ -763,7 +1066,7 @@ function populateOrderDetailModal(order) {
         return `
             <div class="flex items-center gap-4 p-3 bg-slate-50/80 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all duration-300">
                 <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-slate-100/50 flex-shrink-0">
-                    <img src="${product.imageUrl || '/assets/images/placeholder.png'}" 
+                    <img src="${product.imageUrl || '/assets/svg/CutLab.svg'}" 
                          alt="${product.title}" 
                          class="w-full h-full object-contain">
                 </div>
@@ -891,11 +1194,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         fetchProfile(),
         fetchAddresses(),
         fetchOrders(),
+        fetchAppointments(),
         checkDriverStatus(),
         updateCartCount()
     ]);
 
-    state.isLoading = false;
+
 });
 
 
