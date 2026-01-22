@@ -9,7 +9,8 @@ let state = {
     totalReviews: 0,
     totalSales: 0,
     latestOrders: [],
-    latestAppointments: []
+    latestAppointments: [],
+    latestForms: []
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -79,7 +80,12 @@ function initSidebar() {
 async function loadDashboardData() {
     try {
         showToast('Loading dashboard data...', 'info');
-        const dashboardResponse = await indexService.getDashboardStats();
+        const [dashboardResponse, orderResponse, appointmentResponse, formResponse] = await Promise.all([
+            indexService.getDashboardStats(),
+            indexService.getOrders(),
+            indexService.getAppointments(),
+            indexService.getForms()
+        ]);
         if (!dashboardResponse || !dashboardResponse.success) {
             showToast('Failed to load dashboard stats', 'error');
             return;
@@ -93,12 +99,29 @@ async function loadDashboardData() {
         state.totalPayments = data.totalPayments;
         state.totalReviews = data.totalReviews;
         state.totalSales = data.totalSales;
-        state.latestOrders = data.latestOrders || [];
-        state.latestAppointments = data.latestAppointments || [];
 
-        renderStats();
-        renderLatestOrders();
+        if (!orderResponse || !orderResponse.success) {
+            showToast('Failed to load orders', 'error');
+            return;
+        }
+        state.latestOrders = orderResponse.data || [];
+
+        if (!appointmentResponse || !appointmentResponse.success) {
+            showToast('Failed to load appointments', 'error');
+            return;
+        }
+        state.latestAppointments = appointmentResponse.data || [];
+
+        if (!formResponse || !formResponse.success) {
+            showToast('Failed to load forms', 'error');
+            return;
+        }
+        state.latestForms = formResponse.data || [];
+
         renderLatestAppointments();
+        renderLatestOrders();
+        renderStats();
+        // renderUnreadForms();
     } catch (error) {
         console.error("Error loading dashboard data:", error);
         showToast('An error occurred while loading dashboard data', 'error');
@@ -180,9 +203,10 @@ function renderLatestAppointments() {
 
     tableBody.innerHTML = state.latestAppointments.map(appointment => `
         <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-            <td class="py-4 font-medium text-slate-800">${appointment.time}</td>
-            <td class="py-4">${appointment.customer}</td>
-            <td class="py-4 text-xs font-medium">${appointment.service}</td>
+            <td class="py-4 font-medium text-slate-800">#${appointment.appointmentId}</td>
+            <td class="py-4 font-medium text-slate-800">${appointment.startTime} - ${appointment.endTime}</td>
+            <td class="py-4">${appointment.username}</td>
+            <td class="py-4 text-xs font-medium">${appointment.response.name}</td>
             <td class="py-4">
                 <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(appointment.status)}">
                     ${appointment.status}

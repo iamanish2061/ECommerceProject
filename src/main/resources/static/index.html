@@ -131,7 +131,7 @@
             <div class="space-y-6">
                 <h1 class="text-5xl md:text-6xl font-bold text-slate-800 leading-tight">
                     Premium <span class="text-indigo-600">Grooming</span><br />
-                    For Modern Men
+                    For All
                 </h1>
                 <p class="text-xl text-slate-600 leading-relaxed">
                     Experience the perfect blend of traditional barbering and modern style. At CutLab, we craft more
@@ -143,9 +143,9 @@
                         class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105">
                         Shop Now
                     </a>
-                    <a href="#about"
+                    <a href="service.html"
                         class="bg-white border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all">
-                        Learn More
+                        Book now
                     </a>
                 </div>
             </div>
@@ -168,81 +168,17 @@
         </div>
     </section>
 
-    <!-- Featured Products -->
+    <!-- New Arrival Products -->
     <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold text-slate-800 mb-4">Featured Products</h2>
-            <p class="text-xl text-slate-600">Handpicked essentials for your grooming routine</p>
+            <h2 class="text-4xl font-bold text-slate-800 mb-4">New Arrivals</h2>
+            <p class="text-xl text-slate-600">New Products! Grab it now </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Product Card 1 -->
-            <div
-                class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
-                    <span class="text-7xl">💎</span>
-                    <div
-                        class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                        <span class="text-7xl">💎</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Premium Hair Wax</h3>
-                    <p class="text-slate-600 mb-4">Professional hold & shine</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-semibold text-blue-600">Price</span>
-                        <button
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 font-medium  text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Card 2 -->
-            <div
-                class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
-                    <span class="text-7xl">✂️</span>
-                    <div
-                        class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                        <span class="text-7xl">✂️</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Hair Clipper Pro</h3>
-                    <p class="text-slate-600 mb-4">Precision cutting tool</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-semibold text-blue-600">Price</span>
-                        <button
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 font-medium  text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Card 3 -->
-            <div
-                class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
-                    <span class="text-7xl">🧴</span>
-                    <div
-                        class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                        <span class="text-7xl">🧴</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Beard Oil</h3>
-                    <p class="text-slate-600 mb-4">Nourish & condition</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-semibold text-blue-600">Price</span>
-                        <button
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 font-medium text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
+        <div id="newArrivalsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-full flex flex-col items-center justify-center min-h-48 py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+                <p class="mt-4 text-lg text-slate-600 font-medium">Loading products...</p>
             </div>
         </div>
     </section>
@@ -277,7 +213,7 @@
                         <div class="text-slate-600">Happy Clients</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600">5★</div>
+                        <div class="text-3xl font-bold text-blue-600"><span id="averageRatingValue">5</span>★</div>
                         <div class="text-slate-600">Rated Service</div>
                     </div>
                     <div class="text-center">
@@ -296,62 +232,10 @@
             <p class="text-xl text-slate-600">Real reviews from real people</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Review 1 -->
-            <div class="review-card bg-white rounded-3xl shadow-lg p-8 transition-all duration-300">
-                <div class="flex items-center gap-4 mb-4">
-                    <div
-                        class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                        A
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800">Anish Shrestha</h4>
-                        <div class="flex text-yellow-400">
-                            ★★★★★
-                        </div>
-                    </div>
-                </div>
-                <p class="text-slate-600 italic">
-                    "Best barbershop experience I've ever had! The attention to detail is incredible. Highly recommend!"
-                </p>
-            </div>
-
-            <!-- Review 2 -->
-            <div class="review-card bg-white rounded-3xl shadow-lg p-8 transition-all duration-300">
-                <div class="flex items-center gap-4 mb-4">
-                    <div
-                        class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                        R
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800">Ramesh</h4>
-                        <div class="flex text-yellow-400">
-                            ★★★★★
-                        </div>
-                    </div>
-                </div>
-                <p class="text-slate-600 italic">
-                    "Professional service, great products, and friendly staff. CutLab is now my go-to spot!"
-                </p>
-            </div>
-
-            <!-- Review 3 -->
-            <div class="review-card bg-white rounded-3xl shadow-lg p-8 transition-all duration-300">
-                <div class="flex items-center gap-4 mb-4">
-                    <div
-                        class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                        M
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800">Mukesh</h4>
-                        <div class="flex text-yellow-400">
-                            ★★★★★
-                        </div>
-                    </div>
-                </div>
-                <p class="text-slate-600 italic">
-                    "Amazing products and exceptional service. I always leave feeling confident and looking sharp!"
-                </p>
+        <div id="reviewsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+            <div class="col-span-full flex flex-col items-center justify-center min-h-48 py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+                <p class="mt-4 text-lg text-slate-600 font-medium">Loading reviews...</p>
             </div>
         </div>
     </section>
@@ -360,77 +244,13 @@
     <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="text-center mb-12">
             <h2 class="text-4xl font-bold text-slate-800 mb-4"> Best Sellers</h2>
-            <p class="text-xl text-slate-600">Handpicked essentials for your grooming routine</p>
+            <p class="text-xl text-slate-600">Most Sold Products</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Product Card 1 -->
-            <div
-                class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
-                    <span class="text-7xl">💎</span>
-                    <div
-                        class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                        <span class="text-7xl">💎</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Premium Styling Gel</h3>
-                    <p class="text-slate-600 mb-4">Professional hold & shine</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-semibold text-blue-600">Price</span>
-                        <button
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 font-medium text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Card 2 -->
-            <div
-                class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
-                    <span class="text-7xl">✂️</span>
-                    <div
-                        class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                        <span class="text-7xl">✂️</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Professional Trimmer</h3>
-                    <p class="text-slate-600 mb-4">Precision cutting tool</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-semibold text-blue-600">Price</span>
-                        <button
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 font-medium text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Card 3 -->
-            <div
-                class="product-card bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                <div class="relative h-64 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
-                    <span class="text-7xl">🧴</span>
-                    <div
-                        class="product-image-extend bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                        <span class="text-7xl">🧴</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Complete Grooming Kit</h3>
-                    <p class="text-slate-600 mb-4">Nourish & condition</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-2xl font-semibold text-blue-600">Price</span>
-                        <button
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 font-medium text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
+        <div id="bestSellersContainer" class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-full flex flex-col items-center justify-center min-h-48 py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+                <p class="mt-4 text-lg text-slate-600 font-medium">Loading products...</p>
             </div>
         </div>
     </section>
@@ -483,23 +303,6 @@
                     class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
-                        </path>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-slate-800 mb-4">Expert Barbers</h3>
-                <p class="text-slate-600">
-                    Our certified professionals have years of experience in creating perfect styles.
-                </p>
-            </div>
-
-            <!-- Service 4 -->
-            <div
-                class="service-card bg-white rounded-3xl shadow-lg p-8 text-center transition-all duration-300 hover:shadow-2xl">
-                <div
-                    class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
                 </div>
@@ -512,6 +315,56 @@
         </div>
     </section>
 
+    <!-- Review Form Section -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-lg p-12">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-4xl font-bold text-slate-800 mb-2 text-center">Share Your Experience</h2>
+                <p class="text-center text-slate-600 mb-8">Help us improve by sharing your feedback</p>
+
+                <form id="reviewForm" class="space-y-6">
+                    <!-- Rating Field -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Rating <span class="text-red-500">*</span></label>
+                        <div class="flex items-center gap-4">
+                            <div id="starRating" class="flex gap-2">
+                                <button type="button" class="star-btn" data-value="1" aria-label="Rate 1 star">★</button>
+                                <button type="button" class="star-btn" data-value="2" aria-label="Rate 2 stars">★</button>
+                                <button type="button" class="star-btn" data-value="3" aria-label="Rate 3 stars">★</button>
+                                <button type="button" class="star-btn" data-value="4" aria-label="Rate 4 stars">★</button>
+                                <button type="button" class="star-btn" data-value="5" aria-label="Rate 5 stars">★</button>
+                            </div>
+                            <span id="ratingDisplay" class="text-sm font-medium text-slate-600">Select a rating</span>
+                        </div>
+                        <input type="hidden" id="reviewRating" name="rating" required />
+                    </div>
+
+                    <!-- Title Field -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Review Title <span class="text-red-500">*</span></label>
+                        <input type="text" id="reviewTitle" name="title" placeholder="Specific product or service or anything?" maxlength="100"
+                            class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition-all"
+                            required />
+                    </div>
+
+                    <!-- Comment Field -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Comment</label>
+                        <textarea id="reviewComment" name="comment" placeholder="Tell us about your experience (optional)" rows="4" maxlength="500"
+                            class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition-all resize-none"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitReviewBtn"
+                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
+                        Submit Review
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="relative bg-indigo-900 text-white mt-20">
         <div class="w-full px-4 sm:px-6 lg:px-8 py-12">
@@ -520,7 +373,7 @@
                     <!-- Brand -->
                     <div>
                         <h3 class="text-2xl font-bold mb-4">Cut<span class="text-blue-400">Lab</span></h3>
-                        <p class="text-slate-400">Premium grooming for modern men. Excellence in every detail.</p>
+                        <p class="text-slate-400">Premium products. Excellent service.</p>
                     </div>
 
                     <!-- Quick Links -->
@@ -533,8 +386,6 @@
                                     class="text-slate-400 hover:text-blue-400 transition-colors">Shop</a></li>
                             <li><a href="service.html"
                                     class="text-slate-400 hover:text-blue-400 transition-colors">Services</a></li>
-                            <li><a href="about.html"
-                                    class="text-slate-400 hover:text-blue-400 transition-colors">About</a></li>
                         </ul>
                     </div>
 
@@ -577,5 +428,7 @@
 <script src="assets/js/toast.js"></script>
 <script src="assets/js/auth/authService.js"></script>
 <script src="assets/js/navbar.js"></script>
+<script src="assets/js/index/indexService.js"></script>
+<script src="assets/js/index/index.js"></script>
 
 </html>

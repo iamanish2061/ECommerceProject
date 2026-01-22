@@ -137,3 +137,45 @@ body::after {
 .review-card:hover {
     transform: scale(1.05);
 }
+/* Star Rating Styles */
+#starRating {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.star-btn {
+    font-size: 2rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: #cbd5e1;
+    transition: all 0.1s ease-out;
+    position: relative;
+    outline: none;
+    user-select: none;
+}
+
+.star-btn:hover,
+.star-btn.hovered {
+    color: #fbbf24;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.star-btn.selected {
+    color: #fbbf24;
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.7));
+}
+
+.star-btn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+#ratingDisplay {
+    min-width: 120px;
+    text-align: left;
+}
