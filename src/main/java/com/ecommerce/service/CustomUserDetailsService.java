@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserModel user = userRepo.findByUsername(username).orElse(null);
 
         if(user == null){
-            throw new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.NOT_FOUND);
+            throw new UsernameNotFoundException("User not found!");
         }
         return new UserPrincipal(user);
     }
