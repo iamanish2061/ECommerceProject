@@ -29,9 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -125,12 +127,25 @@ public class AdminOrderService {
 
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus status) {
-        OrderModel orderModel = orderRepository.findById(orderId)
+        OrderModel order = orderRepository.findDetailsOfOrderById(orderId)
                 .orElseThrow(()->
                         new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND));
+        if(status == OrderStatus.DELIVERED && order.getPayment() == null){
+            PaymentModel payment = PaymentModel.builder()
+                    .user(order.getUser())
+                    .appointment(null)
+                    .amount(order.getTotalAmount())
+                    .transactionId("COD-"+ UUID.randomUUID().toString())
+                    .paymentMethod(PaymentMethod.CASH_ON_DELIVERY)
+                    .paymentStatus(PaymentStatus.COMPLETE)
+                    .paymentDate(LocalDateTime.now())
+                    .errorCode(null)
+                    .build();
+            order.addPayment(payment);
+        }
 
-        orderModel.setStatus(status);
-        orderRepository.save(orderModel);
+        order.setStatus(status);
+        orderRepository.save(order);
     }
 
 
