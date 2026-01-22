@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @Validated
-@RequestMapping("/admin/api/reviews")
+@RequestMapping("/api/admin/reviews")
 @RequiredArgsConstructor
 public class AdminReviewController {
 

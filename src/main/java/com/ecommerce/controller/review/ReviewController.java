@@ -31,6 +31,12 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.ok(reviewService.getHighRatedReviews(), "Reviews fetched successfully"));
     }
 
+    @GetMapping("/average-rating")
+    @Operation(summary = "to fetch average rating to display on home page")
+    public ResponseEntity<ApiResponse<Double>> getAverageRating(){
+        return ResponseEntity.ok(ApiResponse.ok(reviewService.getAverageRating(), "Average rating fetched successfully"));
+    }
+
     @GetMapping()
     @Operation(summary = "to fetch all reviews to display on review page")
     public ResponseEntity<ApiResponse<List<ReviewResponse>>> getAllReviewsOnDescendingOrder (){

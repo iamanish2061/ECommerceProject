@@ -31,6 +31,10 @@ public class ReviewService {
                 .toList();
     }
 
+    public Double getAverageRating() {
+        return reviewRepository.getAverageRating();
+    }
+
     public List<ReviewResponse> getAllReviews() {
         return reviewRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(reviewMapper::mapEntityToReviewResponse)
@@ -86,4 +90,5 @@ public class ReviewService {
         }
         reviewRepository.delete(review);
     }
+
 }
