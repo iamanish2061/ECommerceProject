@@ -48,7 +48,6 @@ public class DriverController {
         return ResponseEntity.ok(ApiResponse.ok(deliveryAddresses, "Address list fetched successfully"));
     }
 
-
     @PostMapping("/delivery/start/{username}")
     @Operation(summary = "when driver click start button to start delivery")
     public ResponseEntity<ApiResponse<?>> startDelivery(

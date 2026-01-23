@@ -12,16 +12,13 @@ import com.ecommerce.model.address.AddressModel;
 import com.ecommerce.model.address.AddressType;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
-import com.ecommerce.model.user.Driver;
-import com.ecommerce.model.user.Role;
-import com.ecommerce.model.user.UserModel;
-import com.ecommerce.model.user.UserStatus;
+import com.ecommerce.model.user.*;
+import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.ecommerce.rabbitmq.producer.NotificationProducer;
 import com.ecommerce.redis.RedisService;
 import com.ecommerce.repository.address.AddressRepository;
 import com.ecommerce.repository.order.OrderRepository;
 import com.ecommerce.repository.user.DriverRepository;
-import com.ecommerce.repository.user.StaffRepository;
 import com.ecommerce.repository.user.UserRepository;
 import com.ecommerce.service.order.RouteService;
 import com.ecommerce.utils.EventHelper;
@@ -30,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +39,6 @@ public class AdminUserService {
 
     private final UserRepository userRepository;
     private final DriverRepository driverRepository;
-    private final StaffRepository staffRepository;
     private final UserMapper userMapper;
     private final AddressMapper addressMapper;
     private final OrderRepository orderRepository;
@@ -138,5 +135,23 @@ public class AdminUserService {
         redisService.addDeliveryAddressList(driverId, orderedList);
 
         notificationProducer.send("notify.driver", EventHelper.createEventForDeliveryAssignment(driver));
+    }
+
+    @Transactional
+    public void updateDriverRegistrationStatus(Long userId, VerificationStatus status) {
+        UserModel user = userRepository.findById(userId).orElseThrow(()->
+                new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.NOT_FOUND));
+        Driver driver = driverRepository.findById(userId)
+                .orElseThrow(()-> new ApplicationException("Driver not found", "NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        if(status == VerificationStatus.VERIFIED){
+            user.setRole(Role.ROLE_DRIVER);
+            driver.setVerifiedAt(LocalDateTime.now());
+        }
+        driver.setVerified(status);
+        userRepository.save(user);
+        driverRepository.save(driver);
+        NotificationEvent event = EventHelper.createEventForDriverRegistrationResponse(user, status);
+        notificationProducer.send("notify.driver", event);
     }
 }

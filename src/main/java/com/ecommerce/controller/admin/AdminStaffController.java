@@ -1,12 +1,12 @@
 package com.ecommerce.controller.admin;
 
 import com.ecommerce.dto.request.staff.StaffAssignRequest;
-import com.ecommerce.dto.request.staff.StaffLeaveRequest;
 import com.ecommerce.dto.request.staff.WorkingHoursRequest;
 import com.ecommerce.dto.response.ApiResponse;
-import com.ecommerce.dto.response.staff.StaffDetailResponse;
 import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
+import com.ecommerce.dto.response.staff.StaffDetailResponse;
 import com.ecommerce.dto.response.staff.StaffListResponse;
+import com.ecommerce.model.service.LeaveStatus;
 import com.ecommerce.model.user.StaffRole;
 import com.ecommerce.service.staff.StaffManagementService;
 import com.ecommerce.validation.ValidId;
@@ -32,6 +32,13 @@ public class AdminStaffController {
         return ResponseEntity.ok(ApiResponse.ok(staffManagementService.getExpertFieldList(), "Fetched the list of expert field"));
     }
 
+    //    used in service.html of admin to add staff as checkbox
+    @GetMapping("/name-and-id")
+    @Operation(summary = "to fetch name and id of staff for dropdown in adding staff to specific service form")
+    public ResponseEntity<ApiResponse<List<NameAndIdOfStaffResponse>>> getNameAndIdOfStaff(){
+        return ResponseEntity.ok(ApiResponse.ok(staffManagementService.getNameAndIdOfStaff(), "Fetched name and id of staff"));
+    }
+
     @PostMapping("/assign")
     @Operation(summary = "to assign user a staff role with services and his/her expertise from admin's user management ui")
     public ResponseEntity<ApiResponse<?>> assignStaffRole(
@@ -39,13 +46,6 @@ public class AdminStaffController {
     ) {
         staffManagementService.assignStaffRole(request);
         return ResponseEntity.ok(ApiResponse.ok("Role assigned successfully"));
-    }
-
-//    used in service.html of admin to add staff as checkbox
-    @GetMapping("/name-and-id")
-    @Operation(summary = "to fetch name and id of staff for dropdown in adding staff to specific service form")
-    public ResponseEntity<ApiResponse<List<NameAndIdOfStaffResponse>>> getNameAndIdOfStaff(){
-        return ResponseEntity.ok(ApiResponse.ok(staffManagementService.getNameAndIdOfStaff(), "Fetched name and id of staff"));
     }
 
 //    for staff page
@@ -62,7 +62,7 @@ public class AdminStaffController {
             @ValidId @PathVariable Long id
     ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(staffManagementService.getStaffDetail(id), "Fetched detail of staff: "+id));
+                ApiResponse.ok(staffManagementService.getStaffDetailforAdmin(id), "Fetched detail of staff: "+id));
     }
 
     @PostMapping("/{id}/working-hours")
@@ -95,27 +95,4 @@ public class AdminStaffController {
         return ResponseEntity.ok(ApiResponse.ok("Service assignment removed from staff"));
     }
 
-
-
-
-// for dashboard as admin handles the submitted form
-    @PostMapping("/{id}/leave")
-    @Operation(summary = "to add staff leave after approval")
-    public ResponseEntity<ApiResponse<?>> addStaffLeave(
-            @ValidId @PathVariable Long id,
-            @RequestBody StaffLeaveRequest request
-    ) {
-        staffManagementService.addStaffLeave(id, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{id}/leave/{leaveId}")
-    @Operation(summary = "to remove staff leave")
-    public ResponseEntity<ApiResponse<?>> removeStaffLeave(
-            @ValidId @PathVariable Long id,
-            @ValidId @PathVariable Long leaveId
-    ) {
-        staffManagementService.removeStaffLeave(id, leaveId);
-        return ResponseEntity.ok(ApiResponse.ok("Leave removed successfully"));
-    }
 }

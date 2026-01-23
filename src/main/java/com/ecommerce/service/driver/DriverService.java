@@ -7,6 +7,9 @@ import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.user.UserMapper;
 import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.order.OrderStatus;
+import com.ecommerce.model.payment.PaymentMethod;
+import com.ecommerce.model.payment.PaymentModel;
+import com.ecommerce.model.payment.PaymentStatus;
 import com.ecommerce.model.user.Driver;
 import com.ecommerce.model.user.UserModel;
 import com.ecommerce.rabbitmq.dto.NotificationEvent;
@@ -20,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -61,9 +66,24 @@ public class DriverService {
         UserModel clientUser = userRepository.findByUsername(request.username()).orElseThrow(
                 () -> new ApplicationException("User not found!", "USER_NOT_FOUND", HttpStatus.NOT_FOUND)
         );
-        OrderModel order = orderRepository.findById(request.orderId()).orElseThrow(
+        OrderModel order = orderRepository.findDetailsOfOrderById(request.orderId()).orElseThrow(
                 () -> new ApplicationException("Order not found!", "ORDER_NOT_FOUND", HttpStatus.NOT_FOUND)
         );
+
+        if(order.getPayment() == null){
+            PaymentModel payment = PaymentModel.builder()
+                    .user(order.getUser())
+                    .appointment(null)
+                    .amount(order.getTotalAmount())
+                    .transactionId("COD-"+UUID.randomUUID().toString())
+                    .paymentMethod(PaymentMethod.CASH_ON_DELIVERY)
+                    .paymentStatus(PaymentStatus.COMPLETE)
+                    .paymentDate(LocalDateTime.now())
+                    .errorCode(null)
+                    .build();
+            order.addPayment(payment);
+        }
+
         order.setStatus(OrderStatus.DELIVERED);
         orderRepository.save(order);
 

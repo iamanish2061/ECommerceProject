@@ -43,7 +43,10 @@ public class NotificationHandler {
         } else if (eventCastedType == NotificationType.DRIVER_ASSIGN) {
             saveAndSendToDriver(event);
             saveAndSendToAdmin(event);
-        } else if (eventCastedType == NotificationType.INSTORE_PURCHASE) {
+        } else if(eventCastedType == NotificationType.STAFF_LEAVE){
+            saveAndSendToAdmin(event);
+            saveAndSendToStaff(event);
+        }else if (eventCastedType == NotificationType.INSTORE_PURCHASE) {
             saveAndSendToAdmin(event);
         } else{
             saveAndSendToUser(event);

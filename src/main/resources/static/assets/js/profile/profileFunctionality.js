@@ -405,9 +405,16 @@ async function checkDriverStatus() {
     try {
         const response = await profileService.checkDriverStatus();
 
-        if (response?.success) {
-            state.driverStatus = response.data;
-            //updateDriverStatusUI()
+        if (response.success && response.data) {
+            if(response.data == 'VERIFIED'){
+                document.getElementById('driverDashboardBtn').classList.remove('hidden');
+            }else if(response.data == 'PENDING'){
+                document.getElementById('driverPendingBtn').classList.remove('hidden');
+            }else{
+                document.getElementById('applyDriverBtn').classList.remove('hidden');
+            }
+        }else{
+            document.getElementById('applyDriverBtn').classList.remove('hidden');
         }
     } catch (error) {
         console.error("Error in checking driverf status", error);
@@ -1196,7 +1203,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         fetchOrders(),
         fetchAppointments(),
         checkDriverStatus(),
-        updateCartCount()
+        updateCartCount(),
+        checkDriverStatus()
     ]);
 
 

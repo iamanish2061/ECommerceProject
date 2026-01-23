@@ -10,7 +10,8 @@ let state = {
     totalSales: 0,
     latestOrders: [],
     latestAppointments: [],
-    latestForms: []
+    leaveForms: [],
+    registrationForms: []
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -80,11 +81,12 @@ function initSidebar() {
 async function loadDashboardData() {
     try {
         showToast('Loading dashboard data...', 'info');
-        const [dashboardResponse, orderResponse, appointmentResponse, formResponse] = await Promise.all([
+        const [dashboardResponse, orderResponse, appointmentResponse, leaveResponse, registrationResponse] = await Promise.all([
             indexService.getDashboardStats(),
             indexService.getOrders(),
             indexService.getAppointments(),
-            indexService.getForms()
+            indexService.getLeaveForms(),
+            indexService.getDriverRegistrationForms()
         ]);
         if (!dashboardResponse || !dashboardResponse.success) {
             showToast('Failed to load dashboard stats', 'error');
@@ -112,16 +114,24 @@ async function loadDashboardData() {
         }
         state.latestAppointments = appointmentResponse.data || [];
 
-        if (!formResponse || !formResponse.success) {
-            showToast('Failed to load forms', 'error');
+        if (!leaveResponse || !leaveResponse.success) {
+            showToast('Failed to load leave forms', 'error');
             return;
         }
-        state.latestForms = formResponse.data || [];
+        state.leaveForms = leaveResponse.data || [];
+
+        if (!registrationResponse || !registrationResponse.success) {
+            showToast('Failed to load registration forms', 'error');
+            return;
+        }
+        state.registrationForms = registrationResponse.data || [];
 
         renderLatestAppointments();
         renderLatestOrders();
+        renderLeaveForms();
+        renderRegistrationForms();
         renderStats();
-        // renderUnreadForms();
+        initFormEventListeners();
     } catch (error) {
         console.error("Error loading dashboard data:", error);
         showToast('An error occurred while loading dashboard data', 'error');
@@ -214,6 +224,177 @@ function renderLatestAppointments() {
             </td>
         </tr>
     `).join('');
+}
+
+/**
+ * Renders the leave forms table.
+ */
+function renderLeaveForms() {
+    const tableBody = document.getElementById('leaveFormsTable');
+    if (!tableBody) return;
+
+    if (state.leaveForms.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">No leave forms for now</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = state.leaveForms.map(form => `
+        <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+            <td class="py-4 font-medium text-slate-800">#${form.response.id}</td>
+            <td class="py-4">${form.username}</td>
+            <td class="py-4">${form.response.leaveDate}</td>
+            <td class="py-4">${form.response.startTime} - ${form.response.endTime}</td>
+            <td class="py-4">
+                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(form.response.status)}">
+                    ${form.response.status}
+                </span>
+            </td>
+            <td class="py-4">
+                <button class="px-3 py-1 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors view-leave-btn" data-staff-id="${form.staffId}" data-leave-id="${form.response.id}">
+                    View
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/**
+ * Renders the registration forms table.
+ */
+function renderRegistrationForms() {
+    const tableBody = document.getElementById('registrationFormsTable');
+    if (!tableBody) return;
+
+    if (state.registrationForms.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 italic">No registration forms for now</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = state.registrationForms.map(form => `
+        <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+            <td class="py-4 font-medium text-slate-800">#${form.response.id}</td>
+            <td class="py-4">${form.username}</td>
+            <td class="py-4">${form.response.licenseNumber}</td>
+            <td class="py-4">${form.response.vehicleNumber}</td>
+            <td class="py-4">
+                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(form.response.verified)}">
+                    ${form.response.verified}
+                </span>
+            </td>
+            <td class="py-4">
+                <button class="px-3 py-1 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors view-registration-btn" data-user-id="${form.response.id}">
+                    View
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/**
+ * Initializes event listeners for leave and registration forms.
+ */
+function initFormEventListeners() {
+    // Leave form view buttons
+    document.querySelectorAll('.view-leave-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const staffId = button.dataset.staffId;
+            const leaveId = button.dataset.leaveId;
+            openLeaveModal(staffId, leaveId);
+        });
+    });
+
+    // Registration form view buttons
+    document.querySelectorAll('.view-registration-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const userId = button.dataset.userId;
+            openRegistrationModal(userId);
+        });
+    });
+
+    // Close modals
+    document.getElementById('closeLeaveModal').addEventListener('click', closeLeaveModal);
+    document.getElementById('closeRegistrationModal').addEventListener('click', closeRegistrationModal);
+
+    // Approve/Reject leave forms
+    document.getElementById('approveLeaveBtn').addEventListener('click', () => handleLeaveAction('APPROVED'));
+    document.getElementById('rejectLeaveBtn').addEventListener('click', () => handleLeaveAction('REJECTED'));
+
+    // Approve/Reject registration forms
+    document.getElementById('approveRegistrationBtn').addEventListener('click', () => handleRegistrationAction('VERIFIED'));
+    document.getElementById('rejectRegistrationBtn').addEventListener('click', () => handleRegistrationAction('REJECTED'));
+}
+
+function openLeaveModal(staffId, leaveId) {
+    const modal = document.getElementById('leaveModal');
+    const content = document.getElementById('leaveModalContent');
+    modal.classList.remove('hidden');
+    content.innerHTML = `<p>Loading...</p>`;
+
+    indexService.getLeaveForms().then(forms => {
+        const form = forms.find(f => f.staffId == staffId && f.response.id == leaveId);
+        if (form) {
+            content.innerHTML = `
+                <p><strong>Staff:</strong> ${form.username}</p>
+                <p><strong>Date:</strong> ${form.response.leaveDate}</p>
+                <p><strong>Time:</strong> ${form.response.startTime} - ${form.response.endTime}</p>
+                <p><strong>Reason:</strong> ${form.response.reason}</p>
+            `;
+        } else {
+            content.innerHTML = `<p>Form not found.</p>`;
+        }
+    });
+}
+
+function openRegistrationModal(userId) {
+    const modal = document.getElementById('registrationModal');
+    const content = document.getElementById('registrationModalContent');
+    modal.classList.remove('hidden');
+    content.innerHTML = `<p>Loading...</p>`;
+
+    indexService.getDriverRegistrationForms().then(forms => {
+        const form = forms.find(f => f.response.id == userId);
+        if (form) {
+            content.innerHTML = `
+                <p><strong>Username:</strong> ${form.username}</p>
+                <p><strong>License Number:</strong> ${form.response.licenseNumber}</p>
+                <p><strong>Vehicle Number:</strong> ${form.response.vehicleNumber}</p>
+                <p><strong>License Expiry:</strong> ${form.response.licenseExpiry}</p>
+            `;
+        } else {
+            content.innerHTML = `<p>Form not found.</p>`;
+        }
+    });
+}
+
+function closeLeaveModal() {
+    document.getElementById('leaveModal').classList.add('hidden');
+}
+
+function closeRegistrationModal() {
+    document.getElementById('registrationModal').classList.add('hidden');
+}
+
+function handleLeaveAction(status) {
+    const modal = document.getElementById('leaveModal');
+    const staffId = modal.querySelector('.view-leave-btn').dataset.staffId;
+    const leaveId = modal.querySelector('.view-leave-btn').dataset.leaveId;
+
+    indexService.updateLeaveFormStatus(staffId, leaveId, status).then(() => {
+        showToast(`Leave form ${status.toLowerCase()}`, 'success');
+        closeLeaveModal();
+        loadDashboardData();
+    });
+}
+
+function handleRegistrationAction(status) {
+    const modal = document.getElementById('registrationModal');
+    const userId = modal.querySelector('.view-registration-btn').dataset.userId;
+
+    indexService.updateDriverRegistrationStatus(userId, status).then(() => {
+        showToast(`Registration form ${status.toLowerCase()}`, 'success');
+        closeRegistrationModal();
+        loadDashboardData();
+    });
 }
 
 /**

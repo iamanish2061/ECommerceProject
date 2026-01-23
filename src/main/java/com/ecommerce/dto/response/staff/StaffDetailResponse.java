@@ -9,5 +9,5 @@ public record StaffDetailResponse (
     List<ServiceSummaryResponse> services,
     List<WorkingHourResponse> workingHours,
     List<LeaveSummaryResponse> leaves,
-    int upcomingAppointmentsCount
+    long upcomingAppointmentsCount
 ){}

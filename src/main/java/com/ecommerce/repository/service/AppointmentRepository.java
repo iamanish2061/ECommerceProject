@@ -1,8 +1,6 @@
 package com.ecommerce.repository.service;
 
-import com.ecommerce.model.order.OrderModel;
 import com.ecommerce.model.service.Appointment;
-import com.ecommerce.model.service.AppointmentStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 @Repository
@@ -63,15 +62,32 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @EntityGraph("Appointment.customer.staff.service.payment")
     List<Appointment> findAllByOrderByAppointmentDateDesc();
 
-
-    // Upcoming appointments for a staff member (for dashboard)
+    @EntityGraph(value = "Appointment.customer.service", type = EntityGraph.EntityGraphType.FETCH)
     @Query("SELECT a FROM Appointment a WHERE a.staff.id = :staffId " +
-                    "AND a.appointmentDate >= :today " +
-                    "AND a.status IN ('PENDING', 'BOOKED') " +
-                    "ORDER BY a.appointmentDate ASC, a.startTime ASC")
-    List<Appointment> findUpcomingByStaffId(
-                    @Param("staffId") Long staffId,
-                    @Param("today") LocalDate today);
+            "AND a.status IN ('PENDING', 'BOOKED') " +
+            "AND (a.appointmentDate > :today OR (a.appointmentDate = :today AND a.startTime >= :now)) " +
+            "ORDER BY a.appointmentDate ASC, a.startTime ASC")
+    List<Appointment> findUpcomingOfStaff(
+            @Param("staffId") Long staffId,
+            @Param("today") LocalDate today,
+            @Param("now") LocalTime now);
+
+    @EntityGraph(value = "Appointment.customer.service", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("SELECT a FROM Appointment a WHERE a.staff.id = :staffId " +
+            "AND (a.appointmentDate < :today OR (a.appointmentDate = :today AND a.startTime <= :now)) " +
+            "ORDER BY a.appointmentDate DESC, a.startTime DESC")
+    List<Appointment> findHistoryOfStaffId(
+            @Param("staffId") Long staffId,
+            @Param("today") LocalDate today,
+            @Param("now") LocalTime now);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.staff.id = :staffId " +
+            "AND a.status IN ('PENDING', 'BOOKED') " +
+            "AND (a.appointmentDate > :today OR (a.appointmentDate = :today AND a.startTime > :now))")
+    long countUpcomingAppointmentsOfStaff(
+            @Param("staffId") Long staffId,
+            @Param("today") LocalDate today,
+            @Param("now") LocalTime now);
 
     @EntityGraph(value = "Appointment.customer.staff.user.service.payment", type = EntityGraph.EntityGraphType.FETCH)
     List<Appointment> findTop5ByOrderByCreatedAtDesc();
