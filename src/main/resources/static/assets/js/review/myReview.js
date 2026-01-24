@@ -236,6 +236,8 @@ async function handleUpdateReview() {
             comment: comment || null
         };
 
+        showToast("Updating review...", "info");
+
         const response = await ReviewService.updateReview(myReviewState.editingReview.id, reviewData);
 
         if (response.success) {

@@ -145,6 +145,7 @@ async function viewOrderDetail(orderId) {
         </div>
     `;
 
+    showToast("Loading order details...", "info");
     try {
         const response = await orderService.getOrderDetail(orderId);
         if (response.success) {

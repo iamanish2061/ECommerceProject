@@ -243,7 +243,7 @@ function renderLeaveForms() {
             <td class="py-4 font-medium text-slate-800">#${form.response.id}</td>
             <td class="py-4">${form.username}</td>
             <td class="py-4">${form.response.leaveDate}</td>
-            <td class="py-4">${form.response.startTime} - ${form.response.endTime}</td>
+            <td class="py-4">${(form.response.startTime && form.response.endTime) ? `${form.response.startTime} - ${form.response.endTime}` : '<span class="text-indigo-600 font-medium">Full Day</span>'}</td>
             <td class="py-4">
                 <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusClass(form.response.status)}">
                     ${form.response.status}
@@ -328,42 +328,86 @@ function openLeaveModal(staffId, leaveId) {
     const modal = document.getElementById('leaveModal');
     const content = document.getElementById('leaveModalContent');
     modal.classList.remove('hidden');
-    content.innerHTML = `<p>Loading...</p>`;
+    content.innerHTML = `<p class="italic text-slate-400">Loading...</p>`;
 
-    indexService.getLeaveForms().then(forms => {
-        const form = forms.find(f => f.staffId == staffId && f.response.id == leaveId);
-        if (form) {
-            content.innerHTML = `
-                <p><strong>Staff:</strong> ${form.username}</p>
-                <p><strong>Date:</strong> ${form.response.leaveDate}</p>
-                <p><strong>Time:</strong> ${form.response.startTime} - ${form.response.endTime}</p>
-                <p><strong>Reason:</strong> ${form.response.reason}</p>
-            `;
-        } else {
-            content.innerHTML = `<p>Form not found.</p>`;
-        }
-    });
+    const form = state.leaveForms.find(f => f.staffId == staffId && f.response.id == leaveId);
+    if (form) {
+        modal.dataset.staffId = staffId;
+        modal.dataset.leaveId = leaveId;
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Staff Member</span>
+                    <span class="font-semibold text-slate-800">${form.username}</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Date</span>
+                    <span class="font-semibold text-slate-800">${form.response.leaveDate}</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Time Range</span>
+                    <span class="font-semibold text-slate-800">${(form.response.startTime && form.response.endTime) ? `${form.response.startTime} - ${form.response.endTime}` : '<span class="text-indigo-600">Full Day</span>'}</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Applied on</span>
+                    <span class="font-semibold text-slate-800">${form.response.createdAt}</span>
+                </div>
+                <div class="pt-2">
+                    <p class="text-sm text-slate-500 mb-1">Reason</p>
+                    <p class="text-slate-700 bg-slate-50 p-3 rounded-xl text-sm leading-relaxed">${form.response.reason || 'No reason provided'}</p>
+                </div>
+            </div>
+        `;
+    } else {
+        content.innerHTML = `<p class="text-red-500">Form not found.</p>`;
+    }
 }
 
 function openRegistrationModal(userId) {
     const modal = document.getElementById('registrationModal');
     const content = document.getElementById('registrationModalContent');
     modal.classList.remove('hidden');
-    content.innerHTML = `<p>Loading...</p>`;
+    content.innerHTML = `<p class="italic text-slate-400">Loading...</p>`;
 
-    indexService.getDriverRegistrationForms().then(forms => {
-        const form = forms.find(f => f.response.id == userId);
-        if (form) {
-            content.innerHTML = `
-                <p><strong>Username:</strong> ${form.username}</p>
-                <p><strong>License Number:</strong> ${form.response.licenseNumber}</p>
-                <p><strong>Vehicle Number:</strong> ${form.response.vehicleNumber}</p>
-                <p><strong>License Expiry:</strong> ${form.response.licenseExpiry}</p>
-            `;
-        } else {
-            content.innerHTML = `<p>Form not found.</p>`;
-        }
-    });
+    const form = state.registrationForms.find(f => f.response.id == userId);
+    if (form) {
+        modal.dataset.userId = userId;
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Username</span>
+                    <span class="font-semibold text-slate-800">${form.username}</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">License Number</span>
+                    <span class="font-semibold text-slate-800">${form.response.licenseNumber}</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Vehicle Number</span>
+                    <span class="font-semibold text-slate-800">${form.response.vehicleNumber}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-500">License Expiry</span>
+                    <span class="font-semibold text-slate-800">${form.response.licenseExpiry}</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <span class="text-sm text-slate-500">Applied on</span>
+                    <span class="font-semibold text-slate-800">${form.response.submittedAt ? form.response.submittedAt.split('T')[0] : 'N/A'}</span>
+                </div>
+                
+                <div class="pt-2">
+                    <p class="text-sm text-slate-500 mb-2">License Photo</p>
+                    <div class="rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+                        <img src="${form.response.licenseUrl}" alt="License Photo" 
+                             class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                             onclick="window.open(this.src, '_blank')">
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        content.innerHTML = `<p class="text-red-500">Form not found.</p>`;
+    }
 }
 
 function closeLeaveModal() {
@@ -376,9 +420,14 @@ function closeRegistrationModal() {
 
 function handleLeaveAction(status) {
     const modal = document.getElementById('leaveModal');
-    const staffId = modal.querySelector('.view-leave-btn').dataset.staffId;
-    const leaveId = modal.querySelector('.view-leave-btn').dataset.leaveId;
+    const staffId = modal.dataset.staffId;
+    const leaveId = modal.dataset.leaveId;
 
+    if (!staffId || !leaveId) {
+        showToast('Invalid form data', 'error');
+        return;
+    }
+    showToast(`Processing leave form...`, 'info');
     indexService.updateLeaveFormStatus(staffId, leaveId, status).then(() => {
         showToast(`Leave form ${status.toLowerCase()}`, 'success');
         closeLeaveModal();
@@ -388,8 +437,13 @@ function handleLeaveAction(status) {
 
 function handleRegistrationAction(status) {
     const modal = document.getElementById('registrationModal');
-    const userId = modal.querySelector('.view-registration-btn').dataset.userId;
+    const userId = modal.dataset.userId;
 
+    if (!userId) {
+        showToast('Invalid user data', 'error');
+        return;
+    }
+    showToast(`Processing registration form...`, 'info');
     indexService.updateDriverRegistrationStatus(userId, status).then(() => {
         showToast(`Registration form ${status.toLowerCase()}`, 'success');
         closeRegistrationModal();

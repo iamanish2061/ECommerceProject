@@ -82,7 +82,7 @@ document.querySelectorAll("input[name='address_type']").forEach(radio => {
         try {
             showToast("Fetching saved address...", "info");
             const response = await checkoutService.fetchAddress(this.value);
-            data = response.data;
+            const data = response.data;
 
             if (!data) {
                 showToast("No saved address found", "error");
@@ -104,8 +104,11 @@ document.querySelectorAll("input[name='address_type']").forEach(radio => {
 
             confirmSection.classList.add("hidden");
 
+            const productPriceEl = document.getElementById("productPrice");
+            const priceText = productPriceEl ? productPriceEl.textContent.replace("Rs. ", "").replace(",", "") : "0";
+
             deliveryChargeEl.textContent = `Rs. ${data.deliveryCharge || "0.00"}`;
-            totalPriceEl.textContent = "Rs. " + (parseFloat(deliveryChargeEl.textContent.replace("Rs. ", "")) + parseFloat(productPrice.textContent.replace("Rs. ", ""))).toFixed(2);
+            totalPriceEl.textContent = "Rs. " + (parseFloat(data.deliveryCharge || 0) + parseFloat(priceText)).toFixed(2);
             addressConfirmed = true;
 
         } catch (e) {
@@ -167,7 +170,11 @@ confirmCheckbox.addEventListener("change",
             marker.dragging.disable();
             const response = await checkoutService.calculateDeliveryCharge(address);
             deliveryChargeEl.textContent = `Rs. ${response.data?.deliveryCharge.toFixed(2)}`;
-            totalPriceEl.textContent = "Rs. " + (parseFloat(deliveryChargeEl.textContent.replace("Rs. ", "")) + parseFloat(productPrice.textContent.replace("Rs. ", ""))).toFixed(2);
+
+            const productPriceEl = document.getElementById("productPrice");
+            const priceText = productPriceEl ? productPriceEl.textContent.replace("Rs. ", "").replace(",", "") : "0";
+
+            totalPriceEl.textContent = "Rs. " + (parseFloat(response.data?.deliveryCharge || 0) + parseFloat(priceText)).toFixed(2);
             addressConfirmed = true;
             showToast("Address confirmed", "success");
         }

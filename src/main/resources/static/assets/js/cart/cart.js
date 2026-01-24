@@ -223,6 +223,7 @@ async function saveCartItem(productId) {
         return;
     }
 
+    showToast("Saving info...", "info");
     try {
         const response = await cartService.updateCartItem(productId, newQuantity);
 
@@ -258,6 +259,7 @@ async function handleRemoveItem(productId) {
         return
     }
 
+    showToast("Removing item...", "info");
     try {
         const response = await cartService.deleteCartItem(productId);
 

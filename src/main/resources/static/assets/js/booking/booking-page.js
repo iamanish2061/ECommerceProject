@@ -183,6 +183,7 @@ const BookingPage = {
         checkBtn.disabled = true;
         checkBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span> Checking...';
 
+        showToast('Checking availability...', 'info');
         try {
             const response = await BookingService.getAvailableTimesAndRecommendations(
                 BookingPage.serviceId,
