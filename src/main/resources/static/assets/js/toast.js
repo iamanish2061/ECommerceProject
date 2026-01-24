@@ -1,5 +1,5 @@
 //toast function
-function showToast(message, type = "info", duration = 1500) {
+function showToast(message, type = "info", duration = 2000) {
     const toastContainer = document.getElementById('toast-container');
     if (!toastContainer) return;
 

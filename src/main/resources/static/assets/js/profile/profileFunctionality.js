@@ -1,199 +1,276 @@
-// State Initialization
-// Prevent map updates from overwriting user input fields on this page
-window.updateAddressFields = function () { console.log("Automatic address field update disabled on this page."); };
-
+// State Management
 let state = {
     profile: null,
-    addresses: {
-        home: null,
-        work: null
-    },
+    addresses: { home: null, work: null },
     orders: [],
     appointments: [],
-    driverStatus: null,
     isLoading: false,
     cartCount: 0
 };
 
+// Prevent map updates from overwriting user input fields on this page
+window.updateAddressFields = function () {
+    console.log("Automatic address field update disabled on this page to preserve manual input.");
+};
 
-function togglePasswordVisibility(inputId, button) {
-    const input = document.getElementById(inputId);
-    const eye = button.querySelector('svg:nth-child(1)');      // Eye (show)
-    const eyeSlash = button.querySelector('svg:nth-child(2)'); // Eye-slash (hide)
 
-    if (input.type === 'password') {
-        input.type = 'text';
-        eye.classList.add('hidden');
-        eyeSlash.classList.remove('hidden');
-    } else {
-        input.type = 'password';
-        eye.classList.remove('hidden');
-        eyeSlash.classList.add('hidden');
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Initializing Profile Page...');
+    state.isLoading = true;
+
+    try {
+        await Promise.all([
+            fetchProfile(),
+            fetchAddresses(),
+            fetchOrders(),
+            fetchAppointments(),
+            checkDriverStatus(),
+            updateCartCount()
+        ]);
+    } catch (error) {
+        console.error("Error during initialization:", error);
+    } finally {
+        state.isLoading = false;
+    }
+});
+
+// ==========================================
+// 2. DATA FETCHING
+// ==========================================
+
+async function fetchProfile() {
+    try {
+        const res = await profileService.getProfileDetails();
+        if (res?.success) {
+            state.profile = res.data;
+            renderProfile();
+        }
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        showToast("Failed to load profile", "error");
     }
 }
 
-// Update Navbar UI
-function updateAuthUI(isLoggedIn) {
-    const authBtn = document.getElementById('loginBtn');
-    const profileWrapper = document.getElementById('profileWrapper');
+async function fetchAddresses() {
+    try {
+        const [homeRes, workRes] = await Promise.all([
+            profileService.getAddressType('HOME'),
+            profileService.getAddressType('WORK')
+        ]);
 
-    if (!authBtn || !profileWrapper) return;
+        if (homeRes?.success) state.addresses.home = homeRes.data;
+        if (workRes?.success) state.addresses.work = workRes.data;
 
-    if (isLoggedIn) {
-        // Hide login button
-        authBtn.classList.add('hidden');
-
-        // Show profile icon
-        profileWrapper.classList.remove('hidden');
-    } else {
-        // Show login button
-        authBtn.classList.remove('hidden');
-
-        // Hide profile icon
-        profileWrapper.classList.add('hidden');
+        renderAddresses();
+    } catch (error) {
+        console.error("Error fetching addresses:", error);
     }
 }
 
-
-//state update functions
-function updateProfileUI() {
-    if (!state.profile) return;
-
-    const fullNameEl = document.getElementById('fullName');
-    const userEmailEl = document.getElementById('userEmail');
-    const profilePicEl = document.getElementById('profilePic');
-    const userNameEl = document.getElementById('userName');
-
-
-    if (fullNameEl) fullNameEl.textContent = state.profile.fullName || 'User';
-    if (userEmailEl) userEmailEl.textContent = state.profile.email || '';
-    if (userNameEl) userNameEl.textContent = state.profile.username ? `Username: ${state.profile.username}` : 'Username';
-
-    if (profilePicEl && state.profile.profileUrl) {
-        profilePicEl.src = state.profile.profileUrl;
+async function fetchOrders() {
+    try {
+        const res = await profileService.getOrderForProfile();
+        if (res?.success) {
+            state.orders = res.data || [];
+            renderOrders();
+        }
+    } catch (error) {
+        console.error("Error fetching orders:", error);
     }
 }
 
-function updateAddressUI() {
-    updateSingleAddress('home', state.addresses.home);
-    updateSingleAddress('work', state.addresses.work);
+async function fetchAppointments() {
+    try {
+        const res = await profileService.getAppointmentForProfile();
+        if (res?.success) {
+            state.appointments = res.data || [];
+            renderAppointments();
+        }
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+    }
 }
 
 async function updateCartCount() {
     try {
-        const cartCountEl = document.getElementById('cartCount');
-        const resp = await profileService.getCartCount();
-        if (resp.success) {
-            state.cartCount = resp.data.totalCartItems;
-        } else {
-            showToast(resp.message, "error");
+        const res = await profileService.getCartCount();
+        if (res?.success) {
+            state.cartCount = res.data.totalCartItems;
+            const el = document.getElementById('cartCount');
+            if (el) el.textContent = state.cartCount;
         }
-
-        if (cartCountEl) cartCountEl.textContent = state.cartCount;
-    } catch (e) {
-        console.log(e);
-        showToast("Error updating cart count", "error");
+    } catch (error) {
+        console.error("Error updating cart count:", error);
     }
 }
 
-function updateSingleAddress(type, address) {
-    const addressContainer = document.getElementById(`${type}Address`);
+async function checkDriverStatus() {
+    try {
+        const res = await profileService.checkDriverStatus();
+        const btns = {
+            verified: document.getElementById('driverDashboardBtn'),
+            pending: document.getElementById('driverPendingBtn'),
+            apply: document.getElementById('applyDriverBtn')
+        };
 
-    if (!address) {
-        addressContainer.innerHTML = `
-        <div class="text-center py-12">
-            <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <p class="text-slate-500 font-medium">No ${type} address added yet</p>
-            <button onclick="openAddressModal('${type}')" 
-                class="mt-4 text-blue-600 hover:text-blue-700 font-medium">
-                + Add ${type.charAt(0).toUpperCase() + type.slice(1)} Address
-            </button>
-        </div>
-        `;
-    } else {
-        addressContainer.innerHTML = `
-            <div class="bg-slate-50 rounded-2xl p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <h4 class="font-bold text-slate-800 text-lg">${type.charAt(0).toUpperCase() + type.slice(1)} Address</h4>
-                    <button onclick="editAddress('${type}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                        Update
+        // Reset visibility
+        Object.values(btns).forEach(btn => btn?.classList.add('hidden'));
+
+        if (res.success && res.data) {
+            if (res.data === 'VERIFIED') btns.verified?.classList.remove('hidden');
+            else if (res.data === 'PENDING') btns.pending?.classList.remove('hidden');
+            else btns.apply?.classList.remove('hidden');
+        } else {
+            btns.apply?.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error("Error checking driver status:", error);
+    }
+}
+
+// ==========================================
+// 3. UI RENDERING
+// ==========================================
+
+function renderProfile() {
+    if (!state.profile) return;
+    const { fullName, email, username, profileUrl } = state.profile;
+
+    const elements = {
+        fullName: document.getElementById('fullName'),
+        email: document.getElementById('userEmail'),
+        username: document.getElementById('userName'),
+        pic: document.getElementById('profilePic')
+    };
+
+    if (elements.fullName) elements.fullName.textContent = fullName || 'User';
+    if (elements.email) elements.email.textContent = email || '';
+    if (elements.username) elements.username.textContent = username ? `Username: ${username}` : '';
+    if (elements.pic && profileUrl) elements.pic.src = profileUrl;
+}
+
+function renderAddresses() {
+    ['home', 'work'].forEach(type => {
+        const container = document.getElementById(`${type}Address`);
+        if (!container) return;
+
+        const addr = state.addresses[type];
+        if (!addr) {
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <p class="text-slate-500 font-medium">No ${type} address added yet</p>
+                    <button onclick="openAddressModal('${type}')" class="mt-4 text-blue-600 hover:text-blue-700 font-medium">
+                        + Add ${type.charAt(0).toUpperCase() + type.slice(1)} Address
                     </button>
-                </div>
-                <p class="text-slate-600 mb-2">${address.province}, ${address.district}</p>
-                <p class="text-slate-600 mb-2">${address.place}, ${address.landmark}</p>
-                ${address.phone ? `<p class="text-slate-500 text-sm">Phone: ${address.phone}</p>` : ''}
-            </div>
-        `;
-    }
+                </div>`;
+        } else {
+            container.innerHTML = `
+                <div class="bg-slate-50 rounded-2xl p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-bold text-slate-800 text-lg">${type.charAt(0).toUpperCase() + type.slice(1)} Address</h4>
+                        <button onclick="editAddress('${type}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                            Update
+                        </button>
+                    </div>
+                    <p class="text-slate-600 mb-2">${addr.province}, ${addr.district}</p>
+                    <p class="text-slate-600 mb-2">${addr.place}, ${addr.landmark}</p>
+                    ${addr.phone ? `<p class="text-slate-500 text-sm">Phone: ${addr.phone}</p>` : ''}
+                </div>`;
+        }
+    });
 }
 
-function updateOrdersUI() {
-    const ordersContainer = document.getElementById('ordersContainer');
-    if (!ordersContainer) return;
+function renderOrders() {
+    const container = document.getElementById('ordersContainer');
+    if (!container) return;
 
     if (state.orders.length === 0) {
-        ordersContainer.innerHTML = `
+        container.innerHTML = `
             <div class="col-span-full text-center py-12">
                 <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                 </svg>
                 <p class="text-slate-500 font-medium">No orders yet</p>
-            </div>
-        `;
+                <a href="product.html" class="mt-4 inline-block text-blue-600 hover:text-blue-700 font-medium">Order Now</a>
+            </div>`;
         return;
     }
 
-    ordersContainer.innerHTML = state.orders.map(order => createOrderCard(order)).join('');
+    container.innerHTML = state.orders.map(order => createOrderCard(order)).join('');
 }
 
-function updateAppointmentsUI() {
-    const appointmentsContainer = document.getElementById('appointmentsContainer');
-    if (!appointmentsContainer) return;
+function renderAppointments() {
+    const container = document.getElementById('appointmentsContainer');
+    if (!container) return;
 
     if (state.appointments.length === 0) {
-        appointmentsContainer.innerHTML = `
+        container.innerHTML = `
             <div class="col-span-full text-center py-12">
                 <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="text-slate-500 font-medium">No appointments yet</p>
-                <a href="service.html" class="mt-4 inline-block text-blue-600 hover:text-blue-700 font-medium">
-                    Book Service Now
-                </a>
-            </div>
-        `;
+                <a href="service.html" class="mt-4 inline-block text-blue-600 hover:text-blue-700 font-medium">Book Service Now</a>
+            </div>`;
         return;
     }
 
-    appointmentsContainer.innerHTML = state.appointments.map(apt => createAppointmentCard(apt)).join('');
+    container.innerHTML = state.appointments.map(apt => createAppointmentCard(apt)).join('');
+}
+
+// ==========================================
+// 4. COMPONENT CREATORS
+// ==========================================
+
+function createOrderCard(order) {
+    const status = order.status.toLowerCase();
+    const style = getStatusStyle(status);
+    const emoji = status === 'delivered' ? '✅' : status === 'shipped' ? '📦' : '👕';
+    const date = new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    return `
+        <div class="relative bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+            <span class="absolute top-4 right-4 ${style.bgClass} ${style.textClass} px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10">${order.status}</span>
+            <div class="bg-gradient-to-br from-blue-100 to-indigo-100 h-32 flex items-center justify-center">
+                <span class="text-6xl">${emoji}</span>
+            </div>
+            <div class="p-6">
+                <h4 class="font-bold text-slate-800 text-lg mb-1">#${order.orderId}</h4>
+                <p class="text-xs text-slate-500 mb-3">${date}</p>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="font-bold text-blue-600 text-xl">Rs. ${order.totalAmount.toFixed(2)}</span>
+                </div>
+                <button onclick="viewOrderDetails('${order.orderId}')" class="w-full mb-3 bg-slate-800 text-white py-2 rounded-full text-xs font-bold uppercase hover:bg-slate-900 transition-colors">
+                    View Details
+                </button>
+                ${getOrderActionButton(order)}
+            </div>
+        </div>`;
+}
+
+function getOrderActionButton(order) {
+    const status = order.status.toLowerCase();
+    if (status === 'confirmed') {
+        return `<button onclick="cancelOrder('${order.orderId}')" class="w-full bg-red-600 text-white py-2 rounded-full text-xs font-bold uppercase hover:bg-red-700 transition-colors">Cancel Order</button>`;
+    } else if (status === 'shipped') {
+        return `<button onclick="trackOrder('${order.orderId}')" class="w-full bg-blue-600 text-white py-2 rounded-full text-xs font-bold uppercase hover:bg-blue-700 transition-colors">Track Order</button>`;
+    }
+    return '';
 }
 
 function createAppointmentCard(apt) {
-    const statusColors = {
-        booked: { bg: 'bg-indigo-100', text: 'text-indigo-700' },
-        pending: { bg: 'bg-blue-100', text: 'text-blue-700' },
-        completed: { bg: 'bg-green-100', text: 'text-green-700' },
-        cancelled: { bg: 'bg-red-100', text: 'text-red-700' },
-        no_show: { bg: 'bg-slate-100', text: 'text-slate-700' }
-    };
     const status = apt.status.toLowerCase();
-    const style = statusColors[status] || statusColors.pending;
-
-    // Service Info from DTO response (ServiceSummaryResponse)
-    const serviceName = apt.response?.name || 'Service';
+    const style = getAppointmentStatusStyle(status);
+    const serviceName = apt.serviceResponse?.name || 'Service';
     const totalAmount = apt.totalAmount || 0;
     const date = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     return `
         <div class="relative bg-gradient-to-br from-indigo-50/50 to-blue-50/50 rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300">
-            <span class="absolute top-4 right-4 ${style.bg} ${style.text} px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm z-10">
-                ${apt.status}
-            </span>
+            <span class="absolute top-4 right-4 ${style.bgClass} ${style.textClass} px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm z-10">${apt.status}</span>
             <div class="bg-gradient-to-br from-indigo-100 to-blue-100 h-28 flex items-center justify-center">
                 <span class="text-5xl">✂️</span>
             </div>
@@ -209,723 +286,399 @@ function createAppointmentCard(apt) {
                         ${apt.startTime} - ${apt.endTime}
                     </p>
                 </div>
-                <div class="flex items-center justify-between mb-4 mt-2">
+                <div class="flex items-center justify-between mb-4">
                     <span class="font-bold text-indigo-600 text-lg">Rs. ${totalAmount.toFixed(2)}</span>
                 </div>
-                <button onclick="viewAppointmentDetails('${apt.appointmentId}')"
-                    class="w-full mb-3 bg-slate-800 text-white py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-slate-900 transition-colors shadow-sm">
+                <button onclick="viewAppointmentDetails('${apt.appointmentId}')" class="w-full mb-3 bg-slate-800 text-white py-2 rounded-full text-xs font-bold uppercase hover:bg-slate-900 transition-colors">
                     View Info
                 </button>
                 ${getAppointmentActionButton(apt)}
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 function getAppointmentActionButton(apt) {
     const status = apt.status.toLowerCase();
+    if (status !== 'booked' && status !== 'pending') return '';
 
-    // Only show cancel button for booked/pending appointments
-    if (status === 'booked' || status === 'pending') {
-        // Check if appointment start time is at least 30 minutes from now
-        const now = new Date();
+    const now = new Date();
+    const aptDate = new Date(apt.appointmentDate);
+    const timeMatch = apt.startTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
 
-        // Combine appointment date and start time to create full datetime
-        // apt.appointmentDate is the date, apt.startTime is the time (e.g., "10:00" or "10:00 AM")
-        const appointmentDate = new Date(apt.appointmentDate);
-        const startTimeParts = apt.startTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+    if (timeMatch) {
+        let hours = parseInt(timeMatch[1], 10);
+        const mins = parseInt(timeMatch[2], 10);
+        const period = timeMatch[3];
+        if (period?.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+        else if (period?.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        aptDate.setHours(hours, mins, 0, 0);
+    }
 
-        if (startTimeParts) {
-            let hours = parseInt(startTimeParts[1], 10);
-            const minutes = parseInt(startTimeParts[2], 10);
-            const period = startTimeParts[3];
-
-            // Convert to 24-hour format if AM/PM is present
-            if (period) {
-                if (period.toUpperCase() === 'PM' && hours !== 12) {
-                    hours += 12;
-                } else if (period.toUpperCase() === 'AM' && hours === 12) {
-                    hours = 0;
-                }
-            }
-
-            appointmentDate.setHours(hours, minutes, 0, 0);
-        }
-
-        // Calculate difference in milliseconds
-        const timeDiff = appointmentDate.getTime() - now.getTime();
-        const thirtyMinutesInMs = 30 * 60 * 1000;
-
-        // Only show cancel button if appointment is more than 30 minutes away
-        if (timeDiff > thirtyMinutesInMs) {
-            return `
-                <button onclick="cancelUserAppointment('${apt.appointmentId}')"
-                    class="w-full bg-red-50 text-red-600 border border-red-100 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-red-100 transition-colors">
-                    Cancel
-                </button>
-            `;
-        }
+    if (aptDate.getTime() - now.getTime() > 30 * 60 * 1000) {
+        return `<button onclick="cancelUserAppointment('${apt.appointmentId}')" class="w-full bg-red-50 text-red-600 border border-red-100 py-2 rounded-full text-xs font-bold uppercase hover:bg-red-100 transition-colors">Cancel</button>`;
     }
     return '';
 }
 
+// ==========================================
+// 5. EVENT HANDLERS & ACTIONS
+// ==========================================
 
-function createOrderCard(order) {
-    const statusColors = {
-        confirmed: { bg: 'bg-blue-100', text: 'text-blue-700' },
-        shipped: { bg: 'bg-indigo-100', text: 'text-indigo-700' },
-        delivered: { bg: 'bg-green-100', text: 'text-green-700' },
-        cancelled: { bg: 'bg-red-100', text: 'text-red-700' }
+async function handleLogout() {
+    if (!confirm('Are you sure you want to logout?')) return;
+    try {
+        const res = await AuthService.logout();
+        if (res?.success) {
+            updateAuthUI(false);
+            showToast("Logging out...", "success");
+            setTimeout(() => window.location.href = '/auth/login.html', 1000);
+        }
+    } catch (error) {
+        showToast("Logout failed. Please try again.", "error");
+    }
+}
+
+async function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) return showToast('Please select an image file', 'error');
+    if (file.size > 5 * 1024 * 1024) return showToast('Image size should be less than 5MB', 'error');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        showToast('Uploading photo...', 'info');
+        const res = await profileService.changePhoto(formData);
+        if (res?.success) {
+            state.profile.profileUrl = res.data.profileUrl || res.data;
+            renderProfile();
+            showToast('Photo updated successfully', 'success');
+        }
+    } catch (error) {
+        showToast('Upload failed', 'error');
+    }
+}
+
+async function changePassword() {
+    const oldP = document.getElementById('currentPassword').value;
+    const newP = document.getElementById('newPassword').value;
+    const confP = document.getElementById('confirmPassword').value;
+    const pattern = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!_*])(?=\S+$).{8,50}$/;
+
+    if (!oldP || !newP || !confP) return showToast("Please fill all fields", "info");
+    if (!newP.match(pattern)) return showToast("Password must be 8-50 characters with number, letter, and special character", "error");
+    if (newP !== confP) return showToast("Passwords do not match", "error");
+
+    showToast("Updating password...", "info");
+    try {
+        const res = await profileService.changePassword({ oldPassword: oldP, newPassword: newP, reNewPassword: confP });
+        if (res?.success) {
+            closePasswordModal();
+            showToast("Password updated successfully", "success");
+        } else {
+            showToast(res?.message || "Update failed", "error");
+        }
+    } catch (error) {
+        showToast("Network error", "error");
+    }
+}
+
+// Address Actions
+async function saveAddress() {
+    const type = document.getElementById('addressType').value.toUpperCase();
+    const data = getAddressFormData();
+    if (!data.province || !data.district || !data.place) return showToast("Please fill all required fields", "info");
+
+    showToast("Saving address...", "info");
+    try {
+        const res = await profileService.addAddress({ ...data, type });
+        if (res?.success) {
+            state.addresses[type.toLowerCase()] = res.data;
+            renderAddresses();
+            closeAddressModal();
+            showToast("Address saved", "success");
+        }
+    } catch (error) {
+        showToast("Failed to save address", "error");
+    }
+}
+
+async function updateAddress() {
+    const type = document.getElementById('addressType').value.toLowerCase();
+    const data = getAddressFormData();
+    const current = state.addresses[type];
+
+    if (!current) return;
+
+    showToast("Updating address...", "info");
+    try {
+        const res = await profileService.updateAddress(current.addressId || current.id, data);
+        if (res?.success) {
+            state.addresses[type] = res.data;
+            renderAddresses();
+            closeAddressModal();
+            showToast("Address updated", "success");
+        }
+    } catch (error) {
+        showToast("Update failed", "error");
+    }
+}
+
+function getAddressFormData() {
+    return {
+        province: document.getElementById('province').value,
+        district: document.getElementById('district').value,
+        place: document.getElementById('place').value,
+        landmark: document.getElementById('landmark').value,
+        latitude: document.getElementById('latitude').value,
+        longitude: document.getElementById('longitude').value,
+        type: document.getElementById('addressType').value.toUpperCase()
     };
-    const status = order.status.toLowerCase();
-    const statusColor = statusColors[status] || statusColors.pending;
-
-    const emoji = status === 'delivered' ? '✅' : status === 'shipped' ? '📦' : '👕';
-
-    return `
-        <div class="relative bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-            <span class="absolute top-4 right-4 ${statusColor.bg} ${statusColor.text} px-4 py-2 rounded-full text-sm font-medium shadow-sm z-10">
-                ${order.status}
-            </span>
-            <div class="bg-gradient-to-br from-blue-100 to-indigo-100 h-32 flex items-center justify-center">
-                <span class="text-6xl">${emoji}</span>
-            </div>
-            <div class="p-6">
-                <h4 class="font-bold text-slate-800 text-lg mb-1">#${order.orderId}</h4>
-                <p class="text-sm text-slate-500 mb-3">${new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                <div class="flex items-center justify-between mb-4">
-                    <span class="font-bold text-blue-600 text-xl">Rs. ${order.totalAmount.toFixed(2)}</span>
-                </div>
-                 <button onclick="viewOrderDetails('${order.orderId}')"
-                    class="w-full mb-4 bg-slate-700 text-white py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition-colors">
-                    View Details
-                </button>
-                ${getOrderActionButton(order)}
-
-            </div>
-        </div>
-    `;
 }
 
-function getOrderActionButton(order) {
-    const status = order.status.toLowerCase();
-
-    if (status === 'confirmed') {
-        return `
-        <button onclick = "cancelOrder('${order.orderId}')"
-        class="w-full bg-red-600 text-white py-2 rounded-full text-sm font-medium hover:bg-red-700 transition-colors" >
-            Cancel Order
-        </button>
-        `;
-    } else if (status === 'shipped') {
-        return `
-            <button onclick="trackOrder('${order.orderId}')"
-                class="w-full bg-blue-600 text-white py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
-                Track Order
-            </button>
-        `;
-    }
-    return '';
-}
-
-//data fetching functions
-async function fetchProfile() {
+// Order & Appointment Actions
+async function cancelOrder(id) {
+    if (!confirm(`Cancel order #${id}?`)) return;
+    showToast("Cancelling order...", "info");
     try {
-        state.isLoading = true;
-        const response = await profileService.getProfileDetails();
-
-        if (response?.success) {
-            state.profile = response.data;
-            updateProfileUI();
-        } else {
-            showToast('Failed to load profile', "error");
-        }
-
-    } catch (error) {
-        console.error("Error fetching profile", error);
-        showToast("Network Error in loading profile", "error");
-    }
-    finally {
-        state.isLoading = false;
-    }
-}
-
-async function fetchAddresses() {
-    try {
-        const homeResponse = await profileService.getAddressType('HOME');
-        const workResponse = await profileService.getAddressType('WORK');
-
-        if (homeResponse?.success) {
-            state.addresses.home = homeResponse.data;
-        }
-        if (workResponse?.success) {
-            state.addresses.work = workResponse.data;
-        }
-
-        updateAddressUI();
-    } catch (error) {
-        console.error("Error in fetching address", error);
-        showToast('Error loading addresses', "error");
-    }
-}
-
-async function fetchOrders() {
-    try {
-        const response = await profileService.getOrderForProfile();
-        if (response?.success) {
-            state.orders = response.data || [];
-            updateOrdersUI();
-        } else {
-            showToast("Failed to load orders", "error");
+        const res = await profileService.cancelOrder(id);
+        if (res.success) {
+            const idx = state.orders.findIndex(o => o.orderId == id);
+            if (idx !== -1) state.orders[idx].status = 'CANCELLED';
+            renderOrders();
+            showToast("Order cancelled", "success");
         }
     } catch (error) {
-        console.error("Error in fetching in orders", error);
-        showToast("Failed to fetch orders", "error");
+        showToast("Cancellation failed", "error");
     }
 }
 
-async function fetchAppointments() {
+async function cancelUserAppointment(id) {
+    if (!confirm(`Cancel appointment #${id}?`)) return;
+    showToast("Cancelling appointment...", "info");
     try {
-        const response = await profileService.getAppointmentForProfile();
-        if (response?.success) {
-            state.appointments = response.data || [];
-            updateAppointmentsUI();
-        } else {
-            showToast("Failed to load appointments", "error");
+        const res = await profileService.cancelAppointment(id);
+        if (res.success) {
+            const apt = state.appointments.find(a => a.appointmentId == id);
+            if (apt) apt.status = 'CANCELLED';
+            renderAppointments();
+            showToast("Appointment cancelled", "success");
         }
     } catch (error) {
-        console.error("Error fetching appointments", error);
-        showToast("Failed to fetch appointments", "error");
+        showToast("Cancellation failed", "error");
     }
 }
 
-
-//left to update the ui for this
-async function checkDriverStatus() {
+async function viewOrderDetails(id) {
     try {
-        const response = await profileService.checkDriverStatus();
-
-        if (response.success && response.data) {
-            if(response.data == 'VERIFIED'){
-                document.getElementById('driverDashboardBtn').classList.remove('hidden');
-            }else if(response.data == 'PENDING'){
-                document.getElementById('driverPendingBtn').classList.remove('hidden');
-            }else{
-                document.getElementById('applyDriverBtn').classList.remove('hidden');
-            }
-        }else{
-            document.getElementById('applyDriverBtn').classList.remove('hidden');
+        showToast("Fetching details...", "info");
+        const res = await profileService.getSpecificOrderDetail(id);
+        if (res?.success) {
+            populateOrderDetailModal(res.data);
+            openOrderDetailModal();
         }
     } catch (error) {
-        console.error("Error in checking driverf status", error);
+        showToast("Failed to load details", "error");
     }
 }
 
-
-//tab switching function
-function switchAddressTab(tab) {
-    const homeTab = document.getElementById('homeTab');
-    const workTab = document.getElementById('workTab');
-    const homeAddress = document.getElementById('homeAddress');
-    const workAddress = document.getElementById('workAddress');
-
-    if (tab === 'home') {
-        homeTab.classList.remove('tab-inactive');
-        homeTab.classList.add('tab-active');
-        workTab.classList.add('tab-inactive');
-        homeAddress.classList.remove('hidden');
-        workAddress.classList.add('hidden');
-    } else {
-        workTab.classList.remove('tab-inactive');
-        workTab.classList.add('tab-active');
-        homeTab.classList.remove('tab-active');
-        homeTab.classList.add('tab-inactive');
-        workAddress.classList.remove('hidden');
-        homeAddress.classList.add('hidden');
+async function viewAppointmentDetails(id) {
+    try {
+        showToast("Fetching details...", "info");
+        const res = await profileService.getSpecificAppointmentDetail(id);
+        if (res?.success) {
+            populateAppointmentDetailModal(res.data);
+            openAppointmentDetailModal();
+        }
+    } catch (error) {
+        showToast("Failed to load details", "error");
     }
 }
 
-
-
-//modal functions for the the profile picturees and other password modals
-
-function openEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
-    document.getElementById('editModal').classList.remove('flex');
+function trackOrder(id) {
+    window.location.href = `/track-order.html?orderId=${id}`;
 }
 
-function closeEditModal() {
-    document.getElementById('editModal').classList.remove('hidden');
-    document.getElementById('editModal').classList.add('flex');
+// Driver Application
+async function saveLicense() {
+
+    const fields = {
+        num: document.getElementById('licenseNumber').value,
+        expiry: document.getElementById('licenseExpiry').value,
+        veh: document.getElementById('vehicleNumber').value,
+        file: document.getElementById('licenseFile').files[0]
+    };
+
+    if (!fields.num || !fields.expiry || !fields.veh || !fields.file) return showToast('Fill all fields', 'error');
+
+    const formData = new FormData();
+    formData.append('driverRegisterRequest', new Blob([JSON.stringify({
+        licenseNumber: fields.num,
+        licenseExpiry: fields.expiry,
+        vehicleNumber: fields.veh
+    })], { type: 'application/json' }));
+    formData.append('license', fields.file);
+
+    showToast("Saving license...", "info");
+    try {
+        const res = await profileService.registerDriver(formData);
+        if (res?.success) {
+            closeLicenseModal();
+            showToast('Application submitted!', 'success');
+            await checkDriverStatus();
+        }
+    } catch (error) {
+        showToast("Submission failed", "error");
+    }
 }
 
-function openPasswordModal() {
-    document.getElementById('passwordModal').classList.remove('hidden');
-    document.getElementById('passwordModal').classList.add('flex');
-
-    // Clear form fields
-    document.getElementById('currentPassword').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
-}
-
-function closePasswordModal() {
-    document.getElementById('passwordModal').classList.remove('flex');
-    document.getElementById('passwordModal').classList.add('hidden');
-}
+// ==========================================
+// 6. MODALS & POPUPS
+// ==========================================
 
 function openAddressModal(type = 'home') {
-    document.getElementById('addressType').value = type;
-    document.getElementById('addressModal').classList.remove('hidden');
-    document.getElementById('addressModal').classList.add('flex');
-
-    // Try to find the save button
+    const modal = document.getElementById('addressModal');
     const saveBtn = document.getElementById('saveButton');
+    document.getElementById('addressType').value = type;
+    modal.classList.replace('hidden', 'flex');
 
-    if (!saveBtn) {
-        console.error("Save/Update button not found in address modal");
-        return;
-    }
-
-    // Pre-fill if editing existing address
     const addr = state.addresses[type.toLowerCase()];
     if (addr) {
         document.getElementById('province').value = addr.province || '';
         document.getElementById('district').value = addr.district || '';
         document.getElementById('place').value = addr.place || '';
         document.getElementById('landmark').value = addr.landmark || '';
+        updateLatLng(addr.latitude, addr.longitude);
+        if (typeof updateMapFromLatAndLng === 'function') updateMapFromLatAndLng(addr.latitude, addr.longitude);
 
-        // Update coordinates and map
-        if (addr.latitude && addr.longitude) {
-            updateLatLng(addr.latitude, addr.longitude);
-            if (typeof updateMapFromLatAndLng === 'function') {
-                updateMapFromLatAndLng(addr.latitude, addr.longitude);
-            }
-        }
-
-        // Switch button to Update mode
         saveBtn.onclick = updateAddress;
-        saveBtn.textContent = 'Update Address';
-
-        // Leaflet fix: invalidate size when modal opens
-        setTimeout(() => { if (window.map) window.map.invalidateSize(); }, 100);
+        saveBtn.querySelector('span').textContent = 'Update Address';
     } else {
-        // Clear form fields
         ['province', 'district', 'place', 'landmark', 'latitude', 'longitude'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
-
-        // Switch button to Save mode
         saveBtn.onclick = saveAddress;
-        saveBtn.textContent = 'Save Address';
+        saveBtn.querySelector('span').textContent = 'Save Address';
     }
+
+    // Leaflet fix: invalidate size after modal is visible
+    setTimeout(() => {
+        if (typeof map !== 'undefined') map.invalidateSize();
+    }, 600);
+    setTimeout(() => { if (typeof map !== 'undefined') map.invalidateSize(); }, 1200);
 }
 
 function closeAddressModal() {
-    document.getElementById('addressModal').classList.add('hidden');
-    document.getElementById('addressModal').classList.remove('flex');
+    document.getElementById('addressModal').classList.replace('flex', 'hidden');
+}
 
-    // Clear form fields
-    ['province', 'district', 'place', 'landmark'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    })
+function openPasswordModal() {
+    ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('passwordModal').classList.replace('hidden', 'flex');
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').classList.replace('flex', 'hidden');
 }
 
 function openLicenseModal() {
-    document.getElementById('licenseModal').classList.remove('hidden');
-    document.getElementById('licenseModal').classList.add('flex');
-    //set current timestamp for submitted at
+    document.getElementById('licenseModal').classList.replace('hidden', 'flex');
 }
 
 function closeLicenseModal() {
-    document.getElementById('licenseModal').classList.add('hidden');
-    document.getElementById('licenseModal').classList.remove('flex');
-    //reset the form
-    document.getElementById('licenseModal').querySelectorAll('input,select').forEach(input => input.value = '');
+    document.getElementById('licenseModal').classList.replace('flex', 'hidden');
     document.getElementById('licensePreview').classList.add('hidden');
-
-
 }
 
-//profile picture
-function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    //simle validation
-    if (!file.type.startsWith('image/')) {
-        showToast('Please select an image file', 'error');
-        return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('Image size should be less than 5MB', 'error');
-    }
-
-    //priview and upload
-    const formData = new FormData();
-    formData.append('file', file);
-
-    uploadProfilePhoto(formData);
+// Detail View Modals
+function openOrderDetailModal() {
+    const el = document.getElementById('orderDetailModal');
+    el?.classList.replace('hidden', 'flex');
+    document.body.style.overflow = 'hidden';
 }
 
-async function uploadProfilePhoto(formData) {
-    try {
-        showToast('Upoloading photo....', 'info');
-
-        const response = await profileService.changePhoto(formData);
-
-        if (response?.success) {
-            state.profile.profileUrl = response.data.profileUrl || response.data;
-            updateProfileUI();
-            showToast('Profile photo updated successfully', 'success');
-        } else {
-            showToast('Failed to upload photo', 'error');
-        }
-    } catch (error) {
-        console.error('Error uploading photo', error);
-        showToast('Error in uploading photo', 'error');
-    }
+function closeOrderDetailModal() {
+    const el = document.getElementById('orderDetailModal');
+    el?.classList.replace('flex', 'hidden');
+    document.body.style.overflow = '';
 }
 
-
-//change password function
-async function changePassword() {
-    const passwordPattern = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!_*])(?=\S+$).{8,50}$/;
-    const oldPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const reNewPassword = document.getElementById('confirmPassword').value;
-
-    if (!oldPassword || !newPassword || !reNewPassword) {
-        showToast("Please fill all the fields", "info");
-        return;
-    }
-
-    if (!oldPassword.match(passwordPattern)) {
-        showToast("Password must contain at least one number, one uppercase letter, one lowercase letter, one special character, and be at least 8 characters long", "error");
-        return;
-    }
-    if (!newPassword.match(passwordPattern)) {
-        showToast("Password must contain at least one number, one uppercase letter, one lowercase letter, one special character, and be at least 8 characters long", "error");
-        return;
-    }
-    if (newPassword !== reNewPassword) {
-        showToast("Passwords do not match", "error");
-        return;
-    }
-    if (newPassword.length < 8) {
-        showToast('Password must be at least 8 characters', 'error');
-        return;
-    }
-    try {
-        const response = await profileService.changePassword({
-            "oldPassword": oldPassword,
-            "newPassword": newPassword,
-            "reNewPassword": reNewPassword
-        });
-
-        if (response?.success) {
-            closePasswordModal();
-            showToast("Password updated successfully", "success");
-        } else {
-
-            const msg = response?.message || response?.errorCode || "Failed to update password";
-            showToast(msg, "error");
-        }
-    } catch (error) {
-        console.error("Error changing password:", error);
-        showToast("Network error. Please try again.", "error");
-    }
-}
-
-//save address function
-async function saveAddress() {
-    const type = document.getElementById('addressType').value.toUpperCase();
-    const province = document.getElementById('province').value;
-    const district = document.getElementById('district').value;
-    const place = document.getElementById('place').value;
-    const landmark = document.getElementById('landmark').value;
-
-
-    if (!province || !district || !place) {
-        showToast("Pleae fill all the fields", "info");
-        return;
-    }
-
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
-
-    const addressData = {
-        type,
-        province,
-        district,
-        place,
-        landmark,
-        latitude,
-        longitude
-    };
-
-    try {
-        const response = await profileService.addAddress(addressData);
-        if (response?.success) {
-            state.addresses[type.toLowerCase()] = response.data;
-            updateAddressUI();
-            closeAddressModal();
-            showToast("Address saved successfully", "success");
-        } else {
-            const msg = response?.message || "Failed to save address";
-            showToast(msg, "error");
-        }
-    } catch (error) {
-        console.error("Error saving address", error);
-        showToast("Network error", "error");
-    }
-
-}
-
-async function updateAddress() {
-    const type = document.getElementById('addressType').value.toUpperCase();
-    const province = document.getElementById('province').value;
-    const district = document.getElementById('district').value;
-    const place = document.getElementById('place').value;
-    const landmark = document.getElementById('landmark').value;
-
-    if (!province || !district || !place) {
-        showToast("Pleae fill all the fields");
-        return;
-    }
-
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
-
-    const addressData = {
-        province,
-        district,
-        place,
-        landmark,
-        latitude,
-        longitude
-    };
-    try {
-        const currentAddr = state.addresses[type.toLowerCase()];
-        if (!currentAddr) {
-            showToast("Original address not found", "error");
-            return;
-        }
-        const response = await profileService.updateAddress(currentAddr.id, addressData);
-        if (response?.success) {
-            state.addresses[type.toLowerCase()] = response.data;
-            updateAddressUI();
-            closeAddressModal();
-            showToast("Address updated successfully", "success");
-        } else {
-            const msg = response?.message || "Failed to update address";
-            showToast(msg, "error");
-        }
-    } catch (error) {
-        console.error("Error updating address", error);
-        showToast("Network error", "error");
-    }
-
-}
-
-function editAddress(type) {
-    openAddressModal(type);
-}
-
-
-//locate on map function
-// ===== LOCATE BUTTON =====
-const locateBtn = document.getElementById("locateMapBtn");
-const provinceInput = document.getElementById("province");
-const districtInput = document.getElementById("district");
-const placeInput = document.getElementById("place");
-const landmarkInput = document.getElementById("landmark");
-
-if (locateBtn) {
-    locateBtn.addEventListener("click", async () => {
-        const province = provinceInput.value?.trim();
-        const district = districtInput.value?.trim();
-        const place = placeInput.value?.trim();
-        const landmark = landmarkInput.value?.trim();
-
-        if (!province && !district && !place && !landmark) {
-            showToast("Please fill the address field");
-            return;
-        }
-
-        const address = [landmark, place, district, province, COUNTRY]
-            .filter(Boolean)
-            .join(", ");
-
-        const location = await geocodeAddress(address);
-        if (!location) {
-            showToast("Location not found", "error");
-            return;
-        }
-
-        map.setView([location.lat, location.lng], 16);
-        marker.setLatLng([location.lat, location.lng]);
-
-        updateLatLng(location.lat, location.lng);
-        // updateAddressFields(location.components, location.roadInfo); // Disabled to prevent overwriting user input
-    });
-}
-
-
-//Order functions
-function viewAllOrders() {
-    //todo: navigate to allOrder page
-    showToast("Going to order details", "info");
-    window.location.href = '/orders.html';
-}
-
-
-async function cancelOrder(orderId) {
-    if (confirm(`Are you sure you want to cancel order  # ${orderId}?`)) {
-        try {
-            showToast("Cancelling order...", "info");
-            const response = await profileService.cancelOrder(orderId);
-            if (response.success) {
-
-                // Find the specific order and update its status
-                const orderIndex = state.orders.findIndex(o => o.orderId == orderId);
-                if (orderIndex !== -1) {
-                    state.orders[orderIndex].status = 'CANCELLED';
-                }
-                showToast(response.message || "Cancelled successfully", "success");
-            } else {
-                showToast("Failed to cancel order", "error");
-
-            }
-            updateOrdersUI();
-
-        } catch (error) {
-            console.error("Error canceling order", error);
-            showToast("Error in canceling order", "error");
-            updateOrdersUI();
-        }
-    }
-}
-
-async function viewOrderDetails(orderId) {
-    try {
-        //loading state
-
-        showToast("Fetching order details...", "success");
-        const response = await profileService.getSpecificOrderDetail(orderId);
-
-        if (response?.success) {
-            populateOrderDetailModal(response.data);
-            openOrderDetailModal();
-        } else {
-            showToast("Failed to load order details", "error");
-        }
-
-
-    } catch (error) {
-        console.error("Error while fetching", error);
-        showToast("Network error while fetching order details", "error");
-    }
-}
-
-function trackOrder(orderId) {
-    window.location.href = `/track-order.html?orderId=${orderId}`;
-}
-
-// Appointment detailed view and actions
-function viewAllAppointments() {
-    showToast("Opening all appointments", "info");
-    window.location.href = 'appointments.html';
-}
-
-async function viewAppointmentDetails(aptId) {
-    try {
-        showToast("Fetching appointment info...", "info");
-        const response = await profileService.getSpecificAppointmentDetail(aptId);
-
-        if (response?.success) {
-            populateAppointmentDetailModal(response.data);
-            openAppointmentDetailModal();
-        } else {
-            showToast("Failed to load appointment details", "error");
-        }
-    } catch (error) {
-        console.error("Error fetching appointment details", error);
-        showToast("Network error", "error");
-    }
-}
-
-async function cancelUserAppointment(aptId) {
-    if (confirm(`Are you sure you want to cancel appointment #${aptId}?`)) {
-        try {
-            showToast("Cancelling appointment...", "info");
-            const response = await profileService.cancelAppointment(aptId);
-            if (response.success) {
-                // Refresh local state
-                const apt = state.appointments.find(a => a.appointmentId == aptId);
-                if (apt) apt.status = 'CANCELLED';
-                updateAppointmentsUI();
-                showToast(response.message || "Cancelled successfully", "success");
-            } else {
-                showToast(response.message || "Failed to cancel", "error");
-            }
-        } catch (error) {
-            console.error("Error cancelling appointment", error);
-            showToast("Error in cancelling appointment", "error");
-        }
-    }
-}
-
-// Modal Control for Appointments
 function openAppointmentDetailModal() {
-    const modal = document.getElementById('appointmentDetailModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-    }
+    const el = document.getElementById('appointmentDetailModal');
+    el?.classList.replace('hidden', 'flex');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeAppointmentDetailModal() {
-    const modal = document.getElementById('appointmentDetailModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.style.overflow = '';
-    }
+    const el = document.getElementById('appointmentDetailModal');
+    el?.classList.replace('flex', 'hidden');
+    document.body.style.overflow = '';
+}
+
+// ==========================================
+// 7. POPULATORS & STYLES
+// ==========================================
+
+function populateOrderDetailModal(order) {
+    const statusStyle = getStatusStyle(order.status);
+    const date = new Date(order.createdAt).toLocaleString();
+
+    document.getElementById('popupOrderId').textContent = order.orderId;
+    document.getElementById('popupStatus').textContent = order.status;
+    document.getElementById('popupStatus').className = `text-base font-bold ${statusStyle.textClass} capitalize leading-none`;
+    document.getElementById('popupStatusBg').className = `p-2.5 rounded-xl ${statusStyle.bgClass} ${statusStyle.textClass}`;
+    document.getElementById('popupDate').textContent = date;
+    document.getElementById('popupTotal').textContent = `Rs. ${order.totalAmount.toFixed(2)}`;
+
+    const pay = order.payment;
+    document.getElementById('popupPaymentMethod').textContent = pay ? pay.paymentMethod.replace(/_/g, ' ') : 'Cash on Delivery';
+    document.getElementById('popupPaymentStatus').textContent = `Status: ${pay ? pay.paymentStatus : 'Pending'}`;
+
+    const addr = order.address;
+    document.getElementById('popupAddress').innerHTML = `
+        <p class="font-bold text-slate-800">${addr.place}</p>
+        <p>${addr.landmark || ''}</p>
+        <p>${addr.district}, ${addr.province}</p>
+        <p class="mt-2 text-indigo-600 font-medium">${order.phoneNumber || addr.phone || 'N/A'}</p>`;
+
+    document.getElementById('popupItemsContainer').innerHTML = order.orderItems.map(item => `
+        <div class="flex items-center gap-4 p-3 bg-slate-50/80 rounded-2xl border border-slate-100">
+            <div class="w-14 h-14 bg-white rounded-xl p-2 shadow-sm border flex-shrink-0">
+                <img src="${item.product.imageUrl || '/assets/svg/CutLab.svg'}" class="w-full h-full object-contain">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-bold text-slate-800 truncate">${item.product.title}</p>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-[11px] font-medium text-slate-500">${item.quantity} × Rs. ${item.price.toFixed(2)}</p>
+                    <p class="text-[13px] font-bold text-blue-600">Rs. ${(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+            </div>
+        </div>`).join('');
 }
 
 function populateAppointmentDetailModal(apt) {
     const style = getAppointmentStatusStyle(apt.status);
-    const dateStr = new Date(apt.appointmentDate).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric'
-    });
+    const dateStr = new Date(apt.appointmentDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Header
     document.getElementById('aptPopupId').textContent = apt.appointmentId;
-
-    // Status
     const statusText = document.getElementById('aptPopupStatus');
-    const statusBg = document.getElementById('aptPopupStatusBg');
     statusText.textContent = apt.status;
     statusText.className = `font-bold text-base leading-none ${style.textClass} capitalize`;
-    statusBg.className = `p-3 rounded-full ${style.bgClass} ${style.textClass}`;
-
+    document.getElementById('aptPopupStatusBg').className = `p-3 rounded-full ${style.bgClass} ${style.textClass}`;
     document.getElementById('aptPopupDate').textContent = dateStr;
 
-    // Specialist
+    // Staff
     const staff = apt.staffResponse;
     const staffNameEl = document.getElementById('aptPopupStaffName');
-    const staffRoleEl = document.getElementById('aptPopupStaffRole');
     const staffImg = document.getElementById('aptStaffImg');
     const staffInitial = document.getElementById('aptStaffInitial');
 
     if (staff) {
         staffNameEl.textContent = staff.name || 'Specialist';
-        staffRoleEl.textContent = staff.expertiseIn || 'Expert Stylist';
+        document.getElementById('aptPopupStaffRole').textContent = staff.expertiseIn || 'Expert Stylist';
         if (staff.profileUrl) {
             staffImg.src = staff.profileUrl;
             staffImg.classList.remove('hidden');
@@ -935,61 +688,46 @@ function populateAppointmentDetailModal(apt) {
             staffInitial.classList.remove('hidden');
             staffInitial.textContent = (staff.name || 'S').charAt(0).toUpperCase();
         }
-    } else {
-        staffNameEl.textContent = 'Any Specialist';
-        staffRoleEl.textContent = 'Expert Stylist';
-        staffImg.classList.add('hidden');
-        staffInitial.classList.remove('hidden');
-        staffInitial.textContent = 'A';
     }
 
     // Service
     const svc = apt.serviceResponse;
     document.getElementById('aptPopupSvcName').textContent = svc?.name || 'Service';
     document.getElementById('aptPopupSvcDuration').textContent = `Duration: ${svc?.durationMinutes || 0} mins`;
-    if (svc?.imageUrl) document.getElementById('aptPopupSvcImg').src = svc.imageUrl || "/assets/svg/CutLab.svg";
+    if (svc?.imageUrl) document.getElementById('aptPopupSvcImg').src = svc.imageUrl;
 
-    // Schedule Values
     document.getElementById('aptPopupDateVal').textContent = apt.appointmentDate;
     document.getElementById('aptPopupTimeVal').textContent = `${apt.startTime} - ${apt.endTime}`;
+    document.getElementById('aptPopupNotes').textContent = apt.specialNotes || 'No notes provided';
 
-    // Notes
-    document.getElementById('aptPopupNotes').textContent = apt.specialNotes || 'No special notes provided';
-
-    // Payment Info
     const pay = apt.paymentResponse;
-    const payInfo = document.getElementById('aptPaymentInfo');
-    if (pay) {
-        document.getElementById('aptPopupPaymentMethod').textContent = (pay.paymentMethod || 'Online').replace(/_/g, ' ');
-        document.getElementById('aptPopupPaymentStatus').textContent = `Status: ${pay.paymentStatus || 'PENDING'} | Amount: Rs. ${pay.totalAmount?.toFixed(2) || '0.00'}`;
-    } else {
-        document.getElementById('aptPopupPaymentMethod').textContent = 'Unpaid / At Branch';
-        document.getElementById('aptPopupPaymentStatus').textContent = 'Status: PENDING';
-    }
-
-    // Payment Type (Advance Paid or Full Paid based on status)
-    const paymentTypeEl = document.getElementById('aptPopupPaymentType');
-    if (paymentTypeEl) {
-        const isFullPaid = apt.status.toLowerCase() === 'completed';
-        paymentTypeEl.textContent = isFullPaid ? 'Full Paid' : 'Advance Paid';
-        paymentTypeEl.className = `font-bold text-sm leading-none ${isFullPaid ? 'text-emerald-600' : 'text-amber-600'}`;
-    }
-
+    document.getElementById('aptPopupPaymentMethod').textContent = pay ? pay.paymentMethod.replace(/_/g, ' ') : 'Unpaid';
+    document.getElementById('aptPopupPaymentStatus').textContent = `Status: ${pay?.paymentStatus || 'PENDING'}`;
     document.getElementById('aptPopupTotal').textContent = `Rs. ${apt.totalAmount.toFixed(2)}`;
 
-    // Actions (Cancellation button)
+    const payTypeEl = document.getElementById('aptPopupPaymentType');
+    if (payTypeEl) {
+        const full = apt.status.toLowerCase() === 'completed';
+        payTypeEl.textContent = full ? 'Full Paid' : 'Advance Paid';
+        payTypeEl.className = `font-bold text-sm ${full ? 'text-emerald-600' : 'text-amber-600'}`;
+    }
+
     const actionArea = document.getElementById('aptActionArea');
     const status = apt.status.toLowerCase();
     if (status === 'booked' || status === 'pending') {
-        actionArea.innerHTML = `
-            <button onclick="cancelUserAppointment('${apt.appointmentId}'); closeAppointmentDetailModal();"
-                class="w-full bg-red-600 text-white py-3.5 rounded-2xl font-bold uppercase tracking-wider hover:bg-red-700 transition-all shadow-lg hover:shadow-red-100 transform hover:-translate-y-0.5 active:translate-y-0">
-                Cancel Appointment
-            </button>
-        `;
+        actionArea.innerHTML = `<button onclick="cancelUserAppointment('${apt.appointmentId}'); closeAppointmentDetailModal();" class="w-full bg-red-600 text-white py-3.5 rounded-2xl font-bold uppercase hover:bg-red-700 shadow-lg transition-all">Cancel Appointment</button>`;
     } else {
         actionArea.innerHTML = '';
     }
+}
+
+// Helpers
+function getStatusStyle(status) {
+    const s = status.toUpperCase();
+    if (s === 'DELIVERED') return { bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' };
+    if (s === 'CANCELLED') return { bgClass: 'bg-red-50', textClass: 'text-red-600' };
+    if (s === 'SHIPPED') return { bgClass: 'bg-indigo-50', textClass: 'text-indigo-600' };
+    return { bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
 }
 
 function getAppointmentStatusStyle(status) {
@@ -1000,217 +738,95 @@ function getAppointmentStatusStyle(status) {
     return { bgClass: 'bg-slate-50', textClass: 'text-slate-600' };
 }
 
+// ==========================================
+// 8. UTILITIES
+// ==========================================
 
-
-// Modal Control Functions
-function openOrderDetailModal() {
-    const modal = document.getElementById('orderDetailModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-    }
-}
-function closeOrderDetailModal() {
-    const modal = document.getElementById('orderDetailModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.style.overflow = ''; // Restore scrolling
-    }
-}
-// Populate Modal Data
-
-function populateOrderDetailModal(order) {
-    const statusInfo = getStatusStyle(order.status);
-    const date = new Date(order.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    // Update Status UI
-    const statusText = document.getElementById('popupStatus');
-    const statusBg = document.getElementById('popupStatusBg');
-
-    statusText.textContent = order.status;
-    statusText.className = `text-base font-bold ${statusInfo.textClass} capitalize leading-none`;
-    statusBg.className = `p-2.5 rounded-xl ${statusInfo.bgClass} ${statusInfo.textClass}`;
-
-    document.getElementById('popupDate').textContent = date;
-
-    const paymentMethodEl = document.getElementById('popupPaymentMethod');
-    const paymentStatusEl = document.getElementById('popupPaymentStatus');
-
-    if (order.payment) {
-        paymentMethodEl.textContent = order.payment.paymentMethod.replace(/_/g, ' ');
-        paymentStatusEl.textContent = `Status: ${order.payment.paymentStatus || 'N/A'}`;
-    } else {
-        paymentMethodEl.textContent = 'Cash on Delivery';
-        paymentStatusEl.textContent = 'Pending';
-    }
-
-    document.getElementById('popupTotal').textContent = `Rs. ${order.totalAmount.toFixed(2)}`;
-
-    // Address Info
-    const addr = order.address;
-    document.getElementById('popupAddress').innerHTML = `
-        <p class="font-bold text-slate-800">${addr.place}</p>
-        <p>${addr.landmark || ''}</p>
-        <p>${addr.district}, ${addr.province}</p>
-        <p class="mt-2 flex items-center gap-2 text-indigo-600 font-medium font-medium">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-            ${order.phoneNumber || addr.phone || 'N/A'}
-        </p>
-    `;
-
-    // Render Items
-    const itemsContainer = document.getElementById('popupItemsContainer');
-    itemsContainer.innerHTML = order.orderItems.map(item => {
-        const product = item.product;
-        return `
-            <div class="flex items-center gap-4 p-3 bg-slate-50/80 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all duration-300">
-                <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-slate-100/50 flex-shrink-0">
-                    <img src="${product.imageUrl || '/assets/svg/CutLab.svg'}" 
-                         alt="${product.title}" 
-                         class="w-full h-full object-contain">
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-bold text-slate-800 truncate">${product.title}</p>
-                    <div class="flex justify-between items-center mt-1">
-                        <p class="text-[11px] font-medium text-slate-500">Qty: ${item.quantity} × Rs. ${item.price.toFixed(2)}</p>
-                        <p class="text-[13px] font-bold text-blue-600">Rs. ${(item.price * item.quantity).toFixed(2)}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    const eye = button.querySelector('.eye');
+    const slash = button.querySelector('.eye-slash');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    eye?.classList.toggle('hidden');
+    slash?.classList.toggle('hidden');
 }
 
-// Add this utility function to handle the colors
-function getStatusStyle(status) {
-    switch (status.toUpperCase()) {
-        case 'DELIVERED': return { bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' };
-        case 'CANCELLED': return { bgClass: 'bg-red-50', textClass: 'text-red-600' };
-        case 'SHIPPED': return { bgClass: 'bg-indigo-50', textClass: 'text-indigo-600' };
-        default: return { bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
-    }
+function updateAuthUI(isLoggedIn) {
+    const btn = document.getElementById('loginBtn');
+    const wrapper = document.getElementById('profileWrapper');
+    if (btn) btn.classList.toggle('hidden', isLoggedIn);
+    if (wrapper) wrapper.classList.toggle('hidden', !isLoggedIn);
 }
 
+function switchAddressTab(tab) {
+    const isHome = tab === 'home';
+    document.getElementById('homeTab').className = `${isHome ? 'tab-active' : 'tab-inactive'} px-6 py-3 rounded-full font-medium transition-all`;
+    document.getElementById('workTab').className = `${!isHome ? 'tab-active' : 'tab-inactive'} px-6 py-3 rounded-full font-medium transition-all`;
+    document.getElementById('homeAddress').classList.toggle('hidden', !isHome);
+    document.getElementById('workAddress').classList.toggle('hidden', isHome);
+}
 
+function editAddress(type) { openAddressModal(type); }
 
-//driver application
-async function saveLicense() {
-    const licenseNumber = document.getElementById('licenseNumber').value;
-    const licenseExpiry = document.getElementById('licenseExpiry').value;
-    const vehicleNumber = document.getElementById('vehicleNumber').value;
-    const licenseFile = document.getElementById('licenseFile').files[0];
+function viewAllOrders() { window.location.href = '/orders.html'; }
+function viewAllAppointments() { window.location.href = 'appointments.html'; }
 
-    if (!licenseNumber || !licenseExpiry || !vehicleNumber || !licenseFile) {
-        showToast('Please fill all required fields', 'error');
-        return;
-    }
-    const driverRegisterRequest = {
-        "licenseNumber": licenseNumber,
-        "licenseExpiry": licenseExpiry,
-        "vehicleNumber": vehicleNumber
-    };
-    const formData = new FormData();
-    // Append JSON part as a Blob with application/json type
-    formData.append('driverRegisterRequest', new Blob([JSON.stringify(driverRegisterRequest)], {
-        type: 'application/json'
-    }));
-    formData.append('license', licenseFile);
+// Map Locate Button
+document.getElementById("locateMapBtn")?.addEventListener("click", async () => {
+    const data = getAddressFormData();
+    const address = [data.landmark, data.place, data.district, data.province, 'Nepal'].filter(Boolean).join(", ");
+    if (!address.trim()) return showToast("Please fill address fields");
 
     try {
-        const response = await profileService.registerDriver(formData);
+        const loc = await geocodeAddress(address);
+        if (loc) {
+            // Check if map and marker exist in the global scope
+            let mapInstance = null;
+            let markerInstance = null;
 
-        if (response?.success) {
-            closeLicenseModal();
-            showToast('Driver application submitted successfully! We will review it soon.', 'success');
-            await checkDriverStatus();
-        } else {
-            showToast("Failed to submit application", "error");
-        }
-    } catch (error) {
-        console.error("Error submitting driver application");
-        showToast("Error submitting application", "error");
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const licenseFileInput = document.getElementById('licenseFile');
-    if (licenseFileInput) {
-        licenseFileInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const preview = document.getElementById('licensePreview');
-            const imagePreview = document.getElementById('licenseImagePreview');
-            const fileName = document.getElementById('licenseFileName');
-
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    imagePreview.src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
+            try {
+                if (typeof map !== 'undefined') mapInstance = map;
+                if (typeof marker !== 'undefined') markerInstance = marker;
+            } catch (e) {
+                // Ignore if they truly aren't reachable
             }
-            fileName.textContent = file.name;
-            preview.classList.remove('hidden');
-        });
-    }
-});
 
+            // Fallback to window object
+            if (!mapInstance) mapInstance = window.map;
+            if (!markerInstance) markerInstance = window.marker;
 
-//logout function  use the previous function
-async function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-
-        try {
-            const response = await AuthService.logout();
-
-            if (response?.success) {
-                updateAuthUI(false);
-                showToast("Logging out...", "success");
-
-                setTimeout(() => window.location.href = '/auth/login.html', 1000);
+            if (mapInstance && markerInstance) {
+                mapInstance.setView([loc.lat, loc.lng], 16);
+                markerInstance.setLatLng([loc.lat, loc.lng]);
+                updateLatLng(loc.lat, loc.lng);
             } else {
-                showToast("Failed to logout", "error");
+                showToast("Map is not fully loaded. Please wait.", "error");
+                console.error("Map or marker not found in global scope.");
             }
-        } catch (error) {
-            console.error("Network error failed to logout", error);
-            showToast("Network Error", "error");
+        } else {
+            showToast("Location not found", "error");
         }
+    } catch (e) {
+        console.error("Error during map geocoding:", e);
     }
-}
-
-
-// PAGE LOAD INITIALIZATION
-document.addEventListener('DOMContentLoaded', async function () {
-    console.log('Profile page loaded');
-
-    // Show loading state
-    state.isLoading = true;
-
-    // Fetch all data in parallel
-    await Promise.all([
-        fetchProfile(),
-        fetchAddresses(),
-        fetchOrders(),
-        fetchAppointments(),
-        checkDriverStatus(),
-        updateCartCount(),
-        checkDriverStatus()
-    ]);
-
-
 });
 
+// Listener for License File Preview
+document.getElementById('licenseFile')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const preview = document.getElementById('licensePreview');
+    const img = document.getElementById('licenseImagePreview');
+    const name = document.getElementById('licenseFileName');
 
-
-
-
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => img.src = e.target.result;
+        reader.readAsDataURL(file);
+        img.classList.remove('hidden');
+    } else {
+        img.classList.add('hidden');
+    }
+    name.textContent = file.name;
+    preview.classList.remove('hidden');
+});

@@ -54,14 +54,14 @@ async function geocodeAddress(address) {
 }
 
 async function reverseGeocode(lat, lng) {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&countrycode=np&limit=1`;
+    const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&countrycode=np&limit=1`;
 
-  const res = await fetch(url);
-  const data = await res.json();
+    const res = await fetch(url);
+    const data = await res.json();
 
-  if (!data.results?.length) return null;
+    if (!data.results?.length) return null;
 
-  return {components: data.results[0].components, roadInfo: data.results[0].annotations.roadinfo || {} };
+    return { components: data.results[0].components, roadInfo: data.results[0].annotations.roadinfo || {} };
 }
 
 // ===== MARKER DRAG =====

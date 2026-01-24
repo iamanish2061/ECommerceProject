@@ -96,9 +96,15 @@ public class ProfileService {
     public void registerDriver(UserModel user, MultipartFile license, DriverRegisterRequest driverRegisterRequest) {
         Driver existingDriver = driverRepository.findById(user.getId()).orElse(null);
 
-        if(existingDriver != null){
+        if(existingDriver != null && existingDriver.getVerified() == VerificationStatus.VERIFIED){
             throw new ApplicationException("Driver already registered!", "DRIVER_ALREADY_REGISTERED", HttpStatus.CONFLICT);
+        }else if(existingDriver != null && existingDriver.getVerified() == VerificationStatus.PENDING){
+            throw new ApplicationException("Driver registration is yet to be reviewed by admin!", "DRIVER_ALREADY_REGISTERED", HttpStatus.CONFLICT);
+        }else if(existingDriver != null && existingDriver.getVerified() == VerificationStatus.REJECTED){
+            driverRepository.delete(existingDriver);
+            driverRepository.flush();
         }
+
 
         String licenseUrl = UserPictureUploadHelper.uploadLicenseImage(license, user.getUsername());
         Driver newDriver = Driver.builder()
