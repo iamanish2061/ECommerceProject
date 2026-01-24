@@ -12,7 +12,16 @@ const StaffDashboard = {
     init: async function () {
         await this.loadInitialData();
         this.setupEventListeners();
-        this.renderTab('overview');
+
+        // Hash Tracking: Determine initial tab from URL or default to overview
+        const initialTab = window.location.hash.replace('#', '') || 'overview';
+        this.switchTab(initialTab);
+
+        // Sync UI if user uses browser navigation (Back/Forward)
+        window.addEventListener('hashchange', () => {
+            const tabId = window.location.hash.replace('#', '') || 'overview';
+            if (this.state.activeTab !== tabId) this.switchTab(tabId, false);
+        });
     },
 
     loadInitialData: async function () {
@@ -41,8 +50,15 @@ const StaffDashboard = {
         if (navProfilePic && this.state.profile.profileUrl) navProfilePic.src = this.state.profile.profileUrl;
     },
 
-    switchTab: async function (tabId) {
+    switchTab: async function (tabId, updateHash = true) {
+        if (!['overview', 'details', 'upcoming', 'history', 'schedule', 'leave'].includes(tabId)) {
+            tabId = 'overview';
+        }
+
         this.state.activeTab = tabId;
+
+        // Update URL hash
+        if (updateHash) window.location.hash = tabId;
 
         // Update Sidebar UI
         document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -175,19 +191,19 @@ const StaffDashboard = {
         container.innerHTML = `
             <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 h-40 relative">
-                        <div class="absolute -bottom-16 left-12 w-32 h-32 rounded-3xl bg-white p-1.5 shadow-xl">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 h-32 md:h-40 relative">
+                        <div class="absolute -bottom-12 md:-bottom-16 left-1/2 -translate-x-1/2 md:left-12 md:translate-x-0 w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-white p-1 md:p-1.5 shadow-xl">
                             <img src="${p.profileUrl || 'https://ui-avatars.com/api/?name=' + p.fullName}" class="w-full h-full rounded-2xl object-cover shadow-inner">
                         </div>
                     </div>
-                    <div class="pt-20 pb-10 px-12 space-y-8">
-                        <div class="flex justify-between items-start">
+                    <div class="pt-16 md:pt-20 pb-10 px-6 md:px-12 space-y-8">
+                        <div class="flex flex-col md:flex-row justify-between items-center md:items-start text-center md:text-left">
                             <div>
-                                <h2 class="text-3xl font-extrabold text-slate-900">${p.fullName}</h2>
+                                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">${p.fullName}</h2>
                                 <p class="text-blue-600 font-bold uppercase tracking-widest text-xs mt-1">${p.expertiseIn}</p>
-                                <p class="text-slate-500 text-sm mt-2">Member since: ${p.joinedDate}</p>
+                                <p class="text-slate-500 text-[10px] md:text-sm mt-2">Member since: ${p.joinedDate}</p>
                             </div>
-                            <div class="flex gap-2">
+                            <div class="mt-4 md:mt-0">
                                 <span class="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold ring-1 ring-green-100">Active</span>
                             </div>
                         </div>
@@ -246,46 +262,48 @@ const StaffDashboard = {
 
         container.innerHTML = `
             <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden shadow-2xl shadow-blue-900/5">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-50/80 backdrop-blur-sm border-b border-slate-100">
-                        <tr>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Service</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Appointment Time</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        ${this.state.upcomingAppointments.map(apt => `
-                            <tr class="hover:bg-blue-50/30 transition-colors group">
-                                <td class="p-6">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-sm font-bold text-slate-800">#${apt.appointmentId}</span>
-                                    </div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs uppercase">${apt.username.charAt(0)}</div>
-                                        <span class="text-sm font-bold text-slate-800">${apt.username}</span>
-                                    </div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="text-sm font-medium text-slate-600">${apt.response.name}</div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="text-sm font-bold text-slate-800">${apt.appointmentDate}</div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">${apt.startTime} - ${apt.endTime}</div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-sm font-bold text-slate-800">${apt.status}</span>
-                                    </div>
-                                </td>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead class="bg-slate-50/80 backdrop-blur-sm border-b border-slate-100">
+                            <tr>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Service</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Appointment Time</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${this.state.upcomingAppointments.map(apt => `
+                                <tr class="hover:bg-blue-50/30 transition-colors group">
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm font-bold text-slate-800">#${apt.appointmentId}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs uppercase">${apt.username.charAt(0)}</div>
+                                            <span class="text-sm font-bold text-slate-800">${apt.username}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="text-sm font-medium text-slate-600">${apt.response.name}</div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="text-sm font-bold text-slate-800">${apt.appointmentDate}</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">${apt.startTime} - ${apt.endTime}</div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm font-bold text-slate-800">${apt.status}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
     },
@@ -298,46 +316,48 @@ const StaffDashboard = {
 
         container.innerHTML = `
             <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden shadow-2xl shadow-blue-900/5">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-50/80 backdrop-blur-sm border-b border-slate-100">
-                        <tr>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Service</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Appointment Time</th>
-                            <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        ${this.state.history.map(apt => `
-                            <tr class="hover:bg-blue-50/30 transition-colors group">
-                                <td class="p-6">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-sm font-bold text-slate-800">#${apt.appointmentId}</span>
-                                    </div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs uppercase">${apt.username.charAt(0)}</div>
-                                        <span class="text-sm font-bold text-slate-800">${apt.username}</span>
-                                    </div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="text-sm font-medium text-slate-600">${apt.response.name}</div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="text-sm font-bold text-slate-800">${apt.appointmentDate}</div>
-                                    <div class="text-[10px] text-slate-400 mt-0.5">${apt.startTime} - ${apt.endTime}</div>
-                                </td>
-                                <td class="p-6">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-sm font-bold text-slate-800">${apt.status}</span>
-                                    </div>
-                                </td>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead class="bg-slate-50/80 backdrop-blur-sm border-b border-slate-100">
+                            <tr>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Service</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Appointment Time</th>
+                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${this.state.history.map(apt => `
+                                <tr class="hover:bg-blue-50/30 transition-colors group">
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm font-bold text-slate-800">#${apt.appointmentId}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs uppercase">${apt.username.charAt(0)}</div>
+                                            <span class="text-sm font-bold text-slate-800">${apt.username}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="text-sm font-medium text-slate-600">${apt.response.name}</div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="text-sm font-bold text-slate-800">${apt.appointmentDate}</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">${apt.startTime} - ${apt.endTime}</div>
+                                    </td>
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm font-bold text-slate-800">${apt.status}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
     },
@@ -376,7 +396,7 @@ const StaffDashboard = {
                     </div>
                 </div>
 
-                <div class="space-y-6">
+                <div class="order-first lg:order-last space-y-6">
                     <div class="bg-blue-600 p-8 rounded-3xl shadow-xl shadow-blue-600/20 text-white overflow-hidden relative group">
                         <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-all duration-700"></div>
                         <h3 class="text-sm font-bold text-white/60 uppercase tracking-widest mb-3">Today's Shift</h3>
@@ -419,17 +439,18 @@ const StaffDashboard = {
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden shadow-2xl shadow-blue-900/5">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Leave ID</th>
-                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Leave Date</th>
-                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Slot</th>
-                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reason</th>
-                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8">Status</th>
-                                <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Action</th>
-                            </tr>
-                        </thead>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left min-w-[800px]">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Leave ID</th>
+                                    <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Leave Date</th>
+                                    <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Slot</th>
+                                    <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reason</th>
+                                    <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8">Status</th>
+                                    <th class="p-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Action</th>
+                                </tr>
+                            </thead>
                         <tbody class="divide-y divide-slate-100">
                             ${this.state.leaves.length === 0 ? `<tr><td colspan="5" class="p-12 text-center text-slate-400 font-bold">No leave requests found</td></tr>` :
                 this.state.leaves.map(l => `
@@ -472,6 +493,7 @@ const StaffDashboard = {
             }
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -496,7 +518,7 @@ const StaffDashboard = {
             endTime: form.endTime.value || null,
             reason: form.reason.value.trim()
         }
-
+        showToast("Submitting leave request...", "info");
         const response = await StaffService.requestLeave(data);
         if (response.success) {
             showToast(response.message || "Leave request submitted", "success");
@@ -530,7 +552,7 @@ const StaffDashboard = {
         if (confirm("Are you sure you want to logout?")) {
             const response = await AuthService.logout();
             if (response.success) {
-                window.location.href = '../login.html';
+                window.location.href = '../auth/login.html';
             } else {
                 showToast("Logout failed", "error");
             }
@@ -603,6 +625,12 @@ const StaffDashboard = {
         if (toggleBtn) {
             toggleBtn.addEventListener('click', toggleSidebar);
         }
+
+        // Mobile Menu Button (Header)
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+            backdrop?.classList.remove('opacity-0', 'invisible');
+        });
 
         // Close sidebar when clicking backdrop (Mobile)
         if (backdrop) {

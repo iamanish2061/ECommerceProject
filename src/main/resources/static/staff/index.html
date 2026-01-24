@@ -89,7 +89,7 @@
 
         <!-- Toggle Button (Absolute) -->
         <button id="sidebarToggle"
-            class="absolute -right-3 top-24 bg-blue-600 text-white p-1 rounded-full border-2 border-slate-900 hover:bg-blue-700 transition-colors shadow-sm z-[60]">
+            class="absolute -right-3 top-24 bg-blue-600 text-white p-1 rounded-full border-2 border-slate-900 hover:bg-blue-700 transition-colors shadow-sm z-[60] hidden lg:block">
             <!-- Close Icon (Double Chevron Left) -->
             <svg id="sidebarCloseIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
@@ -198,8 +198,17 @@
     <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
         <!-- Header -->
         <header
-            class="bg-white/80 backdrop-blur-md border-b border-slate-200 h-20 flex items-center px-8 justify-between sticky top-0 z-40">
+            class="bg-white/80 backdrop-blur-md border-b border-slate-200 h-20 flex items-center px-4 md:px-8 justify-between sticky top-0 z-40">
             <div class="flex items-center gap-4">
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn"
+                    class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
                 <div class="hidden sm:block">
                     <h1 class="text-xl font-bold text-slate-800">Staff Portal</h1>
                     <p class="text-xs text-slate-400">Manage your daily schedule and clients</p>
@@ -226,7 +235,7 @@
                     </span>
 
                     <div id="notificationDropdown"
-                        class="absolute left-1/2 -translate-x-1/2 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
+                        class="absolute -right-20 sm:right-0 mt-3 w-[calc(100vw-2rem)] sm:w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible translate-y-1 transition-all duration-200 z-[60] flex flex-col overflow-hidden">
                         <div
                             class="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                             <span class="font-bold text-slate-800 text-base">Notifications</span>

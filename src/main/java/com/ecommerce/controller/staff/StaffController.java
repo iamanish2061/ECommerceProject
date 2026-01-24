@@ -75,7 +75,7 @@ public class StaffController {
     @Operation(summary = "to submit leave request by staff")
     public ResponseEntity<ApiResponse<?>> requestLeave(
             @AuthenticationPrincipal UserPrincipal currentUser,
-            @Valid StaffLeaveRequest request
+            @Valid @RequestBody StaffLeaveRequest request
     ){
         if(currentUser == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue!", "NOT_LOGGED_IN"));
