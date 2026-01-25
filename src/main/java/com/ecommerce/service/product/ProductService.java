@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -243,8 +244,22 @@ public class ProductService {
             }
 
 //            continue with following products
+            LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
             Set<Long> cartAndViewedIds = activityList.stream()
-                    .filter(a-> (a.getActivityType() == ActivityType.CART_ADD  || a.getActivityType() == ActivityType.VIEW) && a.getScore()>=0)
+                    .filter(a-> a.getScore()>=0)
+                    .filter(a->{
+                        if(a.getActivityType() == ActivityType.CART_ADD){
+                            return true;
+                        }
+                        if (a.getActivityType() == ActivityType.VIEW) {
+                            return a.getUpdatedAt() != null && a.getUpdatedAt().isAfter(threeDaysAgo);
+                        }
+                        return false;
+                    })
+                    .sorted((a1, a2) -> {
+                        if (a1.getUpdatedAt() == null || a2.getUpdatedAt() == null) return 0;
+                        return a2.getUpdatedAt().compareTo(a1.getUpdatedAt());
+                    })
                     .map(UserActivity::getProductId)
                     .filter(productId -> !purchasedIds.contains(productId))
                     .collect(Collectors.toSet());

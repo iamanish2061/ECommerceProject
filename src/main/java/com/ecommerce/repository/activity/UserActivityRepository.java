@@ -19,14 +19,16 @@ public interface UserActivityRepository extends JpaRepository<UserActivity, Long
     Optional<UserActivity> findByUserIdAndProductIdAndActivityType(Long userId, Long productId, ActivityType type);
 
     @Modifying
-    @Query(value = "INSERT INTO user_activity (user_id, product_id, activity_type, score) " +
-            "VALUES (:userId, :productId, CAST(:activityType AS text), :score) " + // Explicit cast
+    @Query(value = "INSERT INTO user_activity (user_id, product_id, activity_type, score, created_at, updated_at) " +
+            "VALUES (:userId, :productId, CAST(:activityType AS text), :score, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) " +
             "ON CONFLICT (user_id, product_id, activity_type) " +
-            "DO UPDATE SET score = user_activity.score + EXCLUDED.score", nativeQuery = true)
+            "DO UPDATE SET " +
+            "  score = user_activity.score + EXCLUDED.score, " +
+            "  updated_at = CURRENT_TIMESTAMP", nativeQuery = true)
     void upsertActivity(
             @Param("userId") Long userId,
             @Param("productId") Long productId,
-            @Param("activityType") String activityType, // Pass as String
+            @Param("activityType") String activityType,
             @Param("score") int score
     );
 

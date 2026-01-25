@@ -42,26 +42,12 @@ function toArray(res) {
 
 // Helper to extract products response with personalized recommendations
 function extractProductsResponse(res) {
-    if (!res || !res.data) return { products: [], recommendedProducts: [], purchasedProducts: [], cartAndViewedProducts: [] };
-    const data = res.data;
+    const data = (res && res.data) ? res.data : {};
 
-    // Handle response with personalized and products arrays
-    if (data.recommendedProducts && data.products && data.purchasedProducts && data.cartAndViewed) {
-        return {
-            products: Array.isArray(data.products) ? data.products : [],
-            recommendedProducts: Array.isArray(data.recommendedProducts) ? data.recommendedProducts : [],
-            purchasedProducts: Array.isArray(data.purchasedProducts) ? data.purchasedProducts : [],
-            cartAndViewedProducts: Array.isArray(data.cartAndViewed) ? data.cartAndViewed : []
-        };
-    }
-
-    // Fallback for other response formats
-    return {
-        products: toArray(res),
-        recommendedProducts: [],
-        purchasedProducts: [],
-        cartAndViewedProducts: []
-    };
+    state.products = Array.isArray(data.products) ? data.products : toArray(res);
+    state.recommendedProducts = Array.isArray(data.recommendedProducts) ? data.recommendedProducts : [];
+    state.purchasedProducts = Array.isArray(data.purchasedProducts) ? data.purchasedProducts : [];
+    state.cartAndViewedProducts = Array.isArray(data.cartAndViewed) ? data.cartAndViewed : [];
 }
 
 // Initialize the page
@@ -80,11 +66,7 @@ async function init() {
         state.tags = toArray(tagsRes);
 
         // Extract products and personalized recommendations
-        const productsData = extractProductsResponse(productsRes);
-        state.products = productsData.products;
-        state.recommendedProducts = productsData.recommendedProducts;
-        state.purchasedProducts = productsData.purchasedProducts;
-        state.cartAndViewedProducts = productsData.cartAndViewedProducts;
+        extractProductsResponse(productsRes);
         state.filteredProducts = [...state.products];
 
         if (cartRes.success) {
