@@ -1,6 +1,7 @@
 package com.ecommerce.service.appointment;
 
 import com.ecommerce.dto.intermediate.AppointmentDetailForEvent;
+import com.ecommerce.dto.intermediate.BookedTimeInterval;
 import com.ecommerce.dto.intermediate.TempAppointmentDetails;
 import com.ecommerce.dto.request.service.BookingRequest;
 import com.ecommerce.dto.response.appointment.AppointmentDetailAdminResponse;
@@ -104,37 +105,58 @@ public class AppointmentBookingService {
             StaffWorkingHours wh = workingHoursMap.get(staff.getId());
             if (wh == null || !wh.isWorkingDay()) continue;
 
-            LocalTime current = wh.getStartTime();
-            List<Appointment> staffAppts = appointmentsMap.getOrDefault(staff.getId(), List.of());
+            // Prepare "Blocked" intervals (Existing Appointments + Partial Leaves)
+            List<BookedTimeInterval> blockedIntervals = new ArrayList<>();
+
+            // Add existing appointments to blocked list
+            appointmentsMap.getOrDefault(staff.getId(), List.of()).forEach(a ->
+                    blockedIntervals.add(new BookedTimeInterval(a.getStartTime(), a.getEndTime()))
+            );
+
+            // --- Handle Partial vs Full Leave ---
             StaffLeave leave = leavesMap.get(staff.getId());
-
-            // Iterate in 15-minute increments
-            while (!current.plusMinutes(duration).isAfter(wh.getEndTime())) {
-                LocalTime slotEnd = current.plusMinutes(duration);
-
-                if (isSlotFree(current, slotEnd, nowBuffer, staffAppts, leave)) {
-                    uniqueSlots.add(new AvailableTimeResponse(current, slotEnd));
+            if (leave != null) {
+                if (leave.getStartTime() == null || leave.getEndTime() == null) {
+                    // If either is null, we treat it as a Full Day Leave for this staff
+                    continue;
+                } else {
+                    // Partial leave: Treat the leave window as a blocked appointment
+                    blockedIntervals.add(new BookedTimeInterval(leave.getStartTime(), leave.getEndTime()));
                 }
-                current = current.plusMinutes(15);
+            }
+
+            LocalTime currentSlotStart = wh.getStartTime();
+
+            // Sliding window: Check if a slot of 'duration' fits before shift ends
+            while (!currentSlotStart.plusMinutes(duration).isAfter(wh.getEndTime())) {
+                LocalTime currentSlotEnd = currentSlotStart.plusMinutes(duration);
+
+                if (isSlotFree(currentSlotStart, currentSlotEnd, nowBuffer, blockedIntervals)) {
+                    uniqueSlots.add(new AvailableTimeResponse(currentSlotStart, currentSlotEnd));
+                }
+
+                // Move forward by 15-minute increments
+                currentSlotStart = currentSlotStart.plusMinutes(15);
             }
         }
 
         return new ArrayList<>(uniqueSlots);
     }
 
-    private boolean isSlotFree(LocalTime start, LocalTime end, LocalTime nowBuffer, List<Appointment> appts, StaffLeave leave) {
-
-        // Check 1: Is it in the past?
-        if (nowBuffer != null && start.isBefore(nowBuffer)) return false;
-
-        // Check 2: Does it overlap with Leave?
-        if (leave != null) {
-            if (leave.getStartTime() == null) return false; // Full day leave
-            if (start.isBefore(leave.getEndTime()) && leave.getStartTime().isBefore(end)) return false;
+    private boolean isSlotFree(LocalTime start, LocalTime end, LocalTime nowBuffer, List<BookedTimeInterval> blockedIntervals) {
+        // 1. Check against current time (if booking is for today)
+        if (nowBuffer != null && start.isBefore(nowBuffer)) {
+            return false;
         }
 
-        // Check 3: Does it overlap with existing Appointments?
-        return appts.stream().noneMatch(a -> start.isBefore(a.getEndTime()) && a.getStartTime().isBefore(end));
+        // 2. Check against all blocked intervals (Appointments or Partial Leaves)
+        for (BookedTimeInterval blocked : blockedIntervals) {
+            if (start.isBefore(blocked.end()) && end.isAfter(blocked.start())) {
+                return false; // Collision detected
+            }
+        }
+
+        return true; // Slot is available
     }
 
     public Map<String, List<?>> getRecommendationAndTime(Long userId, Long serviceId, LocalDate bookingDate, Long staffId) {
@@ -146,7 +168,7 @@ public class AppointmentBookingService {
     }
 
     public List<TimeSlotRecommendation> getRecommendations(Long userId, Long serviceId, Long staffId, LocalDate bookingDate) {
-        return recommendationService.getRecommendedSlots(userId, serviceId, staffId, LocalDate.now(), LocalDate.now());
+        return recommendationService.getRecommendedSlots(userId, serviceId, staffId, bookingDate);
     }
 
     @Transactional
