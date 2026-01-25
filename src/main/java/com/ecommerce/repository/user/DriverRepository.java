@@ -15,5 +15,4 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     @EntityGraph(value = "Driver.user", type = EntityGraph.EntityGraphType.FETCH)
     List<Driver> findByVerified(VerificationStatus verified);
 
-
 }

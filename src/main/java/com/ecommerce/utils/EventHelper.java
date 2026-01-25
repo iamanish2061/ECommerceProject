@@ -298,7 +298,7 @@ public class EventHelper {
                 .recipientId(user.getId())
                 .username(user.getUsername())
                 .title("ORDER COMPLETED")
-                .message("Your order is delivered")
+                .message("Your order has been delivered")
                 .type(NotificationType.ORDER_DELIVERED)
                 .metadata(metaData)
                 .build();

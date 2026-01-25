@@ -110,6 +110,7 @@ public class AdminUserService {
                 .map(
                         o -> new AssignedDeliveryResponse(
                                 o.getId(),
+                                o.getStatus(),
                                 o.getUser().getUsername(),
                                 o.getPhoneNumber(),
                                 o.getAddress().getDistrict(),
@@ -122,13 +123,14 @@ public class AdminUserService {
 
         addresses.add(0, new AssignedDeliveryResponse(
                 null,
+                null,
                 "adminCutLab",
                 "9823166482",
                 adminAddress.getDistrict(),
                 adminAddress.getPlace(),
                 adminAddress.getLandmark(),
                 adminAddress.getLatitude(),
-                adminAddress.getId())
+                adminAddress.getLongitude())
         );
 
         List<AssignedDeliveryResponse> orderedList = routeService.startRoutingAlgorithm(addresses);

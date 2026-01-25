@@ -264,4 +264,9 @@ public class RedisService {
         }
     }
 
+    public void deleteDeliveryAddressList(Long driverId){
+        String key = "driver_route:" + driverId;
+        redisTemplate.delete(key);
+    }
+
 }
