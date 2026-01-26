@@ -27,16 +27,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .cors(cors -> cors.configure(httpSecurity))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> request
-//                        .requestMatchers("/admin/**", "/api/admin/**").hasAuthority("ROLE_ADMIN")
-//                        .requestMatchers("/driver/**", "/api/driver/**").hasAuthority("ROLE_DRIVER")
-//                        .requestMatchers("/staff/**", "/api/staff/**").hasAuthority("ROLE_STAFF")
-//                        .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER", "ROLE_DRIVER", "ROLE_STAFF")
-//                        .requestMatchers("/*", "/assets/**", "/auth/**", "/ws-notifications/**", "/uploads/**", "/api/auth/**", "/api/products/**", "/api/payment/**").permitAll()
-//                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-//                        .anyRequest().authenticated())
-                        .anyRequest().permitAll())
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/driver/**").hasAuthority("ROLE_DRIVER")
+                        .requestMatchers("/api/staff/**").hasAuthority("ROLE_STAFF")
+                        .requestMatchers( "/api/auth/**", "/api/products/**", "/api/services/**", "/api/payment/**", "/api/reviews/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/error", "/**").permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
