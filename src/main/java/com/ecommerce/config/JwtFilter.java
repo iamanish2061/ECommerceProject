@@ -45,7 +45,6 @@ public class JwtFilter extends OncePerRequestFilter {
             String username = jwtService.extractUsername(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
-
                 if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -58,21 +57,21 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }catch (ApplicationException ex){
             writeError(response, ex);
+            return;
         }
     }
 
-    private void writeError(HttpServletResponse response,
-                            ApplicationException ex) throws IOException {
-
+    private void writeError(HttpServletResponse response, ApplicationException ex) throws IOException {
         response.setStatus(ex.getStatus().value());
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-        ApiResponse<Object> apiRes =
-                ApiResponse.error(ex.getMessage(), ex.getErrorCode());
+        ApiResponse<Object> apiRes = ApiResponse.error(ex.getMessage(), ex.getErrorCode());
 
-        response.getWriter().write(
-                new ObjectMapper().writeValueAsString(apiRes)
-        );
+        String jsonResponse = new ObjectMapper().writeValueAsString(apiRes);
+
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
     }
 
     @Override
