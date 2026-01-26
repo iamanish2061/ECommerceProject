@@ -1,6 +1,6 @@
 package com.ecommerce.utils;
 
-import com.ecommerce.dto.intermediate.AppointmentDetailForEvent;
+import com.ecommerce.dto.intermediate.appointment.AppointmentDetailForEvent;
 import com.ecommerce.dto.intermediate.OrderItemDTO;
 import com.ecommerce.dto.intermediate.StaffLeaveDTO;
 import com.ecommerce.dto.intermediate.TempOrderDetails;

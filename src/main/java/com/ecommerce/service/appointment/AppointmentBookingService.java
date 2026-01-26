@@ -1,8 +1,8 @@
 package com.ecommerce.service.appointment;
 
-import com.ecommerce.dto.intermediate.AppointmentDetailForEvent;
-import com.ecommerce.dto.intermediate.BookedTimeInterval;
-import com.ecommerce.dto.intermediate.TempAppointmentDetails;
+import com.ecommerce.dto.intermediate.appointment.AppointmentDetailForEvent;
+import com.ecommerce.dto.intermediate.appointment.TimeInterval;
+import com.ecommerce.dto.intermediate.appointment.TempAppointmentDetails;
 import com.ecommerce.dto.request.service.BookingRequest;
 import com.ecommerce.dto.response.appointment.AppointmentDetailAdminResponse;
 import com.ecommerce.dto.response.appointment.AppointmentDetailResponse;
@@ -106,11 +106,11 @@ public class AppointmentBookingService {
             if (wh == null || !wh.isWorkingDay()) continue;
 
             // Prepare "Blocked" intervals (Existing Appointments + Partial Leaves)
-            List<BookedTimeInterval> blockedIntervals = new ArrayList<>();
+            List<TimeInterval> blockedIntervals = new ArrayList<>();
 
             // Add existing appointments to blocked list
             appointmentsMap.getOrDefault(staff.getId(), List.of()).forEach(a ->
-                    blockedIntervals.add(new BookedTimeInterval(a.getStartTime(), a.getEndTime()))
+                    blockedIntervals.add(new TimeInterval(a.getStartTime(), a.getEndTime()))
             );
 
             // --- Handle Partial vs Full Leave ---
@@ -121,7 +121,7 @@ public class AppointmentBookingService {
                     continue;
                 } else {
                     // Partial leave: Treat the leave window as a blocked appointment
-                    blockedIntervals.add(new BookedTimeInterval(leave.getStartTime(), leave.getEndTime()));
+                    blockedIntervals.add(new TimeInterval(leave.getStartTime(), leave.getEndTime()));
                 }
             }
 
@@ -143,14 +143,14 @@ public class AppointmentBookingService {
         return new ArrayList<>(uniqueSlots);
     }
 
-    private boolean isSlotFree(LocalTime start, LocalTime end, LocalTime nowBuffer, List<BookedTimeInterval> blockedIntervals) {
+    private boolean isSlotFree(LocalTime start, LocalTime end, LocalTime nowBuffer, List<TimeInterval> blockedIntervals) {
         // 1. Check against current time (if booking is for today)
         if (nowBuffer != null && start.isBefore(nowBuffer)) {
             return false;
         }
 
         // 2. Check against all blocked intervals (Appointments or Partial Leaves)
-        for (BookedTimeInterval blocked : blockedIntervals) {
+        for (TimeInterval blocked : blockedIntervals) {
             if (start.isBefore(blocked.end()) && end.isAfter(blocked.start())) {
                 return false; // Collision detected
             }

@@ -270,6 +270,17 @@ const BookingPage = {
                         <p class="text-[9px] text-slate-400">${rec.matchLabel || 'Recommended'}</p>
                     </div>
                 </div>
+
+                <div class="flex items-center gap-2 px-3 border-x border-slate-50">
+                    <img src="${rec.staff.profileUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(rec.staff.name || 'S')}&background=random`}" 
+                         class="w-7 h-7 rounded-full object-cover border border-slate-100 shadow-sm" 
+                         alt="${rec.staff.name || 'Staff'}">
+                    <div class="hidden sm:block text-left">
+                        <p class="text-[10px] font-bold text-slate-700 truncate max-w-[70px]">${rec.staff.name || 'Specialist'}</p>
+                        <p class="text-[8px] text-slate-400">Specialist</p>
+                    </div>
+                </div>
+
                 <div class="text-right">
                     <p class="text-[10px] font-bold text-blue-600">${rec.matchScore}%</p>
                 </div>
@@ -305,6 +316,7 @@ const BookingPage = {
                     btn.classList.add('bg-blue-600', 'text-white', 'border-transparent', 'shadow-md', 'shadow-blue-100', 'hover:text-white');
                 }
             });
+            BookingPage.selectedStaffId = slot.staff.staffId;
         } else {
             element.classList.remove('text-slate-600', 'border-slate-100');
             element.classList.add('bg-blue-600', 'text-white', 'border-transparent', 'shadow-md', 'shadow-blue-100', 'ring-4', 'ring-blue-100/30', 'hover:text-white');

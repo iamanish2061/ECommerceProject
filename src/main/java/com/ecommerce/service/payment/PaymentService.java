@@ -1,6 +1,6 @@
 package com.ecommerce.service.payment;
 
-import com.ecommerce.dto.intermediate.TempAppointmentDetails;
+import com.ecommerce.dto.intermediate.appointment.TempAppointmentDetails;
 import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.esewa.Esewa;
 import com.ecommerce.esewa.EsewaService;

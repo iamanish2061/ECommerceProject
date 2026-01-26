@@ -1,6 +1,6 @@
 package com.ecommerce.redis;
 
-import com.ecommerce.dto.intermediate.TempAppointmentDetails;
+import com.ecommerce.dto.intermediate.appointment.TempAppointmentDetails;
 import com.ecommerce.dto.intermediate.TempOrderDetails;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.model.notification.Notification;

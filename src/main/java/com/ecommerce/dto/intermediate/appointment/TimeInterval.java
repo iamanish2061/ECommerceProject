@@ -1,8 +1,8 @@
-package com.ecommerce.dto.intermediate;
+package com.ecommerce.dto.intermediate.appointment;
 
 import java.time.LocalTime;
 
-public record BookedTimeInterval(
+public record TimeInterval(
         LocalTime start,
         LocalTime end
 ) {}

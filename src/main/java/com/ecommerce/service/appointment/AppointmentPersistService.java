@@ -1,7 +1,7 @@
 package com.ecommerce.service.appointment;
 
-import com.ecommerce.dto.intermediate.AppointmentDetailForEvent;
-import com.ecommerce.dto.intermediate.TempAppointmentDetails;
+import com.ecommerce.dto.intermediate.appointment.AppointmentDetailForEvent;
+import com.ecommerce.dto.intermediate.appointment.TempAppointmentDetails;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.model.payment.PaymentModel;
 import com.ecommerce.model.service.Appointment;

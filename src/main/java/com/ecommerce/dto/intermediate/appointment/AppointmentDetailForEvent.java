@@ -1,4 +1,4 @@
-package com.ecommerce.dto.intermediate;
+package com.ecommerce.dto.intermediate.appointment;
 
 import lombok.*;
 
