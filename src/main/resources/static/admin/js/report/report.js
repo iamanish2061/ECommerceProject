@@ -190,6 +190,7 @@ function setupPeriodSelectors() {
             btn.classList.add('bg-indigo-50', 'text-indigo-600');
 
             const period = btn.dataset.period;
+            showToast(`Fetching ${period} reports...`, 'info');
             const response = await ReportService.getSalesData(period);
             if (response.success) {
                 initRevenueChart(response.data);
