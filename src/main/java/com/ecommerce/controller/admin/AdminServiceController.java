@@ -7,7 +7,6 @@ import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.service.ServiceDetailResponse;
 import com.ecommerce.dto.response.service.ServiceListResponse;
 import com.ecommerce.dto.response.service.ServiceNameAndIdResponse;
-import com.ecommerce.dto.response.staff.NameAndIdOfStaffResponse;
 import com.ecommerce.service.salon.SalonServiceService;
 import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.security.auth.Subject;
 import java.util.List;
 
 @RestController
@@ -82,6 +82,7 @@ public class AdminServiceController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "to delete the service")
     public ResponseEntity<ApiResponse<?>> deleteService(
             @ValidId @PathVariable Long id
     ) {
