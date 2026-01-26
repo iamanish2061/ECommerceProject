@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,10 +21,10 @@ public interface OrderRepository extends JpaRepository<OrderModel, Long> {
 
     @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.FETCH)
     @Query("""
-        select o from OrderModel o
-        where o.user.id = :userId
-        order by o.createdAt desc
-    """)
+                select o from OrderModel o
+                where o.user.id = :userId
+                order by o.createdAt desc
+            """)
     List<OrderModel> findByUserId(@Param("userId") Long userId);
 
     @EntityGraph(value = "Order.orderItems.product.images.user.address.payment", type = EntityGraph.EntityGraphType.FETCH)
@@ -40,7 +41,10 @@ public interface OrderRepository extends JpaRepository<OrderModel, Long> {
     @EntityGraph(value = "Order.user", type = EntityGraph.EntityGraphType.FETCH)
     List<OrderModel> findTop5ByOrderByCreatedAtDesc();
 
-    @EntityGraph(value = "Order.user.address", type = EntityGraph.EntityGraphType.FETCH)
+    @EntityGraph(value = "Order.orderItems.product.images.user.address.payment", type = EntityGraph.EntityGraphType.FETCH)
     List<OrderModel> findByStatusIn(List<OrderStatus> statuses);
+
+    @Query("SELECT SUM(o.totalAmount) FROM OrderModel o WHERE o.status IN :statuses")
+    BigDecimal sumAmountByStatusIn(@Param("statuses") List<OrderStatus> statuses);
 
 }

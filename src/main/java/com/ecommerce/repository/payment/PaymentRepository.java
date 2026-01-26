@@ -23,9 +23,18 @@ public interface PaymentRepository extends JpaRepository<PaymentModel, Long> {
     @Query("SELECT p FROM PaymentModel p ORDER BY p.paymentDate DESC")
     List<PaymentModel> findAllPayments();
 
-    @EntityGraph(value = "Payment.order.user.appointment", type = EntityGraph.EntityGraphType.FETCH)
-    @Query("SELECT p FROM PaymentModel p where p.id = :paymentId")
-    Optional<PaymentModel> findDetailById(@Param("paymentId") Long paymentId);
+    @Query("""
+                SELECT SUM(p.amount)
+                FROM PaymentModel p
+                WHERE CAST(p.paymentDate AS date) = :date
+            """)
+    java.math.BigDecimal getRevenueByDate(@Param("date") java.time.LocalDate date);
 
+    @Query("""
+                SELECT SUM(p.amount)
+                FROM PaymentModel p
+                WHERE YEAR(p.paymentDate) = :year AND MONTH(p.paymentDate) = :month
+            """)
+    java.math.BigDecimal getRevenueByMonthAndYear(@Param("year") int year, @Param("month") int month);
 
 }
