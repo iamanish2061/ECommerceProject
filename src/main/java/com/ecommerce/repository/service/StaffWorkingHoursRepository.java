@@ -17,9 +17,6 @@ public interface StaffWorkingHoursRepository extends JpaRepository<StaffWorkingH
     // Get all working hours for a staff member
     List<StaffWorkingHours> findByStaffId(Long staffId);
 
-    // Get working hours for a specific day
-    Optional<StaffWorkingHours> findByStaffIdAndDayOfWeek(Long staffId, DayOfWeek dayOfWeek);
-
     // Delete all working hours for a staff (for bulk update)
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from StaffWorkingHours s where s.staff.id = :staffId")

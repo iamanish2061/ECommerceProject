@@ -264,7 +264,7 @@ function getOrderActionButton(order) {
 function createAppointmentCard(apt) {
     const status = apt.status.toLowerCase();
     const style = getAppointmentStatusStyle(status);
-    const serviceName = apt.serviceResponse?.name || 'Service';
+    const serviceName = apt.response?.name || 'Service';
     const totalAmount = apt.totalAmount || 0;
     const date = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 

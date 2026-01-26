@@ -1,11 +1,9 @@
 package com.ecommerce.service;
 
-import com.ecommerce.exception.ApplicationException;
-import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.model.user.UserModel;
+import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

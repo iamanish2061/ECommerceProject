@@ -4,7 +4,6 @@ import com.ecommerce.dto.request.order.OrderCompletionRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
 import com.ecommerce.dto.response.user.DriverDashboardResponse;
-import com.ecommerce.dto.response.user.DriverInfoResponse;
 import com.ecommerce.model.user.Role;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.driver.DriverService;

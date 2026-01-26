@@ -10,6 +10,4 @@ import java.util.Optional;
 public interface UserBookingHistoryRepository extends JpaRepository<UserBookingHistory, Long> {
 
     Optional<UserBookingHistory> findByUserId(Long userId);
-
-    boolean existsByUserId(Long userId);
 }
