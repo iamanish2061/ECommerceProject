@@ -104,7 +104,7 @@ public class AdminOrderService {
     }
 
     public List<String> getStatusList() {
-        return Arrays.asList("PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED", "INSTORE_COMPLETED");
+        return Arrays.asList("PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "INSTORE_COMPLETED");
     }
 
     public SingleOrderResponse getDetailOfOrder(Long orderId) {
