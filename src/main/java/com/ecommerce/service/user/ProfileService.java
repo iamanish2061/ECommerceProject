@@ -14,8 +14,8 @@ import com.ecommerce.rabbitmq.dto.NotificationEvent;
 import com.ecommerce.rabbitmq.producer.NotificationProducer;
 import com.ecommerce.repository.user.DriverRepository;
 import com.ecommerce.repository.user.UserRepository;
+import com.ecommerce.service.image.ImageStorageService;
 import com.ecommerce.utils.EventHelper;
-import com.ecommerce.utils.UserPictureUploadHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ public class ProfileService {
     private final DriverRepository driverRepository;
     private final AddressMapper addressMapper;
     private final NotificationProducer notificationProducer;
+
+    private final ImageStorageService storageService;
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
@@ -80,7 +83,13 @@ public class ProfileService {
     }
 
     public String changeProfilePicture(UserModel user, MultipartFile photo) {
-        String profileUrl = UserPictureUploadHelper.uploadProfileImage(photo, user.getUsername());
+        String profileUrl;
+        try{
+            profileUrl = storageService.uploadClientImage(photo, user.getUsername(), "PROFILE");
+        }catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApplicationException("Failed to upload profile to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         user.setProfileUrl(profileUrl);
         userRepository.save(user);
         return profileUrl;
@@ -105,8 +114,14 @@ public class ProfileService {
             driverRepository.flush();
         }
 
+        String licenseUrl;
+        try {
+            licenseUrl = storageService.uploadClientImage(license, user.getUsername(), "LICENSE");
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApplicationException("Failed to upload license to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        String licenseUrl = UserPictureUploadHelper.uploadLicenseImage(license, user.getUsername());
         Driver newDriver = Driver.builder()
                 .user(user)
                 .verified(VerificationStatus.PENDING)

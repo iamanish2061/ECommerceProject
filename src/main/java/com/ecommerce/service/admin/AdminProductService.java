@@ -14,14 +14,15 @@ import com.ecommerce.repository.product.BrandRepository;
 import com.ecommerce.repository.product.CategoryRepository;
 import com.ecommerce.repository.product.ProductRepository;
 import com.ecommerce.repository.product.TagRepository;
+import com.ecommerce.service.image.ImageStorageService;
 import com.ecommerce.utils.HelperClass;
-import com.ecommerce.utils.ImageUploadHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,13 +43,20 @@ public class AdminProductService {
     private final CategoryMapper categoryMapper;
     private final ProductImageMapper productImageMapper;
 
+    private final ImageStorageService storageService;
 
     @Transactional
     public void addBrand(BrandRequest brandRequest, MultipartFile logo) {
         BrandModel brandModel = new BrandModel();
         brandModel.setName(brandRequest.name().trim());
         brandModel.setSlug(HelperClass.generateSlug(brandRequest.name().trim()));
-        String url = ImageUploadHelper.uploadImage(logo, brandRequest.name().trim(), "BRAND");
+        String url;
+        try{
+            url = storageService.uploadClientImage(logo, brandRequest.name().trim(), "BRAND");
+        }catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApplicationException("Failed to upload brand image to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         brandModel.setLogoUrl(url);
 
         brandRepository.save(brandModel);
@@ -62,7 +70,13 @@ public class AdminProductService {
         categoryModel.setName(categoryRequest.name());
         categoryModel.setSlug(HelperClass.generateSlug(categoryRequest.name().trim()));
         categoryModel.setParent(categoryParent);
-        String url = ImageUploadHelper.uploadImage(image, categoryRequest.name().trim(), "CATEGORY");
+        String url;
+        try{
+            url = storageService.uploadSystemImage(image, categoryRequest.name().trim(), "CATEGORY");
+        }catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApplicationException("Failed to upload category image to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         categoryModel.setImageUrl(url);
         categoryRepository.save(categoryModel);
     }
@@ -120,7 +134,13 @@ public class AdminProductService {
             for (int i = 0; i < imageFiles.size(); i++) {
                 MultipartFile file = imageFiles.get(i);
                 AddProductImageRequest imgReq = request.images().get(i);
-                ProductImageModel imageModel = ImageUploadHelper.uploadImage(file, imgReq);
+                ProductImageModel imageModel;
+                try{
+                    imageModel = storageService.uploadSystemImage(file, imgReq);
+                }catch (IOException | InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new ApplicationException("Failed to upload product photos to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
                 imageModels.add(imageModel);
             }
         }
@@ -130,8 +150,6 @@ public class AdminProductService {
 
         return getAdminDetailOfProduct(savedProduct.getId());
     }
-
-
 
 
 

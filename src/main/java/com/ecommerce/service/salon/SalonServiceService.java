@@ -14,13 +14,14 @@ import com.ecommerce.model.service.ServiceModel;
 import com.ecommerce.model.user.Staff;
 import com.ecommerce.repository.service.ServiceRepository;
 import com.ecommerce.repository.user.StaffRepository;
-import com.ecommerce.utils.ImageUploadHelper;
+import com.ecommerce.service.image.ImageStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -32,6 +33,7 @@ public class SalonServiceService {
 
     private final ServiceMapper serviceMapper;
     private final StaffMapper staffMapper;
+    private final ImageStorageService storageService;
 
 //    User Methods
     public List<ServiceListResponse> getAllActiveServices() {
@@ -86,11 +88,20 @@ public class SalonServiceService {
         if (serviceRepository.existsByNameIgnoreCase(request.name())) {
             throw new ApplicationException("Service with this name already exists", "ALREADY_EXISTS", HttpStatus.CONFLICT);
         }
+
+        String imageUrl;
+        try{
+            imageUrl = storageService.uploadSystemImage(image, request.name(), "SERVICE");
+        }catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApplicationException("Failed to upload service photo to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         ServiceModel service = ServiceModel.builder()
                 .name(request.name())
                 .description(request.description())
                 .price(request.price())
-                .imageUrl(ImageUploadHelper.uploadImage(image, request.name(), "SERVICE"))
+                .imageUrl(imageUrl)
                 .durationMinutes(request.durationMinutes())
                 .category(request.category())
                 .active(true)

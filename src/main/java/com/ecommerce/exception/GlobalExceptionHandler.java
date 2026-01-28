@@ -38,7 +38,6 @@ public class GlobalExceptionHandler{
                 .body(ApiResponse.error(ex.getMessage(), "NOT_FOUND"));
     }
 
-
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<ApiResponse<?>> handleApplicationException(ApplicationException ex) {
         ApiResponse<?> response = ApiResponse.error(ex.getMessage(), ex.getErrorCode());
@@ -79,10 +78,18 @@ public class GlobalExceptionHandler{
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<ApiResponse<String>> handleIOExeption(Exception ex){
+    public ResponseEntity<ApiResponse<String>> handleIOExeption(IOException ex){
         log.error("Uncaught exception: {}", ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Something went wrong!", "INPUT_OUTPUT_EXCEPTION"));
+    }
+
+    @ExceptionHandler(InterruptedException.class)
+    public ResponseEntity<ApiResponse<String>> handleInterruptedException(InterruptedException ex){
+        log.error("Uncaught exception: {}", ex.getMessage(), ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Something went wrong!", "INTERRUPTED_EXCEPTION"));
     }
 }
