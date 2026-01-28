@@ -1,5 +1,6 @@
 package com.ecommerce.controller.admin;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.payment.AdminPaymentResponse;
 import com.ecommerce.dto.response.payment.DetailAdminPaymentResponse;
@@ -18,41 +19,38 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/payments")
-public class AdminPaymentController {
+public class AdminPaymentController extends BaseController {
 
     private final AdminPaymentService paymentService;
 
     @GetMapping("/get-status")
     @Operation(summary = "to fetch all the payment status used in drop downs")
     public ResponseEntity<ApiResponse<List<PaymentStatus>>> getAllPaymentStatus(){
-        return ResponseEntity.ok(ApiResponse.ok(paymentService.getAllPaymentStatus(), "Fetched all payment status"));
+        return success(paymentService.getAllPaymentStatus(), "Fetched all payment status");
     }
 
     @GetMapping
     @Operation(summary = "to fetch all the payments")
     public ResponseEntity<ApiResponse<List<AdminPaymentResponse>>> getAllPayments() {
-        return ResponseEntity.ok(
-                ApiResponse.ok(paymentService.getAllPayments(), "All payments fetched successfully"));
+        return success(paymentService.getAllPayments(), "All payments fetched successfully");
     }
 
     @GetMapping("/{paymentId}")
     @Operation(summary = "to fetch detail of one payment")
-    public ResponseEntity<ApiResponse<DetailAdminPaymentResponse>> getDetailofPayment(
+    public ResponseEntity<ApiResponse<DetailAdminPaymentResponse>> getDetailOfPayment(
             @ValidId @PathVariable Long paymentId
     ){
-        return ResponseEntity.ok(
-                ApiResponse.ok(paymentService.getAdminPaymentDetail(paymentId), "Fetched detail of payment")
-        );
+        return success(paymentService.getAdminPaymentDetail(paymentId), "Fetched detail of payment");
     }
 
     @PutMapping("/{id}/status")
     @Operation(summary = "to update status of payment")
-    public ResponseEntity<ApiResponse<?>> updateStatus(
+    public ResponseEntity<ApiResponse<Void>> updateStatus(
             @ValidId @PathVariable Long id,
             @RequestParam PaymentStatus status
     ) {
         paymentService.updatePaymentStatus(id, status);
-        return ResponseEntity.ok(ApiResponse.ok("Status updated successfully"));
+        return success("Status updated successfully");
     }
 
 }

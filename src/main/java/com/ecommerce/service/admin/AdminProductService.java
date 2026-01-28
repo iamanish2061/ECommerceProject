@@ -1,9 +1,7 @@
 package com.ecommerce.service.admin;
 
 import com.ecommerce.dto.request.product.*;
-import com.ecommerce.dto.response.product.NameAndIdResponse;
-import com.ecommerce.dto.response.product.SingleProductResponse;
-import com.ecommerce.dto.response.product.SingleProductWithCostPriceResponse;
+import com.ecommerce.dto.response.product.*;
 import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.mapper.product.BrandMapper;
 import com.ecommerce.mapper.product.CategoryMapper;
@@ -46,7 +44,7 @@ public class AdminProductService {
     private final ImageStorageService storageService;
 
     @Transactional
-    public void addBrand(BrandRequest brandRequest, MultipartFile logo) {
+    public BrandResponse addBrand(BrandRequest brandRequest, MultipartFile logo) {
         BrandModel brandModel = new BrandModel();
         brandModel.setName(brandRequest.name().trim());
         brandModel.setSlug(HelperClass.generateSlug(brandRequest.name().trim()));
@@ -59,11 +57,11 @@ public class AdminProductService {
         }
         brandModel.setLogoUrl(url);
 
-        brandRepository.save(brandModel);
+        return brandMapper.mapEntityToBrandResponse(brandRepository.save(brandModel));
     }
 
     @Transactional
-    public void addCategory(CategoryRequest categoryRequest, MultipartFile image) {
+    public CategoryResponse addCategory(CategoryRequest categoryRequest, MultipartFile image) {
         CategoryModel categoryParent = categoryRepository.findBySlug(categoryRequest.parentSlug().trim())
                 .orElse(null);
         CategoryModel categoryModel = new CategoryModel();
@@ -78,18 +76,18 @@ public class AdminProductService {
             throw new ApplicationException("Failed to upload category image to cloud", "STORAGE_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         categoryModel.setImageUrl(url);
-        categoryRepository.save(categoryModel);
+        return categoryMapper.mapEntityToCategoryResponse(categoryRepository.save(categoryModel));
     }
 
     @Transactional
-    public void addTag(TagRequest request){
+    public TagResponse addTag(TagRequest request){
         String incomingSlug = HelperClass.generateSlug(request.name());
         TagModel existing = tagRepository.findBySlug(incomingSlug).orElse(null);
         if(existing != null){
             throw new ApplicationException("Tag already exists!", "ALREADY_EXISTS", HttpStatus.CONFLICT);
         }
         TagModel newTagModel = new TagModel(request.name(), incomingSlug);
-        tagRepository.save(newTagModel);
+        return tagMapper.mapEntityToTagResponse(tagRepository.save(newTagModel));
     }
 
     @Transactional

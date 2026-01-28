@@ -1,5 +1,6 @@
 package com.ecommerce.controller.address;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.address.AddAddressRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.address.AddressWithDeliveryChargeResponse;
@@ -11,7 +12,6 @@ import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -21,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/address")
 @RequiredArgsConstructor
 @Validated
-public class AddressController {
+public class AddressController extends BaseController {
 
     private final AddressService addressService;
-    private final String notLoggedInMessage = "Please login to continue";
-    private final String notLoggedInErrorCode = "NOT_LOGGED_IN";
 
     @GetMapping("/type/{addressType}")
     @Operation(summary = "to get address of user (home and work) if exists")
@@ -34,13 +32,12 @@ public class AddressController {
         @PathVariable AddressType addressType
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         AddressWithDeliveryChargeResponse address = addressService.getAddressOfType(currentUser.getUser(), addressType);
         if(address!= null)
-            return ResponseEntity.ok(ApiResponse.ok(address, "Fetched address successfully"));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.ok("Address not found"));
+            return success(address, "Fetched address successfully");
+        return success("Address not found");
     }
 
     @GetMapping("/fetch-type/{addressType}")
@@ -50,13 +47,12 @@ public class AddressController {
             @PathVariable AddressType addressType
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         DetailedAddress address = addressService.getAddressForProfileOfType(currentUser.getUser(), addressType);
         if(address!= null)
-            return ResponseEntity.ok(ApiResponse.ok(address, "Fetched address successfully"));
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.ok("Address not found"));
+            return success(address, "Fetched address successfully");
+        return success("Address not found");
     }
 
     @PostMapping("/add")
@@ -66,11 +62,10 @@ public class AddressController {
             @Valid @RequestBody AddAddressRequest request
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         DetailedAddress address =addressService.addAddress(currentUser.getUser().getId(), request);
-        return ResponseEntity.ok(ApiResponse.ok(address,"Address added successfully"));
+        return success(address,"Address added successfully");
     }
 
     @PutMapping("/update/{addressId}")
@@ -81,11 +76,10 @@ public class AddressController {
             @Valid @RequestBody AddAddressRequest request
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         DetailedAddress address =addressService.updateAddress(currentUser.getUser().getId(), addressId, request);
-        return ResponseEntity.ok(ApiResponse.ok(address,"Address updated successfully"));
+        return success(address,"Address updated successfully");
     }
 
 
