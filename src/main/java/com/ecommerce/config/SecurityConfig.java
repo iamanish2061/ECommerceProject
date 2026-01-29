@@ -23,6 +23,7 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -35,7 +36,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/staff/**").hasAuthority("ROLE_STAFF")
                         .requestMatchers( "/api/auth/**", "/api/products/**", "/api/services/**", "/api/payment/**", "/api/reviews/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/error", "/**").permitAll())
+                        .requestMatchers("/**").permitAll())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
