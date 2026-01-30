@@ -179,3 +179,182 @@ body::after {
     min-width: 120px;
     text-align: left;
 }
+
+/* Profile dropdown hover effect */
+#profileWrapper:hover #profileDropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+/* Hamburger icon styles */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.hamburger div {
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 640px) {
+    .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .py-20 {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
+
+    .text-5xl {
+        font-size: 2.5rem;
+    }
+
+    .text-4xl {
+        font-size: 2rem;
+    }
+
+    .text-3xl {
+        font-size: 1.75rem;
+    }
+
+    .text-xl {
+        font-size: 1rem;
+    }
+
+    .gap-8 {
+        gap: 2rem;
+    }
+
+    .gap-4 {
+        gap: 1rem;
+    }
+
+    .h-500px,
+    .w-500px {
+        height: 300px;
+        width: 300px;
+    }
+
+    .h-400px,
+    .w-400px {
+        height: 250px;
+        width: 250px;
+    }
+
+    .h-480px,
+    .w-480px {
+        height: 280px;
+        width: 280px;
+    }
+
+    .rounded-full {
+        border-radius: 50%;
+    }
+
+    .hidden.md\:flex {
+        display: flex !important;
+    }
+
+    .lg\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .lg\:grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Hide the circular hero image */
+    .relative.animate-float {
+        display: none;
+    }
+
+    /* Center all items horizontally */
+    .flex {
+        justify-content: center;
+    }
+
+    .grid {
+        justify-items: center;
+    }
+
+    /* Center all items in the hero section */
+    .hero-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    footer {
+        text-align: center;
+    }
+
+    footer .grid {
+        grid-template-columns: 1fr !important;
+        justify-items: center;
+    }
+
+    /* Mobile Navigation Styles */
+    .hamburger {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 24px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .hamburger div {
+        height: 3px;
+        background-color: #333;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    nav .logo {
+        flex: 1;
+        text-align: center;
+    }
+
+    nav .mobile-menu {
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    nav .mobile-menu.hidden {
+        display: none;
+    }
+
+    nav .mobile-menu a {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    nav .mobile-menu a:last-child {
+        border-bottom: none;
+    }
+}
