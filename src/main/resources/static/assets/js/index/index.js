@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadReviews(),
         await loadAverageRating()
     ]).then(() => {
-        setupReviewForm();
+        setupReviewSubmit();
     })
 });
 
@@ -168,11 +168,11 @@ function createIndexProductCard(product) {
         <div class="relative overflow-hidden rounded-t-xl">
             <div class="bg-gray-50 h-48 flex items-center justify-center group p-4">
                 ${imageUrl
-                    ? `<img src="${imageUrl}" alt="${productName}" 
+            ? `<img src="${imageUrl}" alt="${productName}" 
                         class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'; this.onerror=null;">`
-                    : `<div class="w-full h-full flex items-center justify-center text-5xl text-gray-300">📦</div>`
-                }
+            : `<div class="w-full h-full flex items-center justify-center text-5xl text-gray-300">📦</div>`
+        }
             </div>
             <div class="absolute top-2 right-2">
                 ${stockStatus}
@@ -209,9 +209,6 @@ function createIndexProductCard(product) {
 
     // Card click → go to details page (except buttons)
     productCard.addEventListener('click', (e) => {
-        if (e.target.closest('.add-to-cart-btn') || e.target.closest('.buy-now-btn')) {
-            return;
-        }
         if (productId) {
             window.location.href = `details.html?id=${productId}`;
         }
@@ -223,7 +220,7 @@ function createIndexProductCard(product) {
 // Create Review Card
 function createReviewCard(review) {
     const reviewCard = document.createElement('div');
-    
+
     reviewCard.className = `
         bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300
         p-6 border border-gray-100
@@ -261,22 +258,18 @@ function createReviewCard(review) {
 }
 
 // Setup Review Form
-function setupReviewForm() {
-    const reviewForm = document.getElementById('reviewForm');
+function setupReviewSubmit() {
+    setupStarRating();
     const submitBtn = document.getElementById('submitReviewBtn');
 
-    // Check if user is logged in
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-        reviewForm.style.display = 'none';
-    }
-
-    // Setup star rating
-    setupStarRating();
-
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', async (e) => {
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to submit a review', 'error');
+                return;
+            }
 
             const rating = document.getElementById('reviewRating').value;
             const title = document.getElementById('reviewTitle').value;
@@ -330,7 +323,7 @@ function setupStarRating() {
         // Mouse enter for hover effect
         button.addEventListener('mouseenter', (e) => {
             const value = parseInt(e.target.dataset.value);
-            
+
             // Update all stars based on hover position
             starButtons.forEach((btn, index) => {
                 if (index < value) {
@@ -347,7 +340,7 @@ function setupStarRating() {
         // Mouse leave to reset hover state
         button.addEventListener('mouseleave', () => {
             starButtons.forEach(btn => btn.classList.remove('hovered'));
-            
+
             // Restore display to selected rating or default
             if (ratingInput.value) {
                 const selectedValue = parseInt(ratingInput.value);
@@ -361,7 +354,7 @@ function setupStarRating() {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const value = parseInt(e.target.dataset.value);
-            
+
             // Update hidden input
             ratingInput.value = value;
 
