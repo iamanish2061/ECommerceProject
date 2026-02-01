@@ -73,6 +73,7 @@ async function initBrandPage() {
 
         updateCartCount();
         setupBrandEventListeners();
+        setupResponsiveEventListeners();
     } catch (err) {
         console.error('Error initializing brand page:', err);
         const container = document.getElementById('brandProductsContainer');
@@ -135,10 +136,11 @@ async function loadBrandBySlug(slug) {
 // ---------- RENDER: SIDEBAR ----------
 
 function renderBrandSidebar() {
-    const container = document.getElementById('brandsSidebarContainer');
-    if (!container) return;
+    const desktopContainer = document.getElementById('brandsSidebarContainer');
+    const mobileContainer = document.getElementById('mobileBrandsSidebarContainer');
 
-    container.innerHTML = '';
+    if (desktopContainer) desktopContainer.innerHTML = '';
+    if (mobileContainer) mobileContainer.innerHTML = '';
 
     if (!brandState.brands || brandState.brands.length === 0) {
         container.innerHTML =
@@ -168,24 +170,36 @@ function renderBrandSidebar() {
             }
             <span class="font-medium">${name}</span>
         `;
-        btn.addEventListener('click', async () => {
+        // Clone for mobile
+        const mobileBtn = btn.cloneNode(true);
+        mobileBtn.addEventListener('click', async () => {
             if (brandState.selectedBrandSlug === slug) return;
-
-            brandState.selectedBrandSlug = slug;
-            brandState.searchQuery = '';
-
-            // update URL query (so refresh keeps the selected brand)
-            const params = new URLSearchParams(window.location.search);
-            params.set('brand', slug);
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
-            window.history.replaceState({}, '', newUrl);
-
-            await loadBrandBySlug(slug);
-            renderBrandSidebar();
+            handleBrandSelection(slug);
+            closeMobileSidebar();
         });
 
-        container.appendChild(btn);
+        btn.addEventListener('click', async () => {
+            if (brandState.selectedBrandSlug === slug) return;
+            handleBrandSelection(slug);
+        });
+
+        if (desktopContainer) desktopContainer.appendChild(btn);
+        if (mobileContainer) mobileContainer.appendChild(mobileBtn);
     });
+}
+
+async function handleBrandSelection(slug) {
+    brandState.selectedBrandSlug = slug;
+    brandState.searchQuery = '';
+
+    // update URL query
+    const params = new URLSearchParams(window.location.search);
+    params.set('brand', slug);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+
+    await loadBrandBySlug(slug);
+    renderBrandSidebar();
 }
 
 // ---------- RENDER: HEADER ----------
@@ -346,6 +360,11 @@ function createBrandProductCard(product) {
             e.stopPropagation();
             if (stock === 0) return;
 
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to continue', 'error');
+                return;
+            }
+
             try {
                 showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(productId);
@@ -368,6 +387,11 @@ function createBrandProductCard(product) {
         buyNowBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             if (stock === 0) return;
+
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to continue', 'error');
+                return;
+            }
 
             try {
                 showToast('Redirecting to checkout...', 'info');
@@ -434,26 +458,70 @@ function setupBrandEventListeners() {
     }
 
     const searchInput = document.getElementById('brandSearchInput');
-    if (searchInput) {
-        let timeoutId;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(timeoutId);
-            const value = e.target.value.trim().toLowerCase();
-            brandState.searchQuery = value;
+    const mobileSearchInput = document.getElementById('mobileBrandSearchInput');
 
-            timeoutId = setTimeout(() => {
-                if (!value) {
-                    brandState.filteredProducts = [...brandState.products];
-                } else {
-                    brandState.filteredProducts = brandState.products.filter(p => {
-                        const name = (p.name || p.productName || p.title || '').toLowerCase();
-                        return name.includes(value);
-                    });
-                }
-                renderBrandProducts();
-            }, 300);
+    const handleSearch = (e) => {
+        const value = e.target.value.trim().toLowerCase();
+        brandState.searchQuery = value;
+
+        // Sync inputs
+        if (searchInput && e.target !== searchInput) searchInput.value = e.target.value;
+        if (mobileSearchInput && e.target !== mobileSearchInput) mobileSearchInput.value = e.target.value;
+
+        if (!value) {
+            brandState.filteredProducts = [...brandState.products];
+        } else {
+            brandState.filteredProducts = brandState.products.filter(p => {
+                const name = (p.name || p.productName || p.title || '').toLowerCase();
+                return name.includes(value);
+            });
+        }
+        renderBrandProducts();
+    };
+
+    if (searchInput) searchInput.addEventListener('input', handleSearch);
+    if (mobileSearchInput) mobileSearchInput.addEventListener('input', handleSearch);
+}
+
+function setupResponsiveEventListeners() {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+    if (hamburgerBtn && mobileMenu) {
+        hamburgerBtn.addEventListener('click', () => {
+            hamburgerBtn.classList.toggle('active');
+            mobileMenu.classList.toggle('show');
         });
     }
+
+    if (mobileFilterBtn && mobileSidebar && sidebarOverlay) {
+        mobileFilterBtn.addEventListener('click', () => {
+            mobileSidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        const closeSidebar = () => {
+            mobileSidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+    }
+}
+
+function closeMobileSidebar() {
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (mobileSidebar) mobileSidebar.classList.remove('open');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 function updateCartCount() {

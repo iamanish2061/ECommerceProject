@@ -58,8 +58,8 @@ async function handleLogout() {
                 updateAuthUI(false);
                 showToast('Logged out successfully', 'success');
                 setTimeout(() => {
-                        window.location.href = '/auth/login.html';
-                    }, 500);
+                    window.location.href = '/auth/login.html';
+                }, 500);
             } else {
                 showToast('Failed to log out', 'error');
             }
