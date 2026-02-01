@@ -1,3 +1,4 @@
+/* ===== RESET & BASE ===== */
 * {
     margin: 0;
     padding: 0;
@@ -12,11 +13,11 @@ body {
     justify-content: center;
     background: #a9cfff;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    padding: 20px;
 }
 
-/* bg blob like shapes */
-
+/* ===== BACKGROUND BLOBS ===== */
 .blob {
     position: absolute;
     border-radius: 100px;
@@ -47,7 +48,6 @@ body {
         transform: translateY(0) translateX(0);
     }
 }
-
 
 .blob.b1 {
     width: 260px;
@@ -106,19 +106,17 @@ body {
     opacity: 0.3;
 }
 
+/* ===== HERO SECTION ===== */
 .hero-illustration {
     width: 100%;
-    height: 100%;
     margin: 0 auto;
-    /* center in card */
     position: relative;
     z-index: 2;
-    /* above blob shapes */
 }
 
 .hero-illustration img {
     width: 100%;
-    height: 200px;
+    height: 180px;
     object-fit: contain;
     animation: float 2.8s ease-in-out infinite;
 }
@@ -138,24 +136,24 @@ body {
 .hero-title {
     text-align: center;
     margin-top: 4px;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
     position: relative;
     z-index: 2;
 }
 
 .hero-title small {
-    font-size: 12px;
-    letter-spacing: .22em;
+    font-size: 11px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: #12345B;
-    opacity: .85;
+    opacity: 0.85;
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-weight: 500;
 }
 
 .hero-title h1 {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 800;
     line-height: 1.1;
     margin: 0;
@@ -163,22 +161,19 @@ body {
     letter-spacing: -0.5px;
 }
 
-
-/* auth card */
+/* ===== AUTH CARD ===== */
 .auth-card {
-    /* display: flex;
-    flex-direction: column; */
     position: relative;
-    width: 420px;
+    width: 100%;
+    max-width: 420px;
     background: #ffffff;
-    border-radius: 32px;
+    border-radius: 24px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-    padding: 24px 26px 30px;
+    padding: 20px 22px 24px;
     border: 3px solid #12345B;
     z-index: 2;
     overflow: hidden;
-    gap: 20px;
-    animation: card-in 420ms ease-out
+    animation: card-in 420ms ease-out;
 }
 
 @keyframes card-in {
@@ -191,7 +186,6 @@ body {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
-
 }
 
 .card-shape {
@@ -209,7 +203,6 @@ body {
     top: 60px;
     right: 300px;
     transform: rotate(-50deg);
-
 }
 
 .card-shape.s2 {
@@ -221,20 +214,19 @@ body {
     transform: rotate(-50deg);
 }
 
-
-/* login and signup toggle pill */
+/* ===== TAB BAR ===== */
 .tab-bar {
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .tabs-pill {
     display: flex;
-    width: 50%;
+    width: 70%;
     border-radius: 999px;
     overflow: hidden;
     background: #F4F6FB;
@@ -244,14 +236,11 @@ body {
 .tab {
     flex: 1;
     text-align: center;
-    padding: 7px 0;
+    padding: 8px 0;
     font-size: 13px;
     border-radius: 999px;
     cursor: pointer;
-    transition:
-        color 0.18s ease,
-        background 0.18s ease,
-        transform 0.16s ease;
+    transition: color 0.18s ease, background 0.18s ease, transform 0.16s ease;
     color: #4c6176;
 }
 
@@ -262,8 +251,7 @@ body {
     transform: translateY(-1px);
 }
 
-/* form */
-
+/* ===== FORMS ===== */
 .form-wrapper {
     position: relative;
     z-index: 1;
@@ -272,94 +260,22 @@ body {
 form {
     display: none;
     flex-direction: column;
-    gap: 12px;
-
+    gap: 10px;
 }
 
 .form.active {
     display: flex;
 }
 
-
-
 .field {
     position: relative;
     display: flex;
     flex-direction: column;
-
-}
-
-.input-container {
-    position: relative;
-    /* CRITICAL: This is the new anchor for the eye-icon */
-    width: 100%;
-    /* Ensure it fills the width of the .field */
-
-    /* We need to ensure the input and error message are still stacked/managed */
-    display: flex;
-    flex-direction: column;
-}
-
-.eye-icon {
-    cursor: pointer;
-    position: absolute;
-    right: 14px;
-    top: 14px;
-    color: #12345B;
-    display: none;
-    font-weight: 600;
-    z-index: 10;
-}
-
-/* --- New Highly Specific Rules --- */
-
-
-.field:has(#login-password) .eye-icon.closed,
-.field:has(#login-password) .eye-icon.open {
-    top: 14px !important;
-}
-
-.field:has(#signup-password) .eye-icon.closed,
-.field:has(#signup-password) .eye-icon.open {
-    top: 14px !important;
-}
-
-.field:has(#confirm-password) .eye-icon.closed,
-.field:has(#confirm-password) .eye-icon.open {
-    top: 14px !important;
-}
-
-.eye-icon.active {
-    display: block;
-}
-
-.otp-wrapper {
-    display: flex;
-    gap: 8px;
-    margin-top: 6px;
-}
-
-.otp-input {
-    width: 40px;
-    height: 40px;
-    text-align: center;
-    font-size: 18px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    outline: none;
-}
-
-
-.otp-input:focus {
-    border-color: #4b7cff;
-    /* or your primary color */
-    box-shadow: 0 0 0 1px rgba(75, 124, 255, 0.2);
 }
 
 .field label {
-
     margin-bottom: 2px;
-    font-size: 14px;
+    font-size: 13px;
     color: #22314A;
     font-weight: 500;
 }
@@ -369,9 +285,9 @@ form {
     border: none;
     outline: none;
     background: #F2F5FA;
-    padding: 9px 12px;
+    padding: 10px 12px;
     border-radius: 12px;
-    font-size: 13px;
+    font-size: 14px;
     color: #22314A;
 }
 
@@ -379,9 +295,57 @@ form {
     color: #9BA4B6;
 }
 
+/* ===== INPUT CONTAINER (for password fields) ===== */
+.input-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.eye-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    color: #12345B;
+    display: none;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.eye-icon.active {
+    display: block;
+}
+
+/* ===== OTP INPUT ===== */
+.otp-wrapper {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    justify-content: center;
+}
+
+.otp-input {
+    width: 38px;
+    height: 42px;
+    text-align: center;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.otp-input:focus {
+    border-color: #4b7cff;
+    box-shadow: 0 0 0 3px rgba(75, 124, 255, 0.15);
+}
+
+/* ===== LINKS & BUTTONS ===== */
 .forgot-row {
     text-align: right;
-    font-size: 14px;
+    font-size: 13px;
     margin-top: 2px;
 }
 
@@ -397,8 +361,7 @@ form {
 
 .btn-primary {
     width: 100%;
-    /* ⬅ let flex handle it */
-    height: 42px;
+    height: 44px;
     padding: 0 16px;
     border: none;
     border-radius: 999px;
@@ -409,51 +372,36 @@ form {
     font-weight: 600;
     cursor: pointer;
     margin-top: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     box-shadow: 0 10px 22px rgba(9, 35, 74, 0.35);
     transform: translateY(0);
-    transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease,
-        color 0.18s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    /* space between text and arrow */
-    vertical-align: middle;
-    /* prevents slight shift */
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(9, 35, 74, 0.38);
+    background: #285589;
 }
 
 .btn-primary i {
     font-size: 18px;
 }
 
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 30px rgba(9, 35, 74, 0.38);
-    background: #285589;
-    /* slightly lighter blue, still on-brand */
-}
-
-#prev-btn i,
-#next-btn i {
-    font-size: 18px;
+.btn-container {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    justify-content: flex-start;
 }
 
 .btn-container .btn-primary {
     flex: 1;
     width: auto;
-    /* ⬅ make buttons equal width */
-}
-
-.btn-container {
-    display: flex;
-    width: 100%;
-    gap: 12px;
-    justify-content: flex-start;
 }
 
 .field-label-row {
@@ -468,7 +416,7 @@ form {
     padding: 0;
     border: none;
     color: #234B76;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
 }
@@ -477,52 +425,35 @@ form {
     color: #4b7cff;
 }
 
+/* ===== STEPS ===== */
 .step {
     display: none;
 }
 
 .step.active {
-    display: block
+    display: block;
 }
 
-.bottom-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #22314A;
-    font-size: 12px;
-    text-align: center;
-}
-
-.bottom-text span {
-    color: #234B76;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-/* Styling for the error message container */
+/* ===== ERROR MESSAGES ===== */
 .field .error-msg {
     display: block;
-    font-size: 0.9em;
-    margin-top: 5px;
+    font-size: 0.85em;
+    margin-top: 4px;
     opacity: 0;
     overflow: hidden;
     height: 0;
     transition: height 0.3s ease, opacity 0.4s ease-in-out;
 }
 
-/* Styling for when the error is active (shown by JavaScript) */
 .field .error-msg.active {
     height: auto;
     opacity: 1;
     visibility: visible;
     color: #dc3545;
-    font-size: 0.85em;
     padding: 2px 0;
 }
 
-
+/* ===== ANIMATIONS ===== */
 @keyframes slide-in {
     from {
         opacity: 0;
@@ -539,5 +470,126 @@ form {
     to {
         opacity: 0;
         transform: translateX(40px);
+    }
+}
+
+/* ===== RESPONSIVE: MOBILE ===== */
+@media (max-width: 480px) {
+    body {
+        padding: 15px;
+    }
+
+    .auth-card {
+        padding: 18px 16px 20px;
+        border-radius: 20px;
+        border-width: 2px;
+    }
+
+    .hero-illustration img {
+        height: 140px;
+    }
+
+    .hero-title h1 {
+        font-size: 22px;
+    }
+
+    .hero-title small {
+        font-size: 10px;
+    }
+
+    .tabs-pill {
+        width: 85%;
+    }
+
+    .tab {
+        font-size: 12px;
+        padding: 7px 0;
+    }
+
+    .field label {
+        font-size: 12px;
+    }
+
+    .field input {
+        padding: 9px 10px;
+        font-size: 13px;
+    }
+
+    .otp-wrapper {
+        gap: 4px;
+    }
+
+    .otp-input {
+        width: 34px;
+        height: 38px;
+        font-size: 16px;
+    }
+
+    .btn-primary {
+        height: 42px;
+        font-size: 14px;
+    }
+
+    .btn-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn-container .btn-primary {
+        width: 100%;
+    }
+
+    /* Hide some blobs on mobile */
+    .blob.b4,
+    .blob.b5,
+    .blob.b6 {
+        display: none;
+    }
+
+    .blob.b1,
+    .blob.b2,
+    .blob.b3 {
+        transform: scale(0.7);
+    }
+}
+
+/* ===== RESPONSIVE: SMALL MOBILE ===== */
+@media (max-width: 360px) {
+    .auth-card {
+        padding: 15px 12px 18px;
+    }
+
+    .hero-illustration img {
+        height: 120px;
+    }
+
+    .hero-title h1 {
+        font-size: 20px;
+    }
+
+    .otp-input {
+        width: 30px;
+        height: 34px;
+        font-size: 14px;
+    }
+}
+
+/* ===== RESPONSIVE: TABLET & UP ===== */
+@media (min-width: 481px) {
+    .auth-card {
+        padding: 24px 26px 30px;
+        border-radius: 32px;
+    }
+
+    .hero-illustration img {
+        height: 200px;
+    }
+
+    .hero-title h1 {
+        font-size: 32px;
+    }
+
+    .tabs-pill {
+        width: 50%;
     }
 }
