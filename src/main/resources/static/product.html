@@ -13,33 +13,37 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <style>
-        #profileWrapper:hover #profileDropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, 0);
-        }
-    </style>
+
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative w-full overflow-x-hidden">
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
 
-    <!-- Abstract Background Blobs -->
-    <div
-        class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
-    </div>
-    <div
-        class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
-    </div>
-    <div
-        class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+    <!-- Background Blobs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div
+            class="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
+        </div>
+        <div
+            class="absolute top-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
+        </div>
+        <div
+            class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+        </div>
     </div>
 
     <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Hamburger Icon (Mobile only) -->
+                <div class="hamburger" id="hamburgerBtn">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+
                 <!-- Logo -->
-                <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                <a href="index.html"
+                    class="text-2xl md:text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
                 </a>
 
@@ -172,18 +176,69 @@
 
                 </div>
             </div>
+
+            <!-- Mobile Menu (Dropdown below navbar on mobile) -->
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="index.html" class="text-slate-700 hover:text-indigo-600">Home</a>
+                <a href="service.html" class="text-slate-700 hover:text-indigo-600">Services</a>
+                <a href="reviews.html" class="text-slate-700 hover:text-indigo-600">Reviews</a>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="mobile-search">
+            <input type="text" id="mobileSearchInput" placeholder="Search products..." />
         </div>
     </nav>
 
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    </div>
+
+    <!-- Mobile Sidebar (Outside main container for proper z-index) -->
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <!-- Close button for mobile -->
+        <div class="sidebar-close" id="sidebarClose">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+
+        <!-- Categories Card -->
+        <div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Categories</h2>
+            <div class="space-y-2" id="mobileCategoriesContainer">
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brands Card -->
+        <div class="bg-white rounded-3xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Brands</h2>
+            <div class="space-y-2" id="mobileBrandsContainer">
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+
+
     <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-10 py-8 relative z-10">
         <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Sidebar - Categories & Brands -->
-            <aside class="w-full lg:w-80 flex-shrink-0">
+            <!-- Desktop Sidebar - Categories & Brands (Hidden on mobile) -->
+            <aside class="hidden lg:block w-80 flex-shrink-0">
                 <!-- Categories Card -->
                 <div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
                     <h2 class="text-xl font-bold text-slate-800 mb-4">Categories</h2>
                     <div class="space-y-2" id="categoriesContainer">
-                        <div class="text-center py-4 text-slate-500">Loading...</div>
+                        <div class="flex items-center justify-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -191,13 +246,25 @@
                 <div class="bg-white rounded-3xl shadow-lg p-6">
                     <h2 class="text-xl font-bold text-slate-800 mb-4">Brands</h2>
                     <div class="space-y-2" id="brandsContainer">
-                        <div class="text-center py-4 text-slate-500">Loading...</div>
+                        <div class="flex items-center justify-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        </div>
                     </div>
                 </div>
             </aside>
 
             <!-- Main Content - Products Grid -->
             <main class="flex-1">
+                <!-- Mobile Filter Button -->
+                <button class="mobile-filter-btn" id="mobileFilterBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                    </svg>
+                    Filter & Categories
+                </button>
+
                 <div id="recommendedSection" class="bg-white rounded-3xl shadow-lg p-8 mb-6" style="display: none;">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-bold text-slate-800">Recommended For You:</h2>
@@ -264,7 +331,7 @@
                                             d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
                                         </path>
                                     </svg>
-                                    <span class="font-medium">Tags</span>
+                                    <span id="tagLabel" class="font-medium">Tags</span>
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7"></path>
@@ -277,14 +344,36 @@
                                 </div>
                             </div>
 
-                            <select id="sortSelect" class="bg-white px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-700
+                            <!-- Custom Sort Dropdown -->
+                            <div class="tags-dropdown" id="sortDropdown">
+                                <button id="sortBtn" class="bg-white px-4 py-2 rounded-xl border-2 border-slate-200 text-slate-700
                                         flex items-center gap-2
                                         focus:outline-none focus:border-blue-400
                                         hover:border-blue-400 transition">
-                                <option value="featured">Sort by: Featured</option>
-                                <option value="price-asc">Price: Low to High</option>
-                                <option value="price-desc">Price: High to Low</option>
-                            </select>
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                                    </svg>
+                                    <span id="sortLabel" class="font-medium">Sort by: Featured</span>
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div id="sortMenu" class="tags-menu">
+                                    <div class="grid grid-cols-1 gap-1 p-2">
+                                        <button
+                                            class="sort-option w-full text-left px-4 py-2 rounded-lg text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all font-bold bg-blue-50 text-blue-700"
+                                            data-value="featured">Sort by: Featured</button>
+                                        <button
+                                            class="sort-option w-full text-left px-4 py-2 rounded-lg text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all"
+                                            data-value="price-asc">Price: Low to High</button>
+                                        <button
+                                            class="sort-option w-full text-left px-4 py-2 rounded-lg text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all"
+                                            data-value="price-desc">Price: High to Low</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -294,7 +383,7 @@
                             id="productsContainer">
                             <div class="col-span-full flex flex-col items-center justify-center min-h-96 py-12">
                                 <div
-                                    claass="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent">
+                                    class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent">
                                 </div>
                                 <p class="mt-6 text-lg text-slate-600 font-medium">Loading products...</p>
                             </div>

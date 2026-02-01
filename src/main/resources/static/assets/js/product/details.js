@@ -2,7 +2,9 @@
 let detailsState = {
     product: null,
     currentImageIndex: 0,
-    cartCount: 0
+    cartCount: 0,
+    categories: [],
+    brands: []
 };
 
 // Get product ID from URL
@@ -44,9 +46,11 @@ async function initDetailsPage() {
     }
 
     try {
-        const [res, cartResp] = await Promise.all([
+        const [res, cartResp, catResp, brandResp] = await Promise.all([
             productService.getProductsById(id),
-            productService.getCartCount()
+            productService.getCartCount(),
+            productService.getProductsByCategory(),
+            productService.getProductsByBrandDetails()
         ])
 
         if (!res || res.success === false) {
@@ -57,6 +61,9 @@ async function initDetailsPage() {
             detailsState.cartCount = cartResp.data.totalCartItems || 0;
         }
 
+        if (catResp.success) detailsState.categories = catResp.data || [];
+        if (brandResp.success) detailsState.brands = brandResp.data || [];
+
         const product = extractProduct(res);
         if (!product) {
             showDetailsError("Product not found.");
@@ -64,7 +71,9 @@ async function initDetailsPage() {
         }
         detailsState.product = product;
         renderDetails(product);
+        renderMobileSidebar();
         updateCartCount();
+        setEventListeners();
     } catch (err) {
         console.error("Error loading product:", err);
         showDetailsError("Error loading product. Please try again.");
@@ -189,6 +198,12 @@ function renderDetails(product) {
                 showToast('Out of stock', 'error');
                 return;
             }
+
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to continue', 'error');
+                return;
+            }
+
             try {
                 showToast('Adding to cart...', 'info');
                 const response = await productService.addToCart(product.id);
@@ -210,6 +225,11 @@ function renderDetails(product) {
             e.stopPropagation();
             if (product.stock === 0) return;
 
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to continue', 'error');
+                return;
+            }
+
             try {
                 showToast('Redirecting to checkout...', 'info');
                 setTimeout(() => {
@@ -221,6 +241,96 @@ function renderDetails(product) {
                 showToast('Could not proceed to buy', 'error');
             }
         });
+    }
+}
+
+function renderMobileSidebar() {
+    const catContainer = document.getElementById('mobileCategoriesContainer');
+    const brandContainer = document.getElementById('mobileBrandsContainer');
+
+    if (catContainer) {
+        catContainer.innerHTML = detailsState.categories.map(cat => `
+            <button onclick="window.location.href='product.html?category=${encodeURIComponent(cat.name)}'" 
+                    class="w-full text-left px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                ${cat.name}
+            </button>
+        `).join('') || '<p class="text-sm text-slate-400">No categories</p>';
+    }
+
+    if (brandContainer) {
+        brandContainer.innerHTML = detailsState.brands.map(brand => `
+            <button onclick="window.location.href='product.html?brand=${encodeURIComponent(brand.name)}'"
+                    class="w-full text-left px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                ${brand.name}
+            </button>
+        `).join('') || '<p class="text-sm text-slate-400">No brands</p>';
+    }
+}
+
+function setEventListeners() {
+    // Hamburger Menu toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Mobile filter toggle
+    const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+    if (mobileFilterBtn) {
+        mobileFilterBtn.addEventListener('click', toggleSidebar);
+    }
+
+    // Sidebar Close
+    const overlay = document.getElementById('sidebarOverlay');
+    const closeBtn = document.getElementById('sidebarClose');
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+
+    // Cart redirect
+    const cartBtn = document.getElementById('cartBtn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', () => {
+            window.location.href = 'cart.html';
+        });
+    }
+
+
+    // Profile toggle for mobile
+    const profileWrap = document.getElementById('profileWrapper');
+    if (profileWrap) {
+        profileWrap.addEventListener('click', (e) => {
+            if (window.innerWidth < 1024) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown) dropdown.classList.toggle('active');
+            }
+        });
+    }
+}
+
+function toggleMobileMenu() {
+    const hamburger = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (hamburger && mobileMenu) {
+        hamburger.classList.toggle('active');
+        mobileMenu.classList.toggle('show');
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('mobileSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('mobileSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
     }
 }
 
@@ -240,10 +350,6 @@ async function updateCartCountByFetching() {
         console.error("Failed to fetch cart count");
     }
 }
-
-document.getElementById('cartBtn').addEventListener('click', () => {
-    window.location.href = 'cart.html';
-});
 
 // Start
 document.addEventListener('DOMContentLoaded', initDetailsPage);

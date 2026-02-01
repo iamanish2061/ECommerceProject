@@ -2,6 +2,15 @@
     font-family: 'Poppins', sans-serif;
 }
 
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== ANIMATIONS ===== */
 @keyframes blob {
 
     0%,
@@ -30,6 +39,7 @@
     animation-delay: 4s;
 }
 
+/* ===== SUBCATEGORY ANIMATION ===== */
 .subcategory-enter {
     max-height: 0;
     overflow: hidden;
@@ -40,6 +50,7 @@
     max-height: 300px;
 }
 
+/* ===== TAGS DROPDOWN ===== */
 .tags-dropdown {
     position: relative;
 }
@@ -52,13 +63,472 @@
     margin-top: 8px;
     background: white;
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    min-width: 200px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
     max-height: 400px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 2000;
+    padding: 0.5rem;
 }
 
 .tags-menu.active {
     display: block;
+}
+
+.tags-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tags-menu::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+/* Custom Dropdowns (Tags & Sort) */
+.tags-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+#tagsBtn,
+#sortBtn {
+    height: 44px;
+    min-width: 180px;
+    white-space: nowrap;
+    justify-content: space-between;
+    /* Align icons to edges */
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#tagsMenu,
+#sortMenu {
+    right: 0;
+    left: auto;
+}
+
+.sort-option.active,
+.tag-btn.active {
+    background-color: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
+}
+
+#profileDropdown.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translate(-50%, 0) !important;
+}
+
+#profileWrapper:hover #profileDropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 26px;
+    height: 20px;
+    cursor: pointer;
+    position: relative;
+    z-index: 60;
+}
+
+.hamburger div {
+    height: 3px;
+    background-color: #334155;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+.hamburger.active div:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+}
+
+.hamburger.active div:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.hamburger.active div:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu {
+    display: none;
+    flex-direction: column;
+    background-color: white;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    border-top: 1px solid #e2e8f0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.mobile-menu.show {
+    display: flex;
+    max-height: 300px;
+}
+
+.mobile-menu a {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-weight: 500;
+    color: #334155;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-menu a:hover {
+    background-color: #f8fafc;
+    color: #4f46e5;
+}
+
+.mobile-menu a:last-child {
+    border-bottom: none;
+}
+
+/* ===== MOBILE SEARCH ===== */
+.mobile-search {
+    display: none;
+    padding: 1rem;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mobile-search input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 9999px;
+    border: 2px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.mobile-search input:focus {
+    outline: none;
+    border-color: #60a5fa;
+}
+
+/* ===== MOBILE FILTER TOGGLE ===== */
+.mobile-filter-btn {
+    display: none;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(to right, #2563eb, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    z-index: 10;
+}
+
+.mobile-filter-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ===== SIDEBAR (Collapsible on mobile) ===== */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999998;
+    backdrop-filter: blur(2px);
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* Mobile Sidebar - Outside main container */
+.mobile-sidebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: -105%;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    z-index: 999999;
+    background: white;
+    padding: 1.5rem;
+    padding-top: 4rem;
+    overflow-y: auto;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-sidebar.open {
+    left: 0 !important;
+}
+
+.mobile-sidebar .sidebar-close {
+    display: flex;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #64748b;
+    z-index: 10;
+}
+
+.mobile-sidebar .sidebar-close:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+@media (max-width: 767px) {
+    .mobile-sidebar {
+        display: block;
+    }
+}
+
+/* ===== RESPONSIVE: MOBILE ===== */
+@media (max-width: 1023px) {
+
+    /* Hide desktop sidebar */
+    aside:not(.mobile-sidebar) {
+        display: none !important;
+    }
+
+    /* Outer content container - prevent overflow */
+    .max-w-screen-2xl {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Main content area */
+    main {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Section container (the white cards) */
+    .bg-white.rounded-3xl.shadow-lg {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 1rem !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Search bar in nav */
+    .mobile-search {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .mobile-search input {
+        width: 100% !important;
+    }
+
+    /* All Products header section */
+    .flex.items-center.justify-between.mb-6.flex-wrap.gap-4 {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* Sort and Tags control group */
+    .flex.items-center.gap-4:has(#sortDropdown) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    /* Dropdown Buttons - forced 100% on mobile */
+    #tagsBtn,
+    #sortBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        font-size: 14px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+    }
+
+    /* Tags Button - forced 100% */
+    #tagsBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* Show hamburger */
+    .hamburger {
+        display: flex;
+    }
+
+    /* Show mobile search */
+    .mobile-search {
+        display: block;
+    }
+
+    /* Show filter button */
+    .mobile-filter-btn {
+        display: flex;
+        width: 100% !important;
+    }
+
+    /* Hide blobs on mobile performance */
+    .animate-blob {
+        display: none;
+    }
+
+    /* Notification dropdown cleanup */
+    #notificationDropdown {
+        position: fixed !important;
+        top: 70px !important;
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+        width: calc(100vw - 1rem) !important;
+        transform: none !important;
+    }
+
+    /* Product grids - 2 columns */
+    #productsContainer,
+    #recommendedContainer,
+    #continueContainer,
+    #purchaseContainer {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+
+    /* Section padding / font scale */
+    .text-2xl {
+        font-size: 1.25rem !important;
+    }
+
+    .p-8 {
+        padding: 1rem !important;
+    }
+}
+
+/* ===== RESPONSIVE: SMALL MOBILE ===== */
+@media (max-width: 480px) {
+
+    /* Single column for very small screens */
+    #productsContainer,
+    #recommendedContainer,
+    #continueContainer,
+    #purchaseContainer {
+        grid-template-columns: 1fr !important;
+    }
+
+    .text-2xl {
+        font-size: 1.1rem !important;
+    }
+
+    /* Cart/Notification icons smaller spacing */
+    .flex.items-center.gap-6 {
+        gap: 0.5rem;
+    }
+
+    /* Constrain all form elements */
+    select,
+    button,
+    input {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Tags menu constrain */
+    .tags-menu {
+        right: 0 !important;
+        left: auto !important;
+        width: 100% !important;
+        max-width: calc(100vw - 2rem) !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* ===== RESPONSIVE: TABLET ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    /* Sidebar visible but narrower */
+    aside {
+        width: 240px !important;
+    }
+
+    /* 2-column grids */
+    #productsContainer,
+    #recommendedContainer,
+    #continueContainer,
+    #purchaseContainer {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ===== RESPONSIVE: DESKTOP ===== */
+@media (min-width: 1024px) {
+    .hamburger {
+        display: none !important;
+    }
+
+    .mobile-menu {
+        display: none !important;
+    }
+
+    .mobile-search {
+        display: none !important;
+    }
+
+    .mobile-filter-btn {
+        display: none !important;
+    }
+
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    aside {
+        position: static !important;
+        left: auto !important;
+        width: auto !important;
+        height: auto !important;
+        box-shadow: none !important;
+    }
+
+    /* 3-4 columns on desktop */
+    #productsContainer,
+    #recommendedContainer,
+    #continueContainer,
+    #purchaseContainer {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
 }

@@ -11,47 +11,7 @@
     <link rel="stylesheet" href="/assets/css/toast.css">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
-
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-
-        @keyframes blob {
-            0% {
-                transform: translate(0px, 0px) scale(1);
-            }
-
-            33% {
-                transform: translate(30px, -50px) scale(1.1);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) scale(0.9);
-            }
-
-            100% {
-                transform: translate(0px, 0px) scale(1);
-            }
-        }
-
-        #profileWrapper:hover #profileDropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, 0);
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/product/details.css">
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
@@ -72,14 +32,21 @@
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Hamburger Icon (Mobile only) -->
+                <div class="hamburger" id="hamburgerBtn">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+
                 <!-- Logo -->
-                <a href="index.html" 
-                class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
+                <a href="index.html"
+                    class="text-2xl md:text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
                 </a>
 
-                <div class="flex justify-center max-w-2xl mx-0 md:mx-8">
+                <div class="hidden md:flex justify-center flex-1 max-w-2xl mx-8">
                     <a href="product.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">
                         Continue Shopping
                     </a>
@@ -90,13 +57,12 @@
                     <!-- Cart with Badge -->
                     <div class="relative">
                         <div id="cartBtn"
-                            class="text-slate-700 p-3 flex items-center   justify-center  cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
+                            class="text-slate-700 p-3 flex items-center justify-center cursor-pointer hover:text-indigo-600 hover:scale-105 transition-all transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                             </svg>
-
                         </div>
                         <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold 
                             rounded-full h-5 w-5 flex items-center justify-center shadow-md">
@@ -199,47 +165,100 @@
 
                 </div>
             </div>
+
+            <!-- Mobile Menu -->
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="index.html">Home</a>
+                <a href="product.html">Products</a>
+                <a href="service.html">Services</a>
+                <a href="reviews.html">Reviews</a>
+            </div>
         </div>
+
     </nav>
 
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Mobile Sidebar -->
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <div class="sidebar-close" id="sidebarClose">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Categories</h2>
+            <div class="space-y-2" id="mobileCategoriesContainer">
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Brands</h2>
+            <div class="space-y-2" id="mobileBrandsContainer">
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-6">
+    <main class="max-w-6xl mx-auto px-4 py-8 lg:py-12 relative z-10">
+        <!-- Mobile Sidebar Toggle -->
+        <button
+            class="mobile-filter-btn hidden items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-xl font-semibold mb-6"
+            id="mobileFilterBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            Filter & Categories
+        </button>
         <section
             class="bg-white rounded-[24px] shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-0 border border-slate-100">
 
             <!-- LEFT: Image Gallery -->
-            <div class="bg-gradient-to-b from-slate-50 to-blue-50 p-6 flex flex-col items-center relative">
-                <!-- Main Image -->
-                <div class="relative rounded-2xl bg-white shadow-sm overflow-hidden h-[420px] w-full max-w-sm">
-                    <img id="productImageMain" src="" alt="Product main image" class="w-full h-full object-cover">
-                    <div id="noImageFallback" class="w-full h-full flex items-center justify-center bg-gray-100">
-                        <span class="text-6xl">📦</span>
+            <div class="bg-gradient-to-b from-slate-50 to-blue-50 p-6 flex flex-col items-center relative self-start">
+                <div class="image-gallery-sticky w-full flex flex-col items-center">
+                    <!-- Main Image -->
+                    <div class="relative rounded-2xl bg-white shadow-sm overflow-hidden h-[360px] w-full max-w-sm">
+                        <img id="productImageMain" src="" alt="Product main image" class="w-full h-full object-cover">
+                        <div id="noImageFallback" class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <span class="text-6xl">📦</span>
+                        </div>
+
+                        <!-- Prev/Next Arrows -->
+                        <button id="prevImage"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg z-10 hidden transition-all hover:scale-110 active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
+                        <button id="nextImage"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg z-10 hidden transition-all hover:scale-110 active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </button>
                     </div>
 
-                    <!-- Prev/Next Arrows -->
-                    <button id="prevImage"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg z-10 hidden transition-all hover:scale-110 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                        </svg>
-                    </button>
-                    <button id="nextImage"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg z-10 hidden transition-all hover:scale-110 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                        </svg>
-                    </button>
+                    <!-- Thumbnails -->
+                    <div id="imageThumbnails" class="grid grid-cols-4 gap-3 mt-6 w-full max-w-md"></div>
+
+                    <!-- Short Description -->
+                    <p id="productShortDescription" class="text-xs text-slate-500 text-center mt-4 max-w-md">
+                        <!-- injected -->
+                    </p>
                 </div>
-
-                <!-- Thumbnails -->
-                <div id="imageThumbnails" class="grid grid-cols-4 gap-3 mt-6 w-full max-w-md"></div>
-
-                <!-- Short Description -->
-                <p id="productShortDescription" class="text-xs text-slate-500 text-center mt-4 max-w-md">
-                    <!-- injected -->
-                </p>
             </div>
 
             <!-- RIGHT: Product Info -->

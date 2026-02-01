@@ -40,6 +40,15 @@ function toArray(res) {
     return [];
 }
 
+// Helper to create a loading spinner
+function getLoadingSpinner() {
+    return `
+        <div class="flex items-center justify-center py-8 w-full">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+    `;
+}
+
 // Helper to extract products response with personalized recommendations
 function extractProductsResponse(res) {
     const data = (res && res.data) ? res.data : {};
@@ -73,16 +82,7 @@ async function init() {
             state.cartCount = cartRes.data.totalCartItems || 0;
         }
 
-        console.log('Loaded lengths:', {
-            categories: state.categories.length,
-            brands: state.brands.length,
-            tags: state.tags.length,
-            products: state.products.length,
-            recommendedProducts: state.recommendedProducts.length,
-            purchasedProducts: state.purchasedProducts.length,
-            cartAndViewedProducts: state.cartAndViewedProducts.length,
-        });
-
+        // Initialize UI components
         renderCategories();
         renderBrands();
         renderTags();
@@ -116,18 +116,37 @@ function showError(message) {
 
 // Event listeners (search, sort, tags dropdown)
 function setEventListeners() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
+    const searchInputs = [
+        document.getElementById('searchInput'),
+        document.getElementById('mobileSearchInput')
+    ].filter(el => el !== null);
+
+    searchInputs.forEach(input => {
         let searchTimeout;
-        searchInput.addEventListener('input', (e) => {
+        input.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => handleSearch(e.target.value), 300);
         });
-    }
+    });
 
-    const sortSelect = document.getElementById('sortSelect');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', handleSort);
+    // Sort listener replacement
+    const sortBtn = document.getElementById('sortBtn');
+    const sortMenu = document.getElementById('sortMenu');
+    if (sortBtn && sortMenu) {
+        sortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sortMenu.classList.toggle('active');
+            // Close tags menu if open
+            document.getElementById('tagsMenu')?.classList.remove('active');
+        });
+
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.dataset.value;
+                handleSort(value);
+                sortMenu.classList.remove('active');
+            });
+        });
     }
 
     const tagBtn = document.getElementById('tagsBtn');
@@ -136,11 +155,75 @@ function setEventListeners() {
         tagBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             tagMenu.classList.toggle('active');
+            // Close sort menu if open
+            document.getElementById('sortMenu')?.classList.remove('active');
         });
+    }
 
-        document.addEventListener('click', (e) => {
-            if (!tagBtn.contains(e.target) && !tagMenu.contains(e.target)) {
-                tagMenu.classList.remove('active');
+    // Click outside to close menus
+    document.addEventListener('click', (e) => {
+        const sortDropdown = document.getElementById('sortDropdown');
+        const tagsDropdown = document.querySelector('.tags-dropdown'); // General class
+
+        if (sortDropdown && !sortDropdown.contains(e.target)) {
+            document.getElementById('sortMenu')?.classList.remove('active');
+        }
+
+        const tagsMenu = document.getElementById('tagsMenu');
+        const tagsBtn = document.getElementById('tagsBtn');
+        if (tagsMenu && tagsBtn && !tagsBtn.contains(e.target) && !tagsMenu.contains(e.target)) {
+            tagsMenu.classList.remove('active');
+        }
+    });
+
+    // Mobile search sync with desktop
+    const mobileSearch = document.getElementById('mobileSearchInput');
+    const desktopSearch = document.getElementById('searchInput');
+    if (mobileSearch && desktopSearch) {
+        mobileSearch.addEventListener('input', (e) => {
+            desktopSearch.value = e.target.value;
+            // No need to dispatch Event('input') as handleSearch handles both independently,
+            // but we sync visually for UX.
+        });
+        desktopSearch.addEventListener('input', (e) => {
+            mobileSearch.value = e.target.value;
+        });
+    }
+
+    // Hamburger Menu toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Mobile filter toggle
+    const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+    if (mobileFilterBtn) {
+        mobileFilterBtn.addEventListener('click', toggleSidebar);
+    }
+
+    // Sidebar Close (Overlay and Close Button)
+    const overlay = document.getElementById('sidebarOverlay');
+    const closeBtn = document.getElementById('sidebarClose');
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+
+    // Cart redirect
+    const cartBtn = document.getElementById('cartBtn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', () => {
+            window.location.href = 'cart.html';
+        });
+    }
+
+    // Profile Dropdown Toggle
+    const profileBtn = document.querySelector('#profileWrapper > a');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+            if (window.innerWidth < 1024) { // Touch logic for mobile
+                e.preventDefault();
+                profileDropdown.classList.toggle('active');
             }
         });
     }
@@ -176,8 +259,26 @@ async function handleSearch(query) {
 }
 
 // Sort handler
-function handleSort(e) {
-    const sortBy = e.target.value;
+function handleSort(sortBy) {
+    const label = document.getElementById('sortLabel');
+    const options = document.querySelectorAll('.sort-option');
+
+    // Update Label
+    if (label) {
+        const selectedOption = Array.from(options).find(opt => opt.dataset.value === sortBy);
+        if (selectedOption) {
+            label.textContent = selectedOption.textContent;
+        }
+    }
+
+    // Update Active Class
+    options.forEach(opt => {
+        if (opt.dataset.value === sortBy) {
+            opt.classList.add('bg-blue-50', 'text-blue-700', 'font-bold');
+        } else {
+            opt.classList.remove('bg-blue-50', 'text-blue-700', 'font-bold');
+        }
+    });
 
     switch (sortBy) {
         case 'price-asc':
@@ -187,8 +288,15 @@ function handleSort(e) {
             state.filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
             break;
         default:
+            // Featured - original order
             state.filteredProducts = [...state.products];
+            // Re-apply other filters if they exist
+            if (state.selectedCategory || state.selectedBrand || state.selectedTag || state.searchQuery) {
+                filterProducts();
+            }
+            break;
     }
+
     renderProducts();
 }
 
@@ -231,25 +339,61 @@ function filterProducts() {
 // Render tags dropdown
 function renderTags() {
     const container = document.getElementById('tagsMenu');
+    const label = document.getElementById('tagLabel');
     if (!container) return;
 
-    container.innerHTML = '<div class="p-2"></div>';
+    container.innerHTML = '<div class="grid grid-cols-1 gap-1 p-2"></div>';
     const tagsDiv = container.firstChild;
 
+    // Update button label
+    if (label) {
+        if (state.selectedTag) {
+            // Find current tag name
+            const currentTag = state.tags.find(t => (t.slug || t) === state.selectedTag);
+            label.textContent = currentTag ? (currentTag.name || currentTag) : 'Tags';
+        } else {
+            label.textContent = 'Tags';
+        }
+    }
+
+    // Add "All Tags" clear option at the top if a tag is selected
+    if (state.selectedTag) {
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'w-full text-left px-4 py-2 rounded-lg text-sm text-blue-600 hover:bg-blue-50 font-medium transition-all mb-1 border-b border-blue-100 pb-2';
+        clearBtn.textContent = '✕ Clear Filter';
+        clearBtn.onclick = () => {
+            state.selectedTag = null;
+            state.filteredProducts = [...state.products];
+            renderTags();
+            renderProducts();
+            container.classList.remove('active');
+        };
+        tagsDiv.appendChild(clearBtn);
+    }
+
     if (!state.tags || state.tags.length === 0) {
-        tagsDiv.innerHTML = '<p class="text-sm text-slate-500 text-center py-2">No tags available</p>';
+        tagsDiv.innerHTML = '<p class="text-sm text-slate-500 text-center py-4">No tags available</p>';
         return;
     }
 
-    state.tags.forEach(tag => {
+    // Sort tags alphabetically
+    const sortedTags = [...state.tags].sort((a, b) => {
+        const nameA = ((a.name || a) + "").toLowerCase();
+        const nameB = ((b.name || b) + "").toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+
+    sortedTags.forEach(tag => {
         const tagName = tag.name || tag;
+        if (!tagName || (tagName + "").trim() === "") return; // Skip empty tags
+
         const tagSlug = tag.slug || tagName;
         const isActive = state.selectedTag === tagSlug;
 
         const tagBtn = document.createElement('button');
         tagBtn.className = `
             w-full text-left px-4 py-2 rounded-lg text-sm transition-all
-            ${isActive ? 'bg-blue-100 text-blue-700 font-medium' : 'text-slate-700 hover:bg-blue-50'}
+            ${isActive ? 'bg-blue-100 text-blue-700 font-bold' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-600'}
         `;
         tagBtn.textContent = tagName;
 
@@ -281,6 +425,11 @@ function renderTags() {
             renderTags();
             renderProducts();
             container.classList.remove('active');
+
+            // Scroll to product heading on mobile to show results
+            if (window.innerWidth < 768) {
+                document.getElementById('productsHeading')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
 
         tagsDiv.appendChild(tagBtn);
@@ -289,53 +438,63 @@ function renderTags() {
 
 // Render categories — only first 3 as parents, with manual children
 function renderCategories() {
-    const container = document.getElementById('categoriesContainer');
-    if (!container) return;
+    const containers = [
+        document.getElementById('categoriesContainer'),
+        document.getElementById('mobileCategoriesContainer')
+    ].filter(el => el !== null);
 
-    container.innerHTML = '';
+    if (containers.length === 0) return;
 
-    if (!state.categories || state.categories.length < 12) {
-        container.innerHTML = '<div class="text-center py-4 text-slate-500">Not enough categories (need 12)</div>';
-        return;
-    }
+    containers.forEach(container => {
+        container.innerHTML = '';
 
-    // First 3 categories are parents
-    const parents = state.categories.slice(0, 3);
+        if (!state.categories || state.categories.length === 0) {
+            container.innerHTML = getLoadingSpinner();
+            return;
+        }
 
-    parents.forEach((category, index) => {
-        const categoryDiv = document.createElement('div');
+        if (state.categories.length < 12) {
+            container.innerHTML = '<div class="text-center py-4 text-slate-500 text-xs">More categories soon...</div>';
+            return;
+        }
 
-        const button = document.createElement('button');
-        button.className = 'w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-blue-50 transition-all text-left group';
+        // First 3 categories are parents
+        const parents = state.categories.slice(0, 3);
 
-        const categoryName = category.name || category.title;
-        const categorySlug = category.slug || toSlug(categoryName);
+        parents.forEach((category, index) => {
+            const categoryDiv = document.createElement('div');
 
-        button.innerHTML = `
-            <span class="font-medium text-slate-700 group-hover:text-blue-600">${categoryName}</span>
-            <svg class="text-slate-400 transition-transform chevron-${categorySlug.replace(/\s/g, '')}" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-        `;
+            const button = document.createElement('button');
+            button.className = 'w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-blue-50 transition-all text-left group';
 
-        const subDiv = document.createElement('div');
-        subDiv.className = 'subcategory-enter ml-4 mt-2 space-y-1';
+            const categoryName = category.name || category.title;
+            const categorySlug = category.slug || toSlug(categoryName);
+            const chevronId = `chevron-${categorySlug.replace(/[^a-zA-Z0-9]/g, '-')}-${container.id}`;
 
-        // Pass index (0,1,2) to identify which parent
-        button.addEventListener('click', () => toggleCategory(categorySlug, index, subDiv));
+            button.innerHTML = `
+                <span class="font-medium text-slate-700 group-hover:text-blue-600">${categoryName}</span>
+                <svg id="${chevronId}" class="text-slate-400 transition-transform" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            `;
 
-        categoryDiv.appendChild(button);
-        categoryDiv.appendChild(subDiv);
-        container.appendChild(categoryDiv);
+            const subDiv = document.createElement('div');
+            subDiv.className = 'subcategory-enter ml-4 mt-2 space-y-1';
+
+            button.addEventListener('click', () => toggleCategory(categorySlug, index, subDiv, chevronId));
+
+            categoryDiv.appendChild(button);
+            categoryDiv.appendChild(subDiv);
+            container.appendChild(categoryDiv);
+        });
     });
 }
 
 // Toggle category with manual child assignment
-async function toggleCategory(categorySlug, parentIndex, subDiv) {
+async function toggleCategory(categorySlug, parentIndex, subDiv, chevronId) {
     if (!subDiv) return;
 
-    const chevronClass = `.chevron-${categorySlug.replace(/\s/g, '')}`;
-    const chevron = document.querySelector(chevronClass);
+    const chevron = document.getElementById(chevronId);
 
     // Close if same parent clicked again
     if (state.selectedCategory === categorySlug && subDiv.classList.contains('active')) {
@@ -345,9 +504,9 @@ async function toggleCategory(categorySlug, parentIndex, subDiv) {
         return;
     }
 
-    // Close all other submenus
+    // Close all other submenus (within the same container relative scope if needed, but global is fine here)
     document.querySelectorAll('.subcategory-enter').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('[class*="chevron-"]').forEach(el => el.style.transform = 'rotate(0deg)');
+    document.querySelectorAll('[id^="chevron-"]').forEach(el => el.style.transform = 'rotate(0deg)');
 
     // Set current parent
     state.selectedCategory = categorySlug;
@@ -390,6 +549,7 @@ async function toggleCategory(categorySlug, parentIndex, subDiv) {
                 }
 
                 renderProducts();
+                if (window.innerWidth < 768) closeSidebar();
             });
 
             subDiv.appendChild(subButton);
@@ -408,6 +568,7 @@ async function toggleCategory(categorySlug, parentIndex, subDiv) {
             filterProducts();
         }
         renderProducts();
+        if (window.innerWidth < 768) closeSidebar();
     }
 }
 
@@ -423,40 +584,46 @@ function resetFilters() {
 
 // Render brands with logo
 function renderBrands() {
-    const container = document.getElementById('brandsContainer');
-    if (!container) return;
+    const containers = [
+        document.getElementById('brandsContainer'),
+        document.getElementById('mobileBrandsContainer')
+    ].filter(el => el !== null);
 
-    container.innerHTML = '';
+    if (containers.length === 0) return;
 
-    if (!state.brands || state.brands.length === 0) {
-        container.innerHTML = '<div class="text-center py-4 text-slate-500">No brands available</div>';
-        return;
-    }
+    containers.forEach(container => {
+        container.innerHTML = '';
 
-    state.brands.forEach(brand => {
-        const brandName = brand.name || brand.title || 'Unknown Brand';
-        const brandSlug = brand.slug || toSlug(brandName);
-        const brandLogo = brand.logo || brand.logoUrl || null;
+        if (!state.brands || state.brands.length === 0) {
+            container.innerHTML = getLoadingSpinner();
+            return;
+        }
 
-        const btn = document.createElement('button');
-        btn.className = 'w-full px-4 py-3 rounded-xl text-left text-slate-700 hover:bg-blue-50 transition-all flex items-center gap-4';
+        state.brands.forEach(brand => {
+            const brandName = brand.name || brand.title || 'Unknown Brand';
+            const brandSlug = brand.slug || toSlug(brandName);
+            const brandLogo = brand.logo || brand.logoUrl || null;
 
-        btn.innerHTML = `
-            ${brandLogo
-                ? `<img src="${brandLogo}" alt="${brandName}" class="w-10 h-10 object-contain rounded-full border border-gray-200">`
-                : `<div class="w-10 h-10 bg-gray-200 rounded-full border border-gray-300 flex items-center justify-center">
-                     <span class="text-gray-500 font-bold text-lg">${brandName.charAt(0).toUpperCase()}</span>
-                   </div>`
-            }
-            <span class="font-medium">${brandName}</span>
-        `;
+            const btn = document.createElement('button');
+            btn.className = 'w-full px-4 py-3 rounded-xl text-left text-slate-700 hover:bg-blue-50 transition-all flex items-center gap-4';
 
-        btn.addEventListener('click', () => {
-            const slugParam = encodeURIComponent(brandSlug);
-            window.location.href = `brand.html?brand=${slugParam}`;
+            btn.innerHTML = `
+                ${brandLogo
+                    ? `<img src="${brandLogo}" alt="${brandName}" class="w-10 h-10 object-contain rounded-full border border-gray-200">`
+                    : `<div class="w-10 h-10 bg-gray-200 rounded-full border border-gray-300 flex items-center justify-center">
+                         <span class="text-gray-500 font-bold text-lg">${brandName.charAt(0).toUpperCase()}</span>
+                       </div>`
+                }
+                <span class="font-medium">${brandName}</span>
+            `;
+
+            btn.addEventListener('click', () => {
+                const slugParam = encodeURIComponent(brandSlug);
+                window.location.href = `brand.html?brand=${slugParam}`;
+            });
+
+            container.appendChild(btn);
         });
-
-        container.appendChild(btn);
     });
 }
 
@@ -558,6 +725,10 @@ function createProductCard(product) {
         addToCartBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             if (stock === 0) return;
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to continue', 'error');
+                return;
+            }
 
             try {
                 showToast('Adding to cart...', 'info');
@@ -580,6 +751,10 @@ function createProductCard(product) {
         buyNowBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             if (stock === 0) return;
+            if (!AuthService.isAuthenticated()) {
+                showToast('Please login to continue', 'error');
+                return;
+            }
 
             try {
                 showToast('Redirecting to checkout...', 'info');
@@ -764,10 +939,6 @@ function renderContinueProducts() {
 }
 
 
-document.getElementById('cartBtn').addEventListener('click', () => {
-    window.location.href = 'cart.html';
-});
-
 function updateCartCount() {
     const countElement = document.getElementById('cartCount');
     if (countElement) {
@@ -782,6 +953,33 @@ async function updateCartCountByFetching() {
         updateCartCount();
     } else {
         console.error("Failed to fetch cart count");
+    }
+}
+
+function toggleMobileMenu() {
+    const hamburger = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (hamburger && mobileMenu) {
+        hamburger.classList.toggle('active');
+        mobileMenu.classList.toggle('show');
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('mobileSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('mobileSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
     }
 }
 
