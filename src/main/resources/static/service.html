@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/assets/css/toast.css">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/service/service.css">
     <style>
         #profileWrapper:hover #profileDropdown {
             opacity: 1;
@@ -26,6 +27,7 @@
             background-color: #2563eb;
             color: white;
         }
+
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -45,6 +47,13 @@
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
+                <!-- Hamburger Icon (Mobile only) -->
+                <div class="hamburger" id="hamburgerBtn">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+
                 <!-- Logo -->
                 <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
@@ -189,12 +198,46 @@
                 </div>
             </div>
         </div>
+        <!-- Mobile Menu (Dropdown below navbar on mobile) -->
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="index.html" class="text-slate-700 hover:text-indigo-600">Home</a>
+            <a href="product.html" class="text-slate-700 hover:text-indigo-600">Shop</a>
+            <a href="reviews.html" class="text-slate-700 hover:text-indigo-600">Reviews</a>
+        </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="mobile-search">
+            <input type="text" id="mobileSearchInput" placeholder="Search services..." />
+        </div>
     </nav>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Mobile Sidebar (Outside main container for proper z-index) -->
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <!-- Close button for mobile -->
+        <div class="sidebar-close" id="sidebarClose">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+
+        <!-- Categories Card -->
+        <div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Categories</h2>
+            <ul class="space-y-2" id="mobileCategoryList">
+                <!-- Mobile Categories dynamically loaded -->
+            </ul>
+        </div>
+    </aside>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Sidebar / Categories -->
-            <aside class="w-full md:w-64 flex-shrink-0">
+            <aside class="w-full md:w-72 lg:w-80 flex-shrink-0">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-28">
                     <h2 class="text-xl font-bold text-slate-800 mb-6">Categories</h2>
                     <ul class="space-y-2" id="categoryList">
@@ -212,6 +255,18 @@
 
             <!-- Main Content Area -->
             <section class="flex-1">
+                <!-- Mobile Filter Button -->
+                <button
+                    class="mobile-filter-btn mb-6 flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-md active:scale-95 transition-transform md:hidden"
+                    id="mobileFilterBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter Categories
+                </button>
+
                 <div class="flex justify-between items-center mb-8">
                     <h1 id="pageTitle" class="text-2xl font-bold text-slate-800">Explore Our Services</h1>
                     <div class="text-sm text-slate-500 font-medium"><span id="serviceCount">0</span> services found

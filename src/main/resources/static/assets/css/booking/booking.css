@@ -1,0 +1,20 @@
+@import url('/assets/css/product/product.css');
+
+/* Specific override for booking page to handle mobile layout of the split screen if needed */
+@media (max-width: 1023px) {
+    #bookingContent {
+        flex-direction: column !important;
+    }
+
+    /* Ensure service info takes full width on mobile/tablet */
+    .w-full.lg\:w-4\/12,
+    .w-full.lg\:w-8\/12 {
+        width: 100% !important;
+    }
+
+    /* Ensure content is scrollable on mobile */
+    main {
+        height: auto !important;
+        overflow: visible !important;
+    }
+}

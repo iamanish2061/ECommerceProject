@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/assets/css/toast.css">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/booking/booking.css">
     <style>
         * {
             font-family: 'Poppins', sans-serif;
@@ -94,13 +95,20 @@
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-20">
+                <!-- Hamburger Icon (Mobile only) -->
+                <div class="hamburger" id="hamburgerBtn">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+
                 <!-- Logo -->
                 <a href="index.html" class="text-3xl font-bold text-slate-800 hover:scale-105 transition-transform">
                     Cut<span class="text-blue-600">Lab</span>
                 </a>
 
-                <div class="flex justify-center max-w-2xl mx-0 md:mx-8">
+                <div class="hidden md:flex justify-center max-w-2xl mx-0 md:mx-8">
                     <a href="service.html" class="text-slate-700 hover:text-blue-600 font-medium transition-colors">
                         Continue browsing services
                     </a>
@@ -219,6 +227,12 @@
                     </button>
 
                 </div>
+            </div>
+            <!-- Mobile Menu (Dropdown below navbar on mobile) -->
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="index.html" class="text-slate-700 hover:text-indigo-600">Home</a>
+                <a href="service.html" class="text-slate-700 hover:text-indigo-600">Services</a>
+                <a href="reviews.html" class="text-slate-700 hover:text-indigo-600">Reviews</a>
             </div>
         </div>
     </nav>

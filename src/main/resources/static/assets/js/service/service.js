@@ -23,6 +23,7 @@ const ServicePage = {
             ServicePage.loadCartCount()
         ]).then(() => {
             ServicePage.setupEventListeners();
+            ServicePage.setupMobileEventListeners();
         });
     },
 
@@ -45,11 +46,75 @@ const ServicePage = {
             }, 500);
         });
     },
+    
+    setupMobileEventListeners: () => {
+        // Hamburger Menu
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        if (hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', ServicePage.toggleMobileMenu);
+        }
+
+        // Mobile Filter Sidebar
+        const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+        if (mobileFilterBtn) {
+            mobileFilterBtn.addEventListener('click', ServicePage.toggleSidebar);
+        }
+
+        // Close Sidebar (Overlay & Close Button)
+        const overlay = document.getElementById('sidebarOverlay');
+        const closeBtn = document.getElementById('sidebarClose');
+        if (overlay) overlay.addEventListener('click', ServicePage.closeSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', ServicePage.closeSidebar);
+
+        // Mobile Search Sync
+        const mobileSearch = document.getElementById('mobileSearchInput');
+        const desktopSearch = document.getElementById('serviceSearch');
+        if (mobileSearch && desktopSearch) {
+            mobileSearch.addEventListener('input', (e) => {
+                desktopSearch.value = e.target.value;
+                // Trigger search logic - no need to dispatch event as we just need value
+                ServicePage.searchQuery = e.target.value;
+                ServicePage.loadServices();
+            });
+            desktopSearch.addEventListener('input', (e) => {
+                mobileSearch.value = e.target.value;
+            });
+        }
+    },
+
+    toggleMobileMenu: () => {
+        const hamburger = document.getElementById('hamburgerBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (hamburger && mobileMenu) {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('show');
+        }
+    },
+
+    toggleSidebar: () => {
+        const sidebar = document.getElementById('mobileSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+    },
+
+    closeSidebar: () => {
+        const sidebar = document.getElementById('mobileSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar && overlay) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+    },
 
     loadCategories: async () => {
         const response = await ServiceService.getAllCategories();
         if (response.success) {
             const list = document.getElementById('categoryList');
+            const mobileList = document.getElementById('mobileCategoryList');
+
             // Keep "All" and add rest
             response.data.forEach(category => {
                 const li = document.createElement('li');
@@ -59,16 +124,33 @@ const ServicePage = {
                         ${category}
                     </button>
                 `;
-                list.appendChild(li);
+                if (list) list.appendChild(li);
+                if (mobileList) mobileList.appendChild(li.cloneNode(true));
             });
 
-            // Add click listeners to category pills
+            // Add click listeners to category pills (desktop and mobile)
             document.querySelectorAll('.category-pill').forEach(pill => {
                 pill.addEventListener('click', (e) => {
-                    document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active', 'bg-blue-600', 'text-white'));
-                    pill.classList.add('active', 'bg-blue-600', 'text-white');
-                    ServicePage.selectedCategory = pill.dataset.category;
+                    document.querySelectorAll('.category-pill').forEach(p => {
+                        // Remove active class from all pills with same category to sync desktop/mobile
+                        if (p.dataset.category !== pill.dataset.category) {
+                            p.classList.remove('active', 'bg-blue-600', 'text-white');
+                        }
+                    });
+
+                    // Add active class to clicked pill and its counterparts
+                    const category = pill.dataset.category;
+                    document.querySelectorAll(`.category-pill[data-category="${category}"]`).forEach(p => {
+                        p.classList.add('active', 'bg-blue-600', 'text-white');
+                    });
+
+                    ServicePage.selectedCategory = category;
                     ServicePage.loadServices();
+
+                    // Close mobile sidebar if open
+                    if (window.innerWidth < 1024) {
+                        ServicePage.closeSidebar();
+                    }
                 });
             });
         }

@@ -153,6 +153,12 @@ const BookingPage = {
         const dateInput = document.getElementById('bookingDate');
         const checkBtn = document.getElementById('checkAvailabilityBtn');
 
+        // Hamburger Menu
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        if (hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', BookingPage.toggleMobileMenu);
+        }
+
         // Set min date to today
         const today = new Date().toISOString().split('T')[0];
         if (dateInput) {
@@ -331,6 +337,11 @@ const BookingPage = {
     },
 
     handleBooking: async () => {
+        if (!AuthService.isAuthenticated()) {
+            showToast('Please login to continue', 'error');
+            return;
+        }
+
         const paymentMethodInput = document.querySelector('input[name="paymentMethod"]:checked');
 
         if (!BookingPage.selectedDate || !BookingPage.selectedTimeSlot) {
@@ -413,6 +424,15 @@ const BookingPage = {
         document.getElementById("esewa_signature").value = esewaData.signature;
 
         document.getElementById("esewaForm").submit();
+    },
+
+    toggleMobileMenu: () => {
+        const hamburger = document.getElementById('hamburgerBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (hamburger && mobileMenu) {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('show');
+        }
     }
 };
 

@@ -1,0 +1,46 @@
+@import url('/assets/css/product/product.css');
+
+/* Override specific service page styles if needed, but mostly inheriting product responsive patterns */
+
+/* ===== RESPONSIVE: MOBILE SPECIFIC FOR SERVICES ===== */
+@media (max-width: 1023px) {
+
+    /* Adjust grid for services if different */
+    #serviceGrid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* Ensure sidebar is hidden by default and uses mobile-sidebar class logic */
+    aside:not(.mobile-sidebar) {
+        display: none !important;
+    }
+
+    #serviceGrid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Mobile category sidebar adjustment */
+    .mobile-sidebar {
+        z-index: 999999;
+    }
+
+    .py-10 {
+        padding-top: 1rem !important;
+    }
+}
+
+/* ===== RESPONSIVE: DESKTOP SIDEBAR FIX ===== */
+@media (min-width: 1024px) {
+
+    /* Override product.css 'width: auto !important' to allow our w-80 to work, or just enforce it here */
+    aside:not(.mobile-sidebar) {
+        width: 20rem !important;
+        /* 320px / w-80 */
+        display: block !important;
+        /* Ensure it's visible on desktop */
+    }
+}
