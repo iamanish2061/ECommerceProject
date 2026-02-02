@@ -142,10 +142,7 @@ body {
 
 /* ===== RESPONSIVE LAYOUT ===== */
 @media (max-width: 1023px) {
-    .max-w-7xl {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
+    /* Main container adjustments if needed, but leaving max-w-7xl to Tailwind defaults to match product.html */
 }
 
 @media (max-width: 767px) {
@@ -194,4 +191,14 @@ body {
         position: static !important;
         top: 0 !important;
     }
+}
+
+/* ===== RESPONSIVE: SMALL MOBILE ===== */
+@media (max-width: 480px) {
+
+    /* Cart/Notification icons smaller spacing */
+    .flex.items-center.gap-6 {
+        gap: 0.5rem;
+    }
+
 }

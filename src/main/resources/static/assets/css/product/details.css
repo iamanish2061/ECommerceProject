@@ -228,3 +228,13 @@ body {
         transform: none !important;
     }
 }
+
+/* ===== RESPONSIVE: SMALL MOBILE ===== */
+@media (max-width: 480px) {
+
+    /* Cart/Notification icons smaller spacing */
+    .flex.items-center.gap-6 {
+        gap: 0.5rem;
+    }
+
+}
