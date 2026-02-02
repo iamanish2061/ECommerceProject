@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const markAllBtn = document.getElementById('markAllReadBtn');
     const pingEffect = document.getElementById('notifPing');
 
-    notifBtn.addEventListener('click', (e) => {
+    notifBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
         const isHidden = notifDropdown.classList.contains('invisible');
         if (isHidden) {
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    markAllBtn.addEventListener('click', async () => {
+    markAllBtn?.addEventListener('click', async () => {
         showToast("Clearing notifications", "info");
         const res = await notificationService.markAllRead();
         if (res.success) refreshDropdownData();
