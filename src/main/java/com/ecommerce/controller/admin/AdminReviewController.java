@@ -1,5 +1,6 @@
 package com.ecommerce.controller.admin;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.review.AddReviewRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.review.ReviewResponse;
@@ -9,7 +10,6 @@ import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -21,47 +21,50 @@ import java.util.List;
 @Validated
 @RequestMapping("/api/admin/reviews")
 @RequiredArgsConstructor
-public class AdminReviewController {
+public class AdminReviewController extends BaseController {
 
     private final AdminReviewService reviewService;
 
     @GetMapping()
     @Operation(summary = "to fetch all reviews to display on admin review page")
     public ResponseEntity<ApiResponse<List<ReviewResponse>>> getAllReviewsOnDescendingOrder (){
-        return ResponseEntity.ok(ApiResponse.ok(reviewService.getAllReviews(), "All reviews fetched successfully"));
+        return success(reviewService.getAllReviews(), "All reviews fetched successfully");
     }
 
     @PostMapping()
     @Operation(summary = "to add new review by admin")
-    public ResponseEntity<ApiResponse<?>> saveReview(
+    public ResponseEntity<ApiResponse<Void>> saveReview(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @Valid @RequestBody AddReviewRequest request
     ){
+        if(currentUser == null){
+            return unauthorized();
+        }
         reviewService.saveReview(currentUser.getUser(), request);
-        return ResponseEntity.ok(ApiResponse.ok("Review submitted successfully!"));
+        return success("Review submitted successfully!");
     }
 
     @PutMapping("/{reviewId}")
     @Operation(summary = "to update any existing review of admin")
-    public ResponseEntity<ApiResponse<?>> updateReview(
+    public ResponseEntity<ApiResponse<Void>> updateReview(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @Valid @RequestBody AddReviewRequest request,
             @ValidId @PathVariable Long reviewId
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Please login to continue!", "NOT_LOGGED_IN"));
+            return unauthorized();
         }
         reviewService.updateReview(reviewId, currentUser.getUser(), request);
-        return ResponseEntity.ok(ApiResponse.ok("Review updated successfully"));
+        return success("Review updated successfully");
     }
 
     @DeleteMapping("/{reviewId}")
     @Operation(summary = "to delete review by an admin")
-    public ResponseEntity<ApiResponse<?>> deleteReview(
+    public ResponseEntity<ApiResponse<Void>> deleteReview(
             @ValidId @PathVariable Long reviewId
     ){
         reviewService.deleteReview(reviewId);
-        return ResponseEntity.ok(ApiResponse.ok("Review deleted successfully"));
+        return success("Review deleted successfully");
     }
 
 

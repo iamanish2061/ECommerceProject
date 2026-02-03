@@ -6,12 +6,12 @@ import org.springframework.http.ResponseEntity;
 
 public abstract class BaseController {
 
-    protected <T> ResponseEntity<ApiResponse<T>> success( T data, String message) {
-        return ResponseEntity.ok(ApiResponse.ok(data, message));
-    }
-
     protected <T> ResponseEntity<ApiResponse<T>> success(String message) {
         return ResponseEntity.ok(ApiResponse.ok(message));
+    }
+
+    protected <T> ResponseEntity<ApiResponse<T>> success( T data, String message) {
+        return ResponseEntity.ok(ApiResponse.ok(data, message));
     }
 
     protected <T> ResponseEntity<ApiResponse<T>> success(T data, String message, HttpStatus status){

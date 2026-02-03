@@ -1,5 +1,6 @@
 package com.ecommerce.controller.admin;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.report.SalesReportResponse;
 import com.ecommerce.dto.response.report.StaffPerformanceReportResponse;
@@ -23,7 +24,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/reports")
 @RequiredArgsConstructor
 @Validated
-public class AdminReportController {
+public class AdminReportController extends BaseController {
 
     private final AdminReportService reportService;
 
@@ -31,31 +32,30 @@ public class AdminReportController {
     @Operation(summary = "to fetch sales trend data (weekly or monthly)")
     public ResponseEntity<ApiResponse<SalesReportResponse>> getSalesData(
             @RequestParam(defaultValue = "weekly") String period) {
-        return ResponseEntity.ok(ApiResponse.ok(reportService.getSalesData(period), "Sales data fetched successfully"));
+        return success(reportService.getSalesData(period), "Sales data fetched successfully");
     }
 
     @GetMapping("/sales-by-category")
     @Operation(summary = "to fetch total revenue from product and services")
     public ResponseEntity<ApiResponse<Map<String, BigDecimal>>> getRevenueOfCategory(){
-        return ResponseEntity.ok(ApiResponse.ok(reportService.getRevenueOfCategory(), "Fetched revenue by category"));
+        return success(reportService.getRevenueOfCategory(), "Fetched revenue by category");
     }
 
     @GetMapping("/top-products")
     @Operation(summary = "to fetch top selling products from delivered orders")
     public ResponseEntity<ApiResponse<List<TopProductReportResponse>>> getTopProducts() {
-        return ResponseEntity.ok(ApiResponse.ok(reportService.getTopProducts(), "Top products fetched successfully"));
+        return success(reportService.getTopProducts(), "Top products fetched successfully");
     }
 
     @GetMapping("/top-services")
     @Operation(summary = "to fetch most booked services")
     public ResponseEntity<ApiResponse<List<TopServiceReportResponse>>> getTopServices() {
-        return ResponseEntity.ok(ApiResponse.ok(reportService.getTopServices(), "Top services fetched successfully"));
+        return success(reportService.getTopServices(), "Top services fetched successfully");
     }
 
     @GetMapping("/staff-performance")
     @Operation(summary = "to fetch staff performance reports")
     public ResponseEntity<ApiResponse<List<StaffPerformanceReportResponse>>> getStaffPerformance() {
-        return ResponseEntity
-                .ok(ApiResponse.ok(reportService.getStaffPerformance(), "Staff performance fetched successfully"));
+        return success(reportService.getStaffPerformance(), "Staff performance fetched successfully");
     }
 }

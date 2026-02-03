@@ -1,5 +1,6 @@
 package com.ecommerce.controller.admin;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.user.DetailedUser;
 import com.ecommerce.dto.response.user.DetailedUserResponse;
@@ -22,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/users")
-public class AdminUserController {
+public class AdminUserController extends BaseController {
 
     private final AdminUserService userService;
 
@@ -30,7 +31,7 @@ public class AdminUserController {
     @Operation(summary = "to fetch all users")
     public ResponseEntity<ApiResponse<List<DetailedUser>>> getAllUsers(){
         List<DetailedUser> users = userService.getAllUsers();
-        return ResponseEntity.ok(ApiResponse.ok(users, "Fetched info of all users"));
+        return success(users, "Fetched info of all users");
     }
 
     @GetMapping("/{id}")
@@ -39,7 +40,7 @@ public class AdminUserController {
             @ValidId @PathVariable Long id
     ){
         DetailedUserResponse response = userService.getSingleUserInfo(id);
-        return ResponseEntity.ok(ApiResponse.ok(response, "User detail fetched successfully"));
+        return success(response, "User detail fetched successfully");
     }
 
     @PutMapping("/role/{id}")
@@ -49,7 +50,7 @@ public class AdminUserController {
             @RequestParam Role role
     ){
         userService.updateRole(id, role);
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("role", role), "Role updated successfully"));
+        return success(Map.of("role", role), "Role updated successfully");
     }
 
     @PutMapping("/status/{id}")
@@ -60,7 +61,7 @@ public class AdminUserController {
             @RequestParam UserStatus status
     ){
         userService.updateStatus(id, status);
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("status", status),"Status updated successfully"));
+        return success(Map.of("status", status),"Status updated successfully");
     }
 
     @GetMapping("/driver-info")
@@ -69,16 +70,16 @@ public class AdminUserController {
             @ValidId @RequestParam Long id
     ){
         DriverInfoResponse response = userService.getDriverInformation(id);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Fetched driver info of: "+id));
+        return success(response, "Fetched driver info of: "+id);
     }
 
     @PostMapping("/assign-driver/{driverId}")
     @Operation(summary = "to assign delivery addresses to driver")
-    public ResponseEntity<ApiResponse<?>> assignDeliveryToDriver(
+    public ResponseEntity<ApiResponse<Void>> assignDeliveryToDriver(
             @PathVariable Long driverId
     ){
         userService.assignDeliveryToDriver(driverId);
-        return ResponseEntity.ok(ApiResponse.ok("Assigned successfully"));
+        return success("Assigned successfully");
     }
 
 }
