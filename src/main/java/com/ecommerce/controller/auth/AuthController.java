@@ -1,11 +1,11 @@
 package com.ecommerce.controller.auth;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.auth.LoginRequest;
 import com.ecommerce.dto.request.auth.SignupRequest;
 import com.ecommerce.dto.request.auth.VerifyOtpCodeRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.auth.AuthResponse;
-import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.service.auth.AuthService;
 import com.ecommerce.validation.ValidEmail;
 import com.ecommerce.validation.ValidUsername;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 @Tag(name = "Auth APIs")
-public class AuthController {
+public class AuthController extends BaseController {
 
     private final AuthService authService;
 
@@ -34,46 +34,42 @@ public class AuthController {
 //    data to be sent through get request : url?username=data
     @Operation(summary = "check if entered username is available")
     @GetMapping("/username-availability")
-    public ResponseEntity<ApiResponse<String>> checkUserNameAvailability(
+    public ResponseEntity<ApiResponse<Void>> checkUserNameAvailability(
             @ValidUsername @RequestParam String username
     ){
         if(authService.doesUserNameExist(username)){
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.error("Username is taken.", "USERNAME_EXISTS"));
+            return error("Username is taken!", "USERNAME_EXISTS", HttpStatus.CONFLICT);
         }
-        return ResponseEntity.ok(ApiResponse.ok("Username is available."));
+        return success("Username is available.");
     }
 
 //    end point for checking if email is unique for registering and send otp
 //    data to be sent through get request : url?email=data
     @Operation(summary = "send code to entered email by checking if email is unique and does not exist in db")
     @GetMapping("/send-otp-code")
-    public ResponseEntity<ApiResponse<String>> sendOtpCode(
+    public ResponseEntity<ApiResponse<Void>> sendOtpCode(
             @ValidEmail @RequestParam String email
     ){
         if(authService.doesEmailExist(email)){
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.error("Email already exists", "EMAIL_EXISTS"));
+            return error("Email already exists!", "EMAIL_EXISTS", HttpStatus.CONFLICT);
         }
         if(!authService.sendOtpCode(email)) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
-                    body(ApiResponse.error("Failed to send Code", "FAILED_TO_SEND_CODE"));
+            return error("Failed to send Code", "FAILED_TO_SEND_CODE", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.ok(ApiResponse.ok("Code sent successfully"));
+        return success("Code sent successfully");
     }
 
 //    end point for verifying otp code
 //    post request : parameters should be sent in body {email=...., code=...}
 @Operation(summary = "for verifying the code entered by user: (send email also)")
     @PostMapping("/verify-otp-code")
-    public ResponseEntity<ApiResponse<String>> verifyOtpCode(
+    public ResponseEntity<ApiResponse<Void>> verifyOtpCode(
             @Valid @RequestBody VerifyOtpCodeRequest request
     ){
         if(authService.verifyOtpCode(request.email(), request.code())){
-            return ResponseEntity.ok(ApiResponse.ok("OTP verified."));
+            return success("OTP verified.");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Invalid OTP code.", "INVALID_CODE"));
+        return error("Invalid OTP code.", "INVALID_CODE", HttpStatus.BAD_REQUEST);
     }
 
 //    end point for signing up
@@ -82,9 +78,9 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
             @Valid @RequestBody SignupRequest request, HttpServletResponse httpResponse
-    ) throws ApplicationException {
+    ){
         AuthResponse authResponse = authService.register(request, httpResponse);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(authResponse, "Account created successfully"));
+        return success(authResponse, "Account created successfully", HttpStatus.CREATED);
     }
 
 //    end point for logging in
@@ -93,9 +89,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request, HttpServletResponse httpResponse
-    )throws ApplicationException {
+    ){
         AuthResponse authResponse = authService.login(request, httpResponse);
-        return ResponseEntity.ok(ApiResponse.ok(authResponse, "Logged in successfully!"));
+        return success(authResponse, "Logged in successfully!");
     }
 
 //    generating refresh token
@@ -105,23 +101,20 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             HttpServletRequest request, HttpServletResponse httpServletResponse
-    )throws ApplicationException {
+    ){
         AuthResponse authResponse = authService.refreshToken(request, httpServletResponse);
-        return ResponseEntity.ok(
-                ApiResponse.ok(authResponse, "Token refreshed successfully!")
-        );
+        return success(authResponse, "Token refreshed successfully!");
     }
 
 // hit this end point when user logs out of the system
 //    post request with no body
-@Operation(summary = "end point for logging out")
+    @Operation(summary = "end point for logging out")
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(
+    public ResponseEntity<ApiResponse<Void>> logout(
             HttpServletResponse httpServletResponse, Authentication authentication
     ) {
         authService.logout(authentication, httpServletResponse);
-        return ResponseEntity.ok(
-                ApiResponse.ok("Logged out successfully"));
+        return success("Logged out successfully");
     }
 
 }

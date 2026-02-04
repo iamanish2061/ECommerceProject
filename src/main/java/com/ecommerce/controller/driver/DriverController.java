@@ -1,5 +1,6 @@
 package com.ecommerce.controller.driver;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.order.OrderCompletionRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.order.AssignedDeliveryResponse;
@@ -12,7 +13,6 @@ import com.ecommerce.validation.ValidUsername;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/driver")
-public class DriverController {
+public class DriverController extends BaseController {
 
     private final DriverService driverService;
 
@@ -34,10 +34,10 @@ public class DriverController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null || currentUser.getUser().getRole() != Role.ROLE_DRIVER){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized user!", "USER_UNAUTHORIZED"));
+            return unauthorized();
         }
         DriverDashboardResponse response = driverService.getDriverInfo(currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok(response, "Driver info fetched successfully"));
+        return success(response, "Driver info fetched successfully");
     }
 
     @GetMapping("/assigned-deliveries/{driverId}")
@@ -46,46 +46,46 @@ public class DriverController {
             @Valid @PathVariable Long driverId
     ){
         List<AssignedDeliveryResponse> deliveryAddresses = driverService.getAssignedDelivery(driverId);
-        return ResponseEntity.ok(ApiResponse.ok(deliveryAddresses, "Address list fetched successfully"));
+        return success(deliveryAddresses, "Address list fetched successfully");
     }
 
     @PostMapping("/delivery/start/{username}")
     @Operation(summary = "when driver click start button to start delivery")
-    public ResponseEntity<ApiResponse<?>> startDelivery(
+    public ResponseEntity<ApiResponse<Void>> startDelivery(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @ValidUsername @PathVariable String username,
             @ValidId @RequestParam Long orderId
     ){
         if(currentUser == null || currentUser.getUser().getRole() != Role.ROLE_DRIVER){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized user!", "USER_UNAUTHORIZED"));
+            return unauthorized();
         }
         driverService.startDeliveryOf(currentUser.getUser(), username, orderId);
-        return ResponseEntity.ok(ApiResponse.ok("Started delivery of user: "+username));
+        return success("Started delivery of user: "+username);
     }
 
     @PostMapping("/delivery/complete")
     @Operation(summary = "when driver click start button to start delivery")
-    public ResponseEntity<ApiResponse<?>> completeDelivery(
+    public ResponseEntity<ApiResponse<Void>> completeDelivery(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @Valid @RequestBody OrderCompletionRequest request
     ){
         if(currentUser == null || currentUser.getUser().getRole() != Role.ROLE_DRIVER){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized user!", "USER_UNAUTHORIZED"));
+            return unauthorized();
         }
         driverService.completeDeliveryOf(currentUser.getUser(), request);
-        return ResponseEntity.ok(ApiResponse.ok("Completed delivery of user: "+request.username()));
+        return success("Completed delivery of user: "+request.username());
     }
 
     @PostMapping("/delivery/complete-all")
     @Operation(summary = "when driver click back to store so that removing everything from redis")
-    public ResponseEntity<ApiResponse<?>> completAllDelivery(
+    public ResponseEntity<ApiResponse<Void>> completAllDelivery(
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null || currentUser.getUser().getRole() != Role.ROLE_DRIVER){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized user!", "USER_UNAUTHORIZED"));
+            return unauthorized();
         }
         driverService.completeAllDelivery(currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok("Completed all orders"));
+        return success("Completed all orders");
     }
 
 }

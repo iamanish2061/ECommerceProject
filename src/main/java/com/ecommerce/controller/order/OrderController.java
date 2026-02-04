@@ -1,12 +1,12 @@
 package com.ecommerce.controller.order;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.address.DeliveryChargeRequest;
 import com.ecommerce.dto.request.order.PlaceOrderRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.order.OrderResponse;
 import com.ecommerce.dto.response.order.UserOrderResponse;
 import com.ecommerce.dto.response.payment.PaymentRedirectResponse;
-import com.ecommerce.exception.ApplicationException;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.order.OrderService;
 import com.ecommerce.service.order.RouteService;
@@ -14,7 +14,6 @@ import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -28,12 +27,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/orders")
-public class OrderController {
+public class OrderController extends BaseController {
 
     private final RouteService routeService;
     private final OrderService orderService;
-    private final String notLoggedInMessage = "Please login to continue";
-    private final String notLoggedInErrorCode = "NOT_LOGGED_IN";
 
     @GetMapping("/")
     @Operation(summary = "get all orders of that user to list them in their order page")
@@ -41,12 +38,10 @@ public class OrderController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode)
-            );
+            return unauthorized();
         }
         List<OrderResponse> response = orderService.getAllOrdersOf(currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok(response, "All orders of user: "+currentUser.getUser().getId()));
+        return success(response, "All orders of user: "+currentUser.getUser().getId());
 
     }
 
@@ -56,12 +51,10 @@ public class OrderController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode)
-            );
+            return unauthorized();
         }
         List<OrderResponse> response = orderService.getRecentOrdersOf(currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok(response, "Recent orders of user: "+currentUser.getUser().getId()));
+        return success(response, "Recent orders of user: "+currentUser.getUser().getId());
 
     }
 
@@ -72,24 +65,23 @@ public class OrderController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null){
-            throw new ApplicationException("Please login to continue!", "NOT_LOGGED_IN", HttpStatus.UNAUTHORIZED);
+            return unauthorized();
         }
         UserOrderResponse response = orderService.getDetailsOfOrder(orderId);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Detail of order: "+orderId));
+        return success(response, "Detail of order: "+orderId);
     }
 
     @PutMapping("/cancel/{orderId}")
     @Operation(summary = "to cancel the order by the user")
-    public ResponseEntity<ApiResponse<?>> cancelOrder(
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @PathVariable Long orderId
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         orderService.cancelOrder(currentUser.getUser(), orderId);
-        return ResponseEntity.ok(ApiResponse.ok("Order cancelled successfully!"));
+        return success("Order cancelled successfully!");
     }
 
     @PostMapping("/calculate-delivery-charge")
@@ -99,11 +91,10 @@ public class OrderController {
             @Valid @RequestBody DeliveryChargeRequest request
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         BigDecimal deliveryCharge = routeService.calculateDeliveryCharge(request.latitude(), request.longitude());
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("deliveryCharge", deliveryCharge), "Returned delivery charge"));
+        return success(Map.of("deliveryCharge", deliveryCharge), "Returned delivery charge");
     }
 
     @PostMapping("/single-product-checkout/{productId}")
@@ -114,11 +105,10 @@ public class OrderController {
             @Valid @RequestBody PlaceOrderRequest request
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         PaymentRedirectResponse paymentRedirectResponse= orderService.checkoutSingleProduct(currentUser.getUser(), productId, request);
-        return ResponseEntity.ok(ApiResponse.ok(paymentRedirectResponse, "Ready to redirect"));
+        return success(paymentRedirectResponse, "Ready to redirect");
     }
 
     @PostMapping("/checkout")
@@ -128,11 +118,10 @@ public class OrderController {
             @Valid @RequestBody PlaceOrderRequest request
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(notLoggedInMessage, notLoggedInErrorCode));
+            return unauthorized();
         }
         PaymentRedirectResponse paymentRedirectResponse= orderService.checkout(currentUser.getUser(), request);
-        return ResponseEntity.ok(ApiResponse.ok(paymentRedirectResponse, "Ready to redirect"));
+        return success(paymentRedirectResponse, "Ready to redirect");
     }
 
 
