@@ -1,10 +1,10 @@
 package com.ecommerce.controller.product;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.product.*;
 import com.ecommerce.model.user.UserPrincipal;
 import com.ecommerce.service.product.ProductService;
-import com.ecommerce.service.recommendation.RecommendationService;
 import com.ecommerce.validation.ValidId;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
@@ -24,9 +24,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/products")
-public class ProductController {
+public class ProductController extends BaseController {
     private final ProductService productService;
-    private final RecommendationService recommendationService;
 
 //   getting tags for putting in user interface so user clicks to the tag and get related product result (user side)
 //   also for dropdowns and options while adding products (admin side)
@@ -34,7 +33,7 @@ public class ProductController {
     @Operation(summary = "getting details of all available tags to display tag name")
     public ResponseEntity<ApiResponse<List<TagResponse>>> getAllTags(){
         List<TagResponse> tags = productService.getAllTags();
-        return ResponseEntity.ok(ApiResponse.ok(tags, "Tags fetched"));
+        return success(tags, "Tags fetched");
     }
 
 //   while user click the tag, the products related to that tag is returned
@@ -46,7 +45,7 @@ public class ProductController {
             @PathVariable String tagSlug
     ){
         ProductsFromTagResponse response = productService.getProductsOfTag(tagSlug);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Products of tag: "+tagSlug));
+        return success(response, "Products of tag: "+tagSlug);
     }
 
 //  end point for getting brand name that can be used in dropdowns (admin) useful while adding products
@@ -55,7 +54,7 @@ public class ProductController {
     @Operation(summary = "getting details of all available brands to display brand name")
     public ResponseEntity<ApiResponse<List<BrandResponse>>> getAllBrands(){
         List<BrandResponse> brands = productService.getAllBrands();
-        return ResponseEntity.ok(ApiResponse.ok(brands, "Brand name fetched"));
+        return success(brands, "Brand name fetched");
     }
 
 //    after customer clicks particular brand from the list this end point return brand info
@@ -68,7 +67,7 @@ public class ProductController {
             @PathVariable String brandSlug
     ){
         ProductsFromBrandResponse response = productService.getProductsOfBrand(brandSlug);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Products of brand: "+ brandSlug));
+        return success(response, "Products of brand: "+ brandSlug);
     }
 
 //  end point for getting category name that can be used in dropdowns (admin) useful while adding products
@@ -77,7 +76,7 @@ public class ProductController {
     @Operation(summary = "getting details of all available categories to display category name")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories(){
         List<CategoryResponse> categories = productService.getAllCategories();
-        return ResponseEntity.ok(ApiResponse.ok(categories, "Categories fetched"));
+        return success(categories, "Categories fetched");
     }
 
 //    displaying products according to the selected category
@@ -89,7 +88,7 @@ public class ProductController {
             @PathVariable String categorySlug
     ){
         ProductsFromCategoryResponse categories = productService.getProductsOfCategory(categorySlug);
-        return ResponseEntity.ok(ApiResponse.ok(categories, "Products fetched of: "+categorySlug));
+        return success(categories, "Products fetched of: "+categorySlug);
     }
 
 //    all products
@@ -102,11 +101,11 @@ public class ProductController {
         if(currentUser == null || currentUser.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
             Map<String, List<BriefProductsResponse>> res = new HashMap<>();
             res.put("products", productService.getAllProducts());
-            return ResponseEntity.ok(ApiResponse.ok(res, "Fetched successfully"));
+            return success(res, "Fetched successfully");
         }
 
         Map<String, List<BriefProductsResponse>> response = productService.getAllProductsWithPersonalization(currentUser.getUser().getId());
-        return ResponseEntity.ok(ApiResponse.ok(response, "Fetched successfully"));
+        return success(response, "Fetched successfully");
     }
 
 //    get details of one product
@@ -117,7 +116,7 @@ public class ProductController {
             @ValidId @PathVariable Long id
     ){
         SingleProductResponse product = productService.getDetailOfProduct(currentUser, id);
-        return ResponseEntity.ok(ApiResponse.ok(product, "Fetched successfully"));
+        return success(product, "Fetched successfully");
     }
 
     //searched product
@@ -132,7 +131,7 @@ public class ProductController {
             @RequestParam String query
     ){
         List<BriefProductsResponse> response = productService.getSearchedProducts(query);
-        return ResponseEntity.ok(ApiResponse.ok(response, "Fetched searched product successfully"));
+        return success(response, "Fetched searched product successfully");
     }
 
 
@@ -141,13 +140,13 @@ public class ProductController {
     @GetMapping("/new-arrivals")
     @Operation(summary = "to fetch new arrived products in index page")
     public ResponseEntity<ApiResponse<List<BriefProductsResponse>>> getNewArrivedProducts(){
-        return ResponseEntity.ok(ApiResponse.ok(productService.getNewArrivedProducts(),"New arrived products fetched"));
+        return success(productService.getNewArrivedProducts(),"New arrived products fetched");
     }
 
     @GetMapping("/best-sellers")
     @Operation(summary = "to fetch new arrived products in index page")
     public ResponseEntity<ApiResponse<List<BriefProductsResponse>>> getBestSeller(){
-        return ResponseEntity.ok(ApiResponse.ok(productService.getBestSeller(),"Best selling products fetched"));
+        return success(productService.getBestSeller(),"Best selling products fetched");
     }
 
 }
