@@ -1,5 +1,6 @@
 package com.ecommerce.controller.service;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.service.BookingRequest;
 import com.ecommerce.dto.response.ApiResponse;
 import com.ecommerce.dto.response.appointment.AppointmentDetailResponse;
@@ -14,7 +15,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -27,11 +27,9 @@ import java.util.List;
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
 @Validated
-public class BookingController {
+public class BookingController extends BaseController {
 
     private final AppointmentBookingService bookingService;
-    private static final String LOGIN_MSG = "Please login to continue";
-    private static final String LOGIN_CODE = "NOT_LOGGED_IN";
 
     @GetMapping("/time")
     @Operation(summary = "to fetch available time and recommendation of appointment time for any service")
@@ -63,25 +61,23 @@ public class BookingController {
             @Valid @RequestBody BookingRequest request
     ) {
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+            return unauthorized();
         }
-        return ResponseEntity.ok(
-                ApiResponse.ok(bookingService.createBooking(currentUser.getUser().getId(), request),
-                        "Ready to redirect"));
+        return success(bookingService.createBooking(currentUser.getUser().getId(), request),
+                        "Ready to redirect");
     }
 
     @PostMapping("/{id}/cancel")
     @Operation(summary = "to cancel the appointment")
-    public ResponseEntity<ApiResponse<?>> cancelAppointment(
+    public ResponseEntity<ApiResponse<Void>> cancelAppointment(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @ValidId @PathVariable Long id
     ) {
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+            return unauthorized();
         }
         bookingService.cancelAppointment(id, currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok("Appointment cancelled successfully"));
+        return success("Appointment cancelled successfully");
     }
 
     @GetMapping("/for-profile")
@@ -90,10 +86,10 @@ public class BookingController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+            return unauthorized();
         }
         List<AppointmentResponse> response = bookingService.getRecentAppointmentsOf(currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok(response, "Recent appointments of user: "+currentUser.getUser().getId()));
+        return success(response, "Recent appointments of user: "+currentUser.getUser().getId());
     }
 
     @GetMapping("/my-appointments")
@@ -102,11 +98,10 @@ public class BookingController {
             @AuthenticationPrincipal UserPrincipal currentUser
     ) {
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+            return unauthorized();
         }
-        return ResponseEntity.ok(
-                ApiResponse.ok(bookingService.getUserAppointments(currentUser.getUser().getId()),
-                        "Fetched all appointments of user: " + currentUser.getUser().getId()));
+        return success(bookingService.getUserAppointments(currentUser.getUser().getId()),
+                        "Fetched all appointments of user: " + currentUser.getUser().getId());
     }
 
     @GetMapping("/appointment/{id}")
@@ -116,9 +111,8 @@ public class BookingController {
             @ValidId @PathVariable Long id
     ) {
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(LOGIN_MSG, LOGIN_CODE));
+            return unauthorized();
         }
-        return ResponseEntity.ok(ApiResponse.ok(
-                bookingService.getAppointmentDetail(id, currentUser.getUser().getId()), "Fetched detail successfully"));
+        return success(bookingService.getAppointmentDetail(id, currentUser.getUser().getId()), "Fetched detail successfully");
     }
 }

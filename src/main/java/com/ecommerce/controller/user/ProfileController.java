@@ -1,5 +1,6 @@
 package com.ecommerce.controller.user;
 
+import com.ecommerce.controller.BaseController;
 import com.ecommerce.dto.request.user.ChangePasswordRequest;
 import com.ecommerce.dto.request.user.DriverRegisterRequest;
 import com.ecommerce.dto.response.ApiResponse;
@@ -9,7 +10,6 @@ import com.ecommerce.service.user.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,10 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("/api/profile")
-public class ProfileController {
-
-    private static final String profileErrorMessage ="Please log in to continue!";
-    private static final String profileErrorCode ="NOT_LOGGED_IN";
+public class ProfileController extends BaseController {
 
     private final ProfileService profileService;
 
@@ -36,70 +33,65 @@ public class ProfileController {
             @AuthenticationPrincipal UserPrincipal user
     ){
         if(user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+            return unauthorized();
         }
         UserProfileResponse response = profileService.getProfileDetails(user.getUser().getId());
-        return ResponseEntity.ok(ApiResponse.ok(response, "User details fetched"));
+        return success(response, "User details fetched");
     }
 
 
     @PostMapping("/change-password")
     @Operation(summary = "to change password")
-    public ResponseEntity<ApiResponse<?>> changePassword(
+    public ResponseEntity<ApiResponse<Void>> changePassword(
             @AuthenticationPrincipal UserPrincipal user,
             @Valid @RequestBody ChangePasswordRequest request
     ){
         if(user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+            return unauthorized();
         }
         profileService.changePassword(user.getUser().getId(), request);
-        return ResponseEntity.ok(ApiResponse.ok( "Password changed successfully"));
+        return success( "Password changed successfully");
     }
 
 
     @PutMapping(value = "/change-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "to change photo")
-    public ResponseEntity<ApiResponse<?>> changePhoto(
+    public ResponseEntity<ApiResponse<Map<String, String>>> changePhoto(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam("file") MultipartFile file
     ) {
         if(user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+            return unauthorized();
         }
         String profileUrl= profileService.changeProfilePicture(user.getUser(), file);
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("profileUrl", profileUrl), "Profile picture changed successfully"));
+        return success(Map.of("profileUrl", profileUrl), "Profile picture changed successfully");
     }
 
     @GetMapping("/check-driver-status")
     @Operation(summary = "To check if the driver status is pending, verified or not applied to display the text in profile")
-    public ResponseEntity<ApiResponse<?>> checkDriverStatus(
+    public ResponseEntity<ApiResponse<String>> checkDriverStatus(
             @AuthenticationPrincipal UserPrincipal currentUser
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+            return unauthorized();
         }
         String status = profileService.getDriverStatus(currentUser.getUser());
-        return ResponseEntity.ok(ApiResponse.ok(status, "Status fetched successfully"));
+        return success(status, "Status fetched successfully");
     }
 
 
     @PostMapping(value = "/register-driver", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "To handle form of driver registration")
-    public ResponseEntity<ApiResponse<?>> registerDriver(
+    public ResponseEntity<ApiResponse<Void>> registerDriver(
             @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestPart("license") MultipartFile license,
             @Valid @RequestPart("driverRegisterRequest") DriverRegisterRequest driverRegisterRequest
     ){
         if(currentUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(profileErrorMessage, profileErrorCode));
+            return unauthorized();
         }
         profileService.registerDriver(currentUser.getUser(), license, driverRegisterRequest);
-        return ResponseEntity.ok(ApiResponse.ok("Registered successfully"));
+        return success("Registered successfully");
     }
 
 }
