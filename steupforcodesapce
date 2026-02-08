@@ -1,0 +1,26 @@
+# Update package manager
+sudo apt update
+
+# Install PostgreSQL server
+sudo apt install postgresql postgresql-contrib
+
+# To start the service
+sudo service postgresql start
+
+# To stop the service
+sudo service postgresql stop
+
+# To restart the service
+sudo service postgresql restart
+
+# Connect via Unix socket (simplest)
+udo su - postgres
+psql
+
+
+#To Setup Database
+CREATE DATABASE ecommerce;
+CREATE USER root WITH PASSWORD 'root';
+ALTER ROLE root SET client_encoding TO 'utf8';
+ALTER ROLE root SET default_transaction_isolation TO 'read committed';
+GRANT ALL PRIVILEGES ON DATABASE ecommerce TO root;
