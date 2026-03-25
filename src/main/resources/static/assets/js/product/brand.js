@@ -96,6 +96,10 @@ async function initBrandPage() {
 // ---------- LOAD BRAND DATA ----------
 async function loadBrandBySlug(slug) {
     try {
+
+        const container = document.getElementById('brandProductsContainer');
+        if (container) container.innerHTML = getLoadingSpinner();
+
         const res = await productService.getProductsByBrandSlug(slug);
         const data = res.data;
 
@@ -148,13 +152,12 @@ function renderBrandSidebar() {
     const desktopContainer = document.getElementById('brandsSidebarContainer');
     const mobileContainer = document.getElementById('mobileBrandsSidebarContainer');
 
-    if (desktopContainer) desktopContainer.innerHTML = getLoadingSpinner();
-    if (mobileContainer) mobileContainer.innerHTML = getLoadingSpinner();
+    if (desktopContainer) desktopContainer.innerHTML = '';
+    if (mobileContainer) mobileContainer.innerHTML = '';
 
     if (!brandState.brands || brandState.brands.length === 0) {
-        container.innerHTML =
-         
-            '<div class="text-center py-8 text-slate-500">No brands available</div>';
+        if (desktopContainer) desktopContainer.innerHTML = '<div class="text-center py-8 text-slate-500">No brands available</div>';
+        if (mobileContainer) mobileContainer.innerHTML = '<div class="text-center py-8 text-slate-500">No brands available</div>';
         return;
     }
 
