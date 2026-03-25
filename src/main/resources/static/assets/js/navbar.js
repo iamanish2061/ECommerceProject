@@ -5,20 +5,22 @@ function initNavbar() {
 
 function setupAuthState() {
     const isLoggedIn = localStorage.getItem('accessToken') !== null;
+            console.log('hi i am in auth state')
+    console.log(isLoggedIn);
     updateAuthUI(isLoggedIn);
 }
 
 // Update Navbar UI
 function updateAuthUI(isLoggedIn) {
+    
     const authBtn = document.getElementById('loginBtn');
     const profileWrapper = document.getElementById('profileWrapper');
 
-    if (!authBtn || !profileWrapper) return;
+    // if (!authBtn || !profileWrapper) return;
 
     if (isLoggedIn) {
         // Hide login button
         authBtn.classList.add('hidden');
-
         // Show profile icon
         profileWrapper.classList.remove('hidden');
     } else {
@@ -27,6 +29,8 @@ function updateAuthUI(isLoggedIn) {
 
         // Hide profile icon
         profileWrapper.classList.add('hidden');
+
+        console.log("logged in xaina")
     }
 }
 
