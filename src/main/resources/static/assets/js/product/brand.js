@@ -434,7 +434,7 @@ function renderBrandProducts() {
     const container = document.getElementById('brandProductsContainer');
     if (!container) return;
 
-    container.innerHTML = getLoadingSpinner();
+    container.innerHTML = '';
 
     const list = brandState.filteredProducts || [];
 
