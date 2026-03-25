@@ -148,12 +148,12 @@ function renderBrandSidebar() {
     const desktopContainer = document.getElementById('brandsSidebarContainer');
     const mobileContainer = document.getElementById('mobileBrandsSidebarContainer');
 
-    if (desktopContainer) desktopContainer.innerHTML = '';
-    if (mobileContainer) mobileContainer.innerHTML = '';
+    if (desktopContainer) desktopContainer.innerHTML = getLoadingSpinner();
+    if (mobileContainer) mobileContainer.innerHTML = getLoadingSpinner();
 
     if (!brandState.brands || brandState.brands.length === 0) {
         container.innerHTML =
-           getLoadingSpinner() +
+         
             '<div class="text-center py-8 text-slate-500">No brands available</div>';
         return;
     }
@@ -431,13 +431,13 @@ function renderBrandProducts() {
     const container = document.getElementById('brandProductsContainer');
     if (!container) return;
 
-    container.innerHTML = '';
+    container.innerHTML = getLoadingSpinner();
 
     const list = brandState.filteredProducts || [];
 
     if (!list.length) {
         container.innerHTML =
-        getLoadingSpinner() +
+    
             '<div class="col-span-full text-center py-12 text-slate-500">No products found for this brand</div>';
         return;
     }
