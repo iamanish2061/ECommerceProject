@@ -40,7 +40,16 @@ function getBrandSlugFromUrl() {
     return decodeURIComponent(raw);
 }
 
-// ---------- INIT ----------
+// Helper to create a loading spinner
+function getLoadingSpinner() {
+    return `
+        <div class="flex items-center justify-center py-8 w-full">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+    `;
+}
+
+
 
 async function initBrandPage() {
     try {
@@ -144,7 +153,8 @@ function renderBrandSidebar() {
 
     if (!brandState.brands || brandState.brands.length === 0) {
         container.innerHTML =
-            '<div class="text-center py-4 text-slate-500 text-sm">No brands available</div>';
+           getLoadingSpinner() +
+            '<div class="text-center py-8 text-slate-500">No brands available</div>';
         return;
     }
 
@@ -427,6 +437,7 @@ function renderBrandProducts() {
 
     if (!list.length) {
         container.innerHTML =
+        getLoadingSpinner() +
             '<div class="col-span-full text-center py-12 text-slate-500">No products found for this brand</div>';
         return;
     }
