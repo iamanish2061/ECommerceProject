@@ -167,7 +167,7 @@ const StaffDashboard = {
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-bold text-slate-800">Your Expertise & Services</h2>
-                        <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-widest">${this.state.profile.expertiseIn}</span>
+                        
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         ${this.state.services.map(s => `
