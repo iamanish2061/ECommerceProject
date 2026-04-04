@@ -32,7 +32,7 @@ public interface AuthMapper {
             case ROLE_ADMIN -> "/admin/index.html";
             case ROLE_DRIVER -> "/driver/index.html";
             case ROLE_STAFF -> "/staff/index.html";
-            default -> "/product.html";
+            default -> "/index.html";
         };
     }
 
