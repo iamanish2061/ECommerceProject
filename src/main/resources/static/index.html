@@ -10,9 +10,58 @@
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/toast.css">
     <link rel="stylesheet" href="/assets/css/index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        #intro-loader {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: visibility 0.4s;
+        }
+        .loader-bar-bg {
+            width: 200px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #loader-progress {
+            width: 0;
+            height: 100%;
+            background: #3b82f6;
+        }
+        .reveal-site {
+            opacity: 0;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
+
+    <!-- Intro Loader -->
+    <div id="intro-loader">
+        <div id="loader-content" class="text-center">
+            <h1 id="loader-logo" class="text-6xl font-bold tracking-tighter mb-2" style="opacity:0; transform: scale(0.8)">
+                Cut<span class="text-blue-500">Lab</span>
+            </h1>
+            <div class="loader-bar-bg">
+                <div id="loader-progress"></div>
+            </div>
+            <p id="loader-tagline" class="text-slate-400 mt-4 text-xs tracking-[0.3em] uppercase" style="opacity:0">
+                Premium Grooming
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Site Wrapper (for fade-in) -->
+    <div id="main-site" class="reveal-site">
 
     <!-- Abstract Background Blobs -->
     <div
@@ -57,13 +106,13 @@
                     </a>
                 </div>
 
-                <!-- Login Button (Right on both desktop and mobile) -->
-                 <div class="flex items center gap-6 md:order-3">
-                      <button id="loginBtn"
-                    class="login-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 text-sm rounded-full font-medium hover:shadow-md transition-all hover:scale-105 ">
-                    Login
-                </button>
-                <div id="profileWrapper" class="relative">
+                <!-- Auth Section -->
+                <div class="flex items-center gap-6 md:order-3">
+                    <button id="loginBtn"
+                        class="login-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 text-sm rounded-full font-medium hover:shadow-md transition-all hover:scale-105 ">
+                        Login
+                    </button>
+                    <div id="profileWrapper" class="relative hidden">
                         <!-- Profile Icon -->
                         <a href="profile.html" class="flex items-center justify-center text-slate-700
                                 hover:text-indigo-600 transition-transform hover:scale-105">
@@ -110,15 +159,13 @@
                                 </svg>
                                 Logout
                             </button>
-
                         </div>
                     </div>
-                 </div>
-              
+                </div>
             </div>
 
             <!-- Mobile Menu (Dropdown below navbar on mobile) -->
-            <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu hidden md:hidden" id="mobileMenu">
                 <a href="product.html" class="text-slate-700 hover:text-indigo-600">
                     Shop
                 </a>
@@ -166,8 +213,6 @@
                     </a>
                 </div>
             </div>
-
-
 
             <!-- Right: Hero Image -->
             <div class="hero-image-wrapper relative animate-float">
@@ -453,7 +498,54 @@
 
     <div id="toast-container"></div>
 
+    </div> <!-- End main-site -->
+
 </body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Prevent scroll
+        document.body.style.overflow = "hidden";
+
+        const tl = gsap.timeline({
+            onComplete: () => {
+                document.body.style.overflow = "auto";
+                document.getElementById('intro-loader').style.display = "none";
+            }
+        });
+
+        // 1. Logo Entrance
+        tl.to("#loader-logo", {
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "back.out(1.7)"
+        })
+        // 2. Progress Bar
+        .to("#loader-progress", {
+            width: "100%",
+            duration: 1.5,
+            ease: "power2.inOut"
+        }, "-=0.3")
+        // 3. Tagline
+        .to("#loader-tagline", {
+            opacity: 1,
+            duration: 0.5
+        })
+        // 4. Slide Out Loader & Fade in Site
+        .to("#intro-loader", {
+            y: "-100%",
+            duration: 1,
+            ease: "expo.inOut",
+            delay: 0.3
+        })
+        .to("#main-site", {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out"
+        }, "-=0.6");
+    });
+</script>
 
 <script src="assets/js/api.js"></script>
 <script src="assets/js/toast.js"></script>
